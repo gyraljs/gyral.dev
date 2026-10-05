@@ -28,7 +28,7 @@ writeFileSync(
   join(OUT, 'tsconfig.json'),
   JSON.stringify({
     extends: '../../tsconfig.json',
-    compilerOptions: { types: ['node'], noUnusedLocals: true },
+    compilerOptions: { types: ['node', 'vite/client'], noUnusedLocals: true },
     include: ['./**/*.ts'],
   }),
 );

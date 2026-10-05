@@ -18,13 +18,14 @@
     "lint": "eslint . && stylelint \"src/**/*.css\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "invariants": "node scripts/check-docs.mjs && node scripts/check-workflows.mjs",
+    "invariants": "node scripts/check-docs.mjs && node scripts/check-workflows.mjs && node scripts/sync-examples.mjs --check",
     "test": "vitest run",
     "smoke": "node scripts/smoke.mjs",
     "showcase": "node scripts/capture-showcase.mjs",
     "ci:local": "gh act workflow_dispatch -W .github/workflows/ci.yml",
     "deploy": "pnpm check && pnpm dlx wrangler@4.147.0 pages deploy dist --project-name gyral-dev --branch main",
-    "sync:brand": "node scripts/sync-brand.mjs"
+    "sync:brand": "node scripts/sync-brand.mjs",
+    "sync:examples": "node scripts/sync-examples.mjs"
   },
   "dependencies": {
     "@fontsource-variable/sora": "5.3.0",
@@ -37,11 +38,16 @@
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@gyral/devtools": "link:../cyclejs-web-framework/packages/devtools",
+    "@gyral/http": "link:../cyclejs-web-framework/packages/http",
+    "@gyral/router": "link:../cyclejs-web-framework/packages/router",
     "@gyral/testing": "link:../cyclejs-web-framework/packages/testing",
+    "@gyral/time": "link:../cyclejs-web-framework/packages/time",
     "@types/node": "24.19.1",
     "eslint": "10.12.0",
     "eslint-plugin-compat": "7.0.2",
     "globals": "17.13.0",
+    "hono": "4.13.13",
     "marked": "18.0.14",
     "playwright": "1.63.0",
     "prettier": "3.9.9",
@@ -51,6 +57,7 @@
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
+    "valibot": "1.5.0",
     "vite": "8.3.2",
     "vitest": "5.0.3"
   }
