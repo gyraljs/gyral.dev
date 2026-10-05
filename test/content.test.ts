@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { parseFrontmatter } from '../src/content/frontmatter.js';
 import { renderMarkdown, slugify } from '../src/content/markdown.js';
 import { loadAllDocs, loadDoc, loadDocs } from '../src/content/docs.js';
-import { API_PACKAGES, loadApiPages } from '../src/content/api.js';
+import { API_PACKAGES, docMarkdown, loadApiPages } from '../src/content/api.js';
 import { longDate, loadPost, loadPosts } from '../src/content/blog.js';
 import { ALL_EXAMPLES, excerpt } from '../src/content/examples.js';
 
@@ -143,6 +143,15 @@ describe('examples', () => {
 });
 
 describe('API reference', () => {
+  it('turns two-space indented examples into code blocks, after a colon or a blank line', () => {
+    const md = docMarkdown(
+      'Produces values.\n\n  fc.assert(fc.property(arbitraryFrom(Signup), (d) => true));\n\nUse:\n  run(x)\n\n- item\n  continues the item',
+    );
+    expect(md).toContain('```ts\nfc.assert(fc.property(arbitraryFrom(Signup), (d) => true));\n```');
+    expect(md).toContain('```ts\nrun(x)\n```');
+    expect(md).toContain('- item\n  continues the item');
+  });
+
   it('generates a page per package, with every entry point', async () => {
     const pages = await loadApiPages();
     expect(pages.map((p) => p.path)).toEqual(API_PACKAGES.map((p) => `/docs/api/${p.name}/`));

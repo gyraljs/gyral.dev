@@ -148,9 +148,10 @@ function describeExports(program: ts.Program, file: string): ApiSymbol[] {
 const DESIGN_DOCS = 'https://github.com/gyraljs/gyral/blob/main/docs/design-docs';
 
 /**
- * A doc comment as Markdown. Gyral's comments indent code examples by two spaces after a line
- * ending in a colon; those become code blocks. References to the repo's design docs become
- * links.
+ * A doc comment as Markdown. Gyral's comments indent code examples by two spaces, after a line
+ * ending in a colon or after a blank line; those become code blocks (Markdown would need four
+ * spaces). Indented lines continuing a list item stay prose. References to the repo's design
+ * docs become links.
  */
 export function docMarkdown(doc: string): string {
   const out: string[] = [];
@@ -158,7 +159,12 @@ export function docMarkdown(doc: string): string {
   for (let n = 0; n < lines.length; n += 1) {
     const line = lines[n] ?? '';
     const previous = out.findLast((l) => l.trim() !== '') ?? '';
-    if (/^ {2,}\S/.test(line) && previous.trimEnd().endsWith(':') && !/^\s*-\s/.test(line)) {
+    const afterBlank = n > 0 && (lines[n - 1] ?? '').trim() === '' && !/^\s*-\s/.test(previous);
+    if (
+      /^ {2,}\S/.test(line) &&
+      (previous.trimEnd().endsWith(':') || afterBlank) &&
+      !/^\s*-\s/.test(line)
+    ) {
       const block: string[] = [];
       while (
         n < lines.length &&
