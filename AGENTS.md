@@ -1,127 +1,69 @@
-# Agent Instructions
+# AGENTS.md — gyral.dev
 
-This project uses **bd** (beads) for issue tracking. Run `bd prime` for full workflow context.
+The Gyral website: marketing pages and documentation, served at https://gyral.dev. Built
+with Gyral itself (server-rendered with `@gyral/ssr`, prerendered to static files) and hosted
+on Cloudflare Pages. This file is a **map**; the linked docs are the system of record.
 
-> **Architecture in one line:** Issues live in a local Dolt database
-> (`.beads/dolt/`); cross-machine sync uses `bd dolt push/pull` (a
-> git-compatible protocol), stored under `refs/dolt/data` on your git
-> remote — separate from `refs/heads/*` where your code lives.
-> `.beads/issues.jsonl` is a passive export, not the wire protocol.
->
-> See [SYNC_CONCEPTS.md](https://github.com/gastownhall/beads/blob/main/docs/SYNC_CONCEPTS.md)
-> for the one-screen overview and anti-patterns (don't treat JSONL as the
-> source of truth; don't `bd import` during normal operation; don't
-> reach for third-party Dolt hosting before trying the default).
+## Start every session
 
-## Quick Reference
+1. `bd prime`, then `bd ready`. Beads is the only task tracker (no TODO files or plans in chat).
+2. Claim before coding: `bd update <id> --claim`. File discovered work with
+   `--deps discovered-from:<id>`. Close with `--reason`.
+3. Read the design doc for the area you touch (table below).
 
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work atomically
-bd close <id>         # Complete work
-bd dolt push          # Push beads data to remote
-```
+## Commands
 
-## Non-Interactive Shell Commands
+| Command           | What it does                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| `pnpm install`    | Install. Gyral is linked from `../cyclejs-web-framework` until 0.1 is on npm               |
+| `pnpm check`      | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke |
+| `pnpm dev`        | Dev server on http://localhost:5400 (renders per request, Vite for assets)                 |
+| `pnpm build`      | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)          |
+| `pnpm preview`    | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401             |
+| `pnpm smoke`      | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, island       |
+| `pnpm showcase`   | Re-capture the gyral-shop theme screenshots (start the shop first)                         |
+| `pnpm ci:local`   | Run `.github/workflows/ci.yml` locally via `gh act`                                        |
+| `pnpm run deploy` | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)              |
+| `pnpm sync:brand` | Copy logos and icons from a `../gyral-brand` checkout into `public/`                       |
 
-**ALWAYS use non-interactive flags** with file operations to avoid hanging on confirmation prompts.
+First run needs `pnpm exec playwright install chromium`.
 
-Shell commands like `cp`, `mv`, and `rm` may be aliased to include `-i` (interactive) mode on some systems, causing the agent to hang indefinitely waiting for y/n input.
+## Where things are
 
-**Use these forms instead:**
-```bash
-# Force overwrite without prompting
-cp -f source dest           # NOT: cp source dest
-mv -f source dest           # NOT: mv source dest
-rm -f file                  # NOT: rm file
+| Path                                           | Contents                                                             |
+| ---------------------------------------------- | -------------------------------------------------------------------- |
+| [ARCHITECTURE.md](ARCHITECTURE.md)             | Modules, layers, what runs where                                     |
+| `content/docs/*.md`                            | Docs pages (front matter: title, description, section, order, draft) |
+| `src/render/`                                  | Server-only page templates: layout, home, docs, route table          |
+| `src/content/`                                 | Build-time Markdown, front matter, Shiki highlighting                |
+| `src/islands/`                                 | The only browser code: Gyral components hydrated on a page           |
+| `src/styles/site.css`                          | The one site stylesheet (layers, brand tokens, light/dark)           |
+| `public/`                                      | Copied as-is: icons, logos, showcase images, `_headers`, robots      |
+| `scripts/`                                     | Dev, build, preview, smoke, invariants                               |
+| [docs/design-docs/](docs/design-docs/index.md) | Decisions (ADRs)                                                     |
 
-# For recursive operations
-rm -rf directory            # NOT: rm -r directory
-cp -rf source dest          # NOT: cp -r source dest
-```
+## Design docs to read before changing…
 
-**Other commands that may prompt:**
-- `scp` - use `-o BatchMode=yes` for non-interactive
-- `ssh` - use `-o BatchMode=yes` to fail instead of prompting
-- `apt-get` - use `-y` flag
-- `brew` - use `HOMEBREW_NO_AUTO_UPDATE=1` env var
+| Area                                       | Read                                                |
+| ------------------------------------------ | --------------------------------------------------- |
+| Anything                                   | [0001-stack.md](docs/design-docs/0001-stack.md)     |
+| Docs content, drafts, writing style        | [0002-content.md](docs/design-docs/0002-content.md) |
+| Domains, deploys, headers, CSP, CI         | [0003-hosting.md](docs/design-docs/0003-hosting.md) |
+| CSS, brand, accessibility, browser support | [0004-design.md](docs/design-docs/0004-design.md)   |
 
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:6cd5cc61 -->
-## Beads Issue Tracker
+## Skills to load
 
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
+- `modern-css` for `src/styles` and island styles; `semantic-html` for every template;
+  `lit-web-apps` for islands and rendering; `beads` for work tracking.
 
-### Quick Reference
+## Hard rules (enforced by `pnpm check`)
 
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
-```
-
-### Rules
-
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-**Architecture in one line:** issues live in a local Dolt DB; sync uses `refs/dolt/data` on your git remote; `.beads/issues.jsonl` is a passive export. See https://github.com/gastownhall/beads/blob/main/docs/SYNC_CONCEPTS.md for details and anti-patterns.
-
-## Agent Context Profiles
-
-The managed Beads block is task-tracking guidance, not permission to override repository, user, or orchestrator instructions.
-
-- **Conservative (default)**: Use `bd` for task tracking. Do not run git commits, git pushes, or Dolt remote sync unless explicitly asked. At handoff, report changed files, validation, and suggested next commands.
-- **Minimal**: Keep tool instruction files as pointers to `bd prime`; use the same conservative git policy unless active instructions say otherwise.
-- **Team-maintainer**: Only when the repository explicitly opts in, agents may close beads, run quality gates, commit, and push as part of session close. A current "do not commit" or "do not push" instruction still wins.
-
-## Session Completion
-
-This protocol applies when ending a Beads implementation workflow. It is subordinate to explicit user, repository, and orchestrator instructions.
-
-1. **File issues for remaining work** - Create beads for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **Handle git/sync by active profile**:
-   ```bash
-   # Conservative/minimal/default: report status and proposed commands; wait for approval.
-   git status
-
-   # Team-maintainer opt-in only, unless current instructions forbid it:
-   git pull --rebase
-   git push
-   git status
-   ```
-5. **Hand off** - Summarize changes, validation, issue status, and any blocked sync/commit/push step
-
-**Critical rules:**
-- Explicit user or orchestrator instructions override this Beads block.
-- Do not commit or push without clear authority from the active profile or the current user request.
-- If a required sync or push is blocked, stop and report the exact command and error.
-<!-- END BEADS INTEGRATION -->
-
-<!-- BEGIN BEADS CODEX SETUP: generated by bd setup codex -->
-## Beads Issue Tracker
-
-Use Beads (`bd`) for durable task tracking in repositories that include it. Use the `beads` skill at `.agents/skills/beads/SKILL.md` (project install) or `~/.agents/skills/beads/SKILL.md` (global install) for Beads workflow guidance, then use the `bd` CLI for issue operations.
-
-### Quick Reference
-
-```bash
-bd ready                # Find available work
-bd show <id>            # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>           # Complete work
-bd prime                # Refresh Beads context
-```
-
-### Rules
-
-- Use `bd` for all task tracking; do not create markdown TODO lists.
-- Run `bd prime` when Beads context is missing or stale. Codex 0.129.0+ can load Beads context automatically through native hooks; use `/hooks` to inspect or toggle them.
-- Keep persistent project memory in Beads via `bd remember`; do not create ad hoc memory files.
-
-**Architecture in one line:** issues live in a local Dolt DB; sync uses `refs/dolt/data` on your git remote; `.beads/issues.jsonl` is a passive export. See https://github.com/gastownhall/beads/blob/main/docs/SYNC_CONCEPTS.md for details and anti-patterns.
-<!-- END BEADS CODEX SETUP -->
+- Islands (`src/islands`) never import `src/render`, `src/content`, Node built-ins, Markdown
+  or Shiki; they use `define()` from `@gyral/core`, never raw Lit (eslint).
+- Docs code blocks that start with a file comment (`// src/x.ts`) must typecheck against the
+  real Gyral packages (`scripts/check-snippets.mjs`).
+- Pages pass axe in light and dark, have no console errors under the production CSP, and don't
+  overflow at 360 px (`pnpm smoke`).
+- CSS is Baseline newly available; newer features go inside `@supports` (stylelint).
+- Workflows trigger on `workflow_dispatch` only (`scripts/check-workflows.mjs`).
+- Brand files in `public/` are copies; change them in gyraljs/brand and re-sync.

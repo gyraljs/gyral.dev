@@ -1,0 +1,34 @@
+# Runs LOCALLY only: `pnpm ci:local` (gh act + Docker). See docs/design-docs/0003-hosting.md.
+# Do not add push / pull_request / schedule triggers: scripts/check-workflows.mjs rejects them.
+# Gyral is linked from ../cyclejs-web-framework until 0.1 is published, so this checks out both.
+name: ci
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: gyral.dev
+      - uses: actions/checkout@v4
+        with:
+          repository: gyraljs/gyral
+          path: cyclejs-web-framework
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: gyral.dev/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile
+        working-directory: cyclejs-web-framework
+      - run: pnpm install --frozen-lockfile
+        working-directory: gyral.dev
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: gyral.dev
+      - run: pnpm check
+        working-directory: gyral.dev
