@@ -15,7 +15,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 | Command              | What it does                                                                               |
 | -------------------- | ------------------------------------------------------------------------------------------ |
-| `pnpm install`       | Install. Gyral is linked from `../cyclejs-web-framework` until 0.1 is on npm               |
+| `pnpm install`       | Install. `@gyral/*` comes from npm                                                         |
 | `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke |
 | `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                 |
 | `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)          |
@@ -25,7 +25,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 | `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                        |
 | `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)              |
 | `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                       |
-| `pnpm sync:examples` | Copy example excerpts from `../cyclejs-web-framework` into `content/examples/`             |
+| `pnpm sync:examples` | Copy example excerpts from a `../cyclejs-web-framework` checkout into `content/examples/`  |
 
 First run needs `pnpm exec playwright install chromium`.
 

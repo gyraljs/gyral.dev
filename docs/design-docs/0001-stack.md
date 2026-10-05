@@ -29,5 +29,5 @@ Build the site with Gyral and its own SSR package, with no site framework:
   here too.
 - Things a docs framework gives for free are ours to build when needed: search, versioned
   docs, an API reference. Each gets a bead when it's wanted.
-- Until Gyral 0.1 is published, `@gyral/*` is linked from `../cyclejs-web-framework`
-  (as in gyral-shop). After 0.1, switch to npm versions (bead).
+- `@gyral/*` comes from npm (`^0.1.0`, switched 2026-10-05; until then it was linked from
+  `../cyclejs-web-framework`). The API reference is generated from the published `.d.ts`.

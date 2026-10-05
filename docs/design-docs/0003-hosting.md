@@ -10,11 +10,9 @@ Status: **accepted** (2026-10-05)
 - **Cloudflare Pages** serves `dist/`: static HTML, `404.html` for unknown paths, trailing-slash
   URLs, and `_headers` (from `public/`) for security and cache headers.
 - **Deploys are Cloudflare Git-connected builds** of `main` (decided 2026-10-05, when the
-  owner connected the repo; supersedes "direct uploads only"). Until Gyral 0.1 is on npm the
-  `link:` dependency is satisfied by `scripts/cloudflare-build.sh`, which clones the public
-  gyraljs/gyral next to the site (`GYRAL_REF`, default `main`) and builds. Pages settings:
-  build command `bash scripts/cloudflare-build.sh`, output `dist`, env `NODE_VERSION=24`,
-  `SKIP_DEPENDENCY_INSTALL=1`. The gate still runs locally before pushing (`pnpm check`);
+  owner connected the repo). `@gyral/*` comes from npm (0.1.0+), so Cloudflare's defaults
+  work: build command `pnpm run build`, output `dist`, env `NODE_VERSION=24`. Cloudflare
+  installs with the committed lockfile. The gate still runs before pushing (`pnpm check`);
   `pnpm run deploy` (wrangler direct upload) remains for manual deploys.
 - **CI** is `.github/workflows/ci.yml`, `workflow_dispatch` only, run with `pnpm ci:local`.
 

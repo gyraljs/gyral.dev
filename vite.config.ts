@@ -3,7 +3,7 @@ import { gyralVitePreset } from '@gyral/core/vite';
 
 // The client build: the islands' entry and the site stylesheet, content-hashed, with a
 // manifest that scripts/build.ts reads to link them from the prerendered pages.
-// gyralVitePreset(): one Lit copy (Gyral comes from a link: path until 0.1 is published).
+// gyralVitePreset(): Gyral's Vite settings (one Lit copy, deps pre-bundled for the dev server).
 export default defineConfig({
   ...gyralVitePreset(),
   build: {

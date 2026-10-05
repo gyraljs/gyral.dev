@@ -16,8 +16,8 @@ pnpm dev      # http://localhost:5400
 pnpm check    # the full gate, including a production build and a browser smoke test
 ```
 
-Until Gyral 0.1 is on npm, this repo links it from a checkout of `gyraljs/gyral` at
-`../cyclejs-web-framework`.
+`@gyral/*` comes from npm. A checkout of `gyraljs/gyral` at `../cyclejs-web-framework` is
+only needed for `pnpm sync:examples` (the examples gallery excerpts).
 
 ## Contributing to the docs
 

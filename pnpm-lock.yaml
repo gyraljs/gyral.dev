@@ -12,11 +12,11 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       '@gyral/core':
-        specifier: link:../cyclejs-web-framework/packages/core
-        version: link:../cyclejs-web-framework/packages/core
+        specifier: ^0.1.0
+        version: 0.1.0(lit@3.3.3)
       '@gyral/ssr':
-        specifier: link:../cyclejs-web-framework/packages/ssr
-        version: link:../cyclejs-web-framework/packages/ssr
+        specifier: ^0.1.0
+        version: 0.1.0(@lit-labs/ssr-client@1.1.8)(@lit-labs/ssr@4.1.0(@types/node@24.19.1))(lit@3.3.3)
       '@lit-labs/ssr':
         specifier: 4.1.0
         version: 4.1.0(@types/node@24.19.1)
@@ -34,20 +34,20 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.12.0)
       '@gyral/devtools':
-        specifier: link:../cyclejs-web-framework/packages/devtools
-        version: link:../cyclejs-web-framework/packages/devtools
+        specifier: ^0.1.0
+        version: 0.1.0(lit@3.3.3)
       '@gyral/http':
-        specifier: link:../cyclejs-web-framework/packages/http
-        version: link:../cyclejs-web-framework/packages/http
+        specifier: ^0.1.0
+        version: 0.1.0(lit@3.3.3)
       '@gyral/router':
-        specifier: link:../cyclejs-web-framework/packages/router
-        version: link:../cyclejs-web-framework/packages/router
+        specifier: ^0.1.0
+        version: 0.1.0(lit@3.3.3)
       '@gyral/testing':
-        specifier: link:../cyclejs-web-framework/packages/testing
-        version: link:../cyclejs-web-framework/packages/testing
+        specifier: ^0.1.0
+        version: 0.1.0(lit@3.3.3)
       '@gyral/time':
-        specifier: link:../cyclejs-web-framework/packages/time
-        version: link:../cyclejs-web-framework/packages/time
+        specifier: ^0.1.0
+        version: 0.1.0(lit@3.3.3)
       '@types/node':
         specifier: 24.19.1
         version: 24.19.1
@@ -363,6 +363,40 @@ packages:
   '@fontsource-variable/sora@5.3.0':
     resolution: {integrity: sha512-h8kHta4Z8SkfUGeI82TUy1n3rbrKpBRGwuk4t4qCwto5oEHxlbOFD2yGP+Df5fbmTXwKGn+o667vYp0E4K8Whw==}
 
+  '@gyral/core@0.1.0':
+    resolution: {integrity: sha512-bmRucaZQgmCJHd6+3CVtzuVZ2Fwa87wTPlUXBe07cfzKrX1DHWPi2hOz0l5OYaZ9zUM8JnG8TJQVYrV2TsqlxA==}
+    peerDependencies:
+      lit: ^3.3.0
+
+  '@gyral/devtools@0.1.0':
+    resolution: {integrity: sha512-sYArda66F2IXpIsdYeIKXNV9Xsc5D/TDOR3HLT3kGqJ2ML3axIrGmtLItkfyiW9kSFudykExvxiAwwirZS2cFQ==}
+    peerDependencies:
+      lit: ^3.3.0
+
+  '@gyral/http@0.1.0':
+    resolution: {integrity: sha512-d22RTVmFF6s20qrzxRWnxuvvjQoNvmrbpmxdPgHswM2WUkBN8ndhCz40w/W13xbIoXJgcezsA7WscwCRkK7ntQ==}
+
+  '@gyral/router@0.1.0':
+    resolution: {integrity: sha512-cH83nIh/Rp1Mk6+wwwVndfaWGXhCByN/l5+hmJ+/j8FQvABPN0u/p0NpfHbHJiGUC04E0fumpj2iyv/FLMjL3A==}
+
+  '@gyral/ssr@0.1.0':
+    resolution: {integrity: sha512-A2kD8cO+ZhUKO7HxFAbZEjzMG6QWAB8vwwh++flxtdJFNTse4rI5bvgzMY5jgZBbZF6hKPlozG2HSvHAJ1aXwQ==}
+    peerDependencies:
+      '@lit-labs/ssr': ^4.1.0
+      '@lit-labs/ssr-client': ^1.1.8
+      lit: ^3.3.0
+
+  '@gyral/testing@0.1.0':
+    resolution: {integrity: sha512-XSg+FYjcsuvTaAAYX+QTPPPaoRmXHoDZ5rrQlb3T++H0znOWRwn2ZtP6pXTzwLpLVQp4uKobxvHifNSlTdjaog==}
+    peerDependencies:
+      fast-check: ^4.0.0
+    peerDependenciesMeta:
+      fast-check:
+        optional: true
+
+  '@gyral/time@0.1.0':
+    resolution: {integrity: sha512-o+iPXyG9xM4iGXw+OZcxaRtFgX2lbE+Poex/FIzF21N7UxwJG1DO6KK33IEHP2A5Emjx6ES+1qJDmYi66gNbMg==}
+
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
     engines: {node: '>=18.18.0'}
@@ -577,6 +611,15 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@sinonjs/commons@3.0.1':
+    resolution: {integrity: sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ==}
+
+  '@sinonjs/fake-timers@15.4.0':
+    resolution: {integrity: sha512-DsG+8/LscQIQg68J6Ef3dv10u6nVyetYn923s3/sus5eaGfTo1of5WMZSLf0UJc9KDuKPilPH0UDJCjvNbDNCA==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -841,6 +884,9 @@ packages:
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
 
+  effect@3.22.2:
+    resolution: {integrity: sha512-fm1CQXCs7GTMwpadZxwU5rnAb2bN6mbQpknq/pXBGCzSKkosNYb9k0wsoL0TfB10rSa5xOEZJjo77u/KLXSANg==}
+
   electron-to-chromium@1.5.444:
     resolution: {integrity: sha512-5ss/uJfoDYDHT0lfJzT6FbcskIzROIOPf0BbbFkGcvDzoJU7i//9GDrwwIHQVmIsrAGiF3ihpADBRIsrEFt1rQ==}
 
@@ -932,6 +978,10 @@ packages:
   expect-type@1.4.0:
     resolution: {integrity: sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==}
     engines: {node: '>=12.0.0'}
+
+  fast-check@3.23.2:
+    resolution: {integrity: sha512-h5+1OzzfCC3Ef7VbtKdcv7zsstUQwUDlYpUTvjeUsJAssPgLn7QzbboPtL5ro04Mq0rPOsMzl7q5hIbRs2wD1A==}
+    engines: {node: '>=8.0.0'}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -1413,6 +1463,9 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
+  pure-rand@6.1.0:
+    resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
+
   qified@0.10.1:
     resolution: {integrity: sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA==}
     engines: {node: '>=20'}
@@ -1569,6 +1622,10 @@ packages:
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
+
+  type-detect@4.0.8:
+    resolution: {integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==}
+    engines: {node: '>=4'}
 
   typescript-eslint@8.71.0:
     resolution: {integrity: sha512-fBdHYiqQ14RW6mOMXD14Svn82ZsCYAoQSzGRzyEjR59S5A2Krh/l7fGTOQ7iCr8gGy/mHVXtEF7s5fgjEdV0Pw==}
@@ -1916,6 +1973,52 @@ snapshots:
 
   '@fontsource-variable/sora@5.3.0': {}
 
+  '@gyral/core@0.1.0(lit@3.3.3)':
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      effect: 3.22.2
+      lit: 3.3.3
+
+  '@gyral/devtools@0.1.0(lit@3.3.3)':
+    dependencies:
+      '@gyral/core': 0.1.0(lit@3.3.3)
+      lit: 3.3.3
+
+  '@gyral/http@0.1.0(lit@3.3.3)':
+    dependencies:
+      '@gyral/core': 0.1.0(lit@3.3.3)
+      '@standard-schema/spec': 1.1.0
+    transitivePeerDependencies:
+      - lit
+
+  '@gyral/router@0.1.0(lit@3.3.3)':
+    dependencies:
+      '@gyral/core': 0.1.0(lit@3.3.3)
+    transitivePeerDependencies:
+      - lit
+
+  '@gyral/ssr@0.1.0(@lit-labs/ssr-client@1.1.8)(@lit-labs/ssr@4.1.0(@types/node@24.19.1))(lit@3.3.3)':
+    dependencies:
+      '@gyral/core': 0.1.0(lit@3.3.3)
+      '@lit-labs/ssr': 4.1.0(@types/node@24.19.1)
+      '@lit-labs/ssr-client': 1.1.8
+      '@standard-schema/spec': 1.1.0
+      lit: 3.3.3
+
+  '@gyral/testing@0.1.0(lit@3.3.3)':
+    dependencies:
+      '@gyral/core': 0.1.0(lit@3.3.3)
+      '@sinonjs/fake-timers': 15.4.0
+      '@standard-schema/spec': 1.1.0
+    transitivePeerDependencies:
+      - lit
+
+  '@gyral/time@0.1.0(lit@3.3.3)':
+    dependencies:
+      '@gyral/core': 0.1.0(lit@3.3.3)
+    transitivePeerDependencies:
+      - lit
+
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -2086,6 +2189,16 @@ snapshots:
   '@shikijs/vscode-textmate@10.0.2': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
+
+  '@sinonjs/commons@3.0.1':
+    dependencies:
+      type-detect: 4.0.8
+
+  '@sinonjs/fake-timers@15.4.0':
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@types/chai@5.2.3':
     dependencies:
@@ -2350,6 +2463,11 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
+  effect@3.22.2:
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      fast-check: 3.23.2
+
   electron-to-chromium@1.5.444: {}
 
   emoji-regex@8.0.0: {}
@@ -2482,6 +2600,10 @@ snapshots:
   esutils@2.0.3: {}
 
   expect-type@1.4.0: {}
+
+  fast-check@3.23.2:
+    dependencies:
+      pure-rand: 6.1.0
 
   fast-deep-equal@3.1.3: {}
 
@@ -2900,6 +3022,8 @@ snapshots:
 
   punycode@2.3.1: {}
 
+  pure-rand@6.1.0: {}
+
   qified@0.10.1:
     dependencies:
       hookified: 2.2.0
@@ -3102,6 +3226,8 @@ snapshots:
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
+
+  type-detect@4.0.8: {}
 
   typescript-eslint@8.71.0(eslint@10.12.0)(typescript@6.0.3):
     dependencies:
