@@ -16,6 +16,9 @@ Status: **accepted** (2026-10-05)
   `pnpm run deploy` (wrangler direct upload) remains for manual deploys.
 - **CI** is `.github/workflows/ci.yml`, `workflow_dispatch` only, run with `pnpm ci:local`.
 
+- **No analytics** (owner decision 2026-10-05, site-54d.32). Cloudflare Web Analytics stays
+  disabled on the Pages project: its injected beacon would need a third-party CSP exception.
+
 ## Headers (`public/_headers`)
 
 - CSP: `default-src 'self'`; `script-src 'self'` (JSON-LD and hydration seeds are data blocks,
