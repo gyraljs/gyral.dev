@@ -9,7 +9,17 @@ const RAW_LIT =
   "Build islands with @gyral/core define() and import html/css through it. Raw LitElement components don't hydrate in production builds (gyral consumer setup).";
 
 export default tseslint.config(
-  { ignores: ['dist/', '.smoke/', '.claude/', '.beads/', 'node_modules/'] },
+  {
+    ignores: [
+      'dist/',
+      '.smoke/',
+      '.visual/',
+      '.claude/',
+      '.beads/',
+      '.pnpm-store/',
+      'node_modules/',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   {
