@@ -1,0 +1,72 @@
+import { css, define, html, repeat, unsafeCSS, type Next } from '@gyral/core';
+import { delay } from '@gyral/time';
+
+import { letterKeys } from './keyboard.js';
+
+// Cycle's version ran a per-frame easing loop over every letter. Here the model only knows
+// which letters are present or leaving; CSS transitions do the growing and shrinking.
+
+/** How long a letter takes to grow in or shrink out. The model waits this long to drop it. */
+export const TRANSITION_MS = 600;
+
+export interface Letter {
+  readonly key: string;
+  /** Shrinking out; removed from the model once the transition has had time to finish. */
+  readonly leaving: boolean;
+}
+
+export interface State {
+  readonly letters: readonly Letter[];
+}
+
+export type Msg =
+  | { readonly _tag: 'Key'; readonly letter: string }
+  | { readonly _tag: 'Gone'; readonly letter: string };
+
+const byKey = (a: Letter, b: Letter): number => a.key.localeCompare(b.key);
+
+const setLeaving = (s: State, letter: string, leaving: boolean): State => ({
+  letters: s.letters.map((l) => (l.key === letter ? { ...l, leaving } : l)),
+});
+
+/** Toggles a letter: absent → added, present → leaving (dropped later), leaving → back. */
+export function toggle(s: State, letter: string): Next<State, Msg> {
+  const existing = s.letters.find((l) => l.key === letter);
+  if (existing === undefined) {
+    return { letters: [...s.letters, { key: letter, leaving: false }].toSorted(byKey) };
+  }
+  if (existing.leaving) return setLeaving(s, letter, false);
+  return [
+    setLeaving(s, letter, true),
+    // One lane per letter: toggling it again restarts its own timer, nobody else's.
+    [delay<Msg>(TRANSITION_MS, { _tag: 'Gone', letter }, { key: `leave:${letter}` })],
+  ];
+}
+
+export const AnimatedLetters = define<State, Msg>('gy-animated-letters', {
+  init: () => [
+    // The original starts with just "A"; "GYRAL" shows the staggered entrance.
+    { letters: ['A', 'G', 'L', 'R', 'Y'].map((key) => ({ key, leaving: false })) },
+    [letterKeys<Msg>((letter) => ({ _tag: 'Key', letter }))],
+  ],
+  intent: {},
+  update: {
+    Key: (s, m) => toggle(s, m.letter),
+    // Ignore a stale timer if the letter came back while it was shrinking.
+    Gone: (s, m) => ({ letters: s.letters.filter((l) => l.key !== m.letter || !l.leaving) }),
+  },
+  view: (s) => html`
+    <p id="hint">Press a letter key (A–Z) to add it, or press it again to remove it.</p>
+    <ul aria-label="Letters" aria-describedby="hint">
+      ${repeat(
+        s.letters,
+        (l) => l.key,
+        (l) =>
+          html`<li class=${l.leaving ? 'out' : 'in'} aria-hidden=${l.leaving ? 'true' : 'false'}>
+            ${l.key}
+          </li>`,
+      )}
+    </ul>
+  `,
+  styles: css`…`,
+});

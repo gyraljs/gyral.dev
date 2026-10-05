@@ -1,0 +1,117 @@
+import { css, define, html, nothing } from '@gyral/core';
+import {
+  back,
+  listen,
+  makeRouter,
+  routes,
+  setTitle,
+  type RouteLocation,
+  type RouteMatch,
+} from '@gyral/router';
+
+/** The route table: pure, typed, and reusable on a server (ADR 0009). */
+export const app = routes({ home: '/', about: '/about', contacts: '/contacts' });
+
+type Route = RouteMatch<typeof app.table>;
+type Name = Route['name'];
+
+export interface State {
+  /** `undefined` until the router delivers the current location. */
+  readonly location: RouteLocation | undefined;
+  readonly route: Route | undefined;
+}
+
+export type Msg =
+  { readonly _tag: 'Routed'; readonly location: RouteLocation } | { readonly _tag: 'Back' };
+
+interface Page {
+  readonly title: string;
+  readonly nav: string;
+  readonly body: string;
+}
+
+const pages: Readonly<Record<Name, Page>> = {
+  home: {
+    nav: 'Home',
+    title: 'Welcome to the routing example',
+    body: 'Links below are plain anchors. The router captures same-origin clicks, updates history, and streams every location to this component as a message.',
+  },
+  about: {
+    nav: 'About',
+    title: 'About me',
+    body: 'The current route is model state, derived from the location by matching it against a typed route table. The view is a pure function of that state.',
+  },
+  contacts: {
+    nav: 'Contacts',
+    title: 'Contact me',
+    body: 'Try the browser back button, or the Back button below: both arrive here as the same Routed message.',
+  },
+};
+
+const order: readonly Name[] = ['home', 'about', 'contacts'];
+
+/** The document title for a route: one pure function, so a server could reuse it. */
+export const pageTitle = (route: Route | undefined): string =>
+  `${route === undefined ? 'Page not found' : pages[route.name].nav} — Gyral routing`;
+
+export const RoutingView = define<State, Msg>('gy-routing-view', {
+  // This app owns the whole page, so it opts in to capturing link clicks (ADR 0009).
+  drivers: { router: makeRouter({ captureLinks: true }) },
+  // One streaming command: the current location now, then every change (ADR 0009).
+  init: () => [
+    { location: undefined, route: undefined },
+    [listen((location) => ({ _tag: 'Routed', location }))],
+  ],
+  intent: {
+    Back: () => ({ _tag: 'Back' }),
+  },
+  update: {
+    Routed: (_s, { location }) => {
+      const route = app.match(location.href);
+      return [{ location, route }, [setTitle(pageTitle(route))]];
+    },
+    Back: (s) => [s, [back()]],
+  },
+  // Cross-fade between pages (an enhancement: skipped without support or with reduced motion).
+  // The first location is not a page change, so it renders directly.
+  viewTransition: (prev, next) =>
+    prev.location !== undefined && prev.route?.name !== next.route?.name,
+  view: (s, i) => {
+    const page = s.route === undefined ? undefined : pages[s.route.name];
+    return html`
+      <header>
+        <nav aria-label="Main">
+          <ul>
+            ${order.map(
+              (name) =>
+                html`<li>
+                  <a
+                    href=${app.href(name, {})}
+                    aria-current=${s.route?.name === name ? 'page' : nothing}
+                    >${pages[name].nav}</a
+                  >
+                </li>`,
+            )}
+          </ul>
+        </nav>
+      </header>
+      <main>
+        ${
+          s.location === undefined
+            ? nothing
+            : page === undefined
+              ? html`<h1>404 — page not found</h1>
+                  <p>No route matches <code>${s.location.pathname}</code>.</p>`
+              : html`<h1>${page.title}</h1>
+                  <p>${page.body}</p>`
+        }
+        <p><button type="button" data-intent=${i.Back}>Back</button></p>
+        <details>
+          <summary>Location object</summary>
+          <pre><code>${JSON.stringify(s.location, null, 2)}</code></pre>
+        </details>
+      </main>
+    `;
+  },
+  styles: css`…`,
+});

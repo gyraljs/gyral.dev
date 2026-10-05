@@ -1,0 +1,26 @@
+import { css, define, html } from '@gyral/core';
+
+export interface State {
+  readonly name: string;
+}
+
+export type Msg = { readonly _tag: 'Named'; readonly name: string };
+
+export const Hello = define<State, Msg>('gy-hello', {
+  init: () => ({ name: '' }),
+  intent: {
+    Named: ({ value }) => ({ _tag: 'Named', name: value ?? '' }),
+  },
+  update: {
+    Named: (_s, m) => ({ name: m.name }),
+  },
+  view: (s, i) => html`
+    <p>
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" autocomplete="given-name" data-intent=${i.Named} />
+    </p>
+    <hr />
+    <output for="name" aria-live="polite">Hello ${s.name.trim()}</output>
+  `,
+  styles: css`…`,
+});

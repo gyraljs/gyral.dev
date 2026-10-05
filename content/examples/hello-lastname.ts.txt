@@ -1,0 +1,55 @@
+import { css, define, html } from '@gyral/core';
+
+export interface State {
+  readonly first: string;
+  readonly last: string;
+}
+
+export type Msg =
+  | { readonly _tag: 'First'; readonly value: string }
+  | { readonly _tag: 'Last'; readonly value: string };
+
+/** Minimum last-name length before a greeting is shown (from the Cycle.js original). */
+export const MIN_LAST = 3;
+
+/**
+ * Derived from state, never stored: "LAST, First" once both parts are valid, else ''.
+ * The Cycle.js original needed three streams (raw, valid, invalid) to express this.
+ */
+export const fullName = ({ first, last }: State): string =>
+  first.length > 0 && last.length >= MIN_LAST ? `${last.toUpperCase()}, ${first}` : '';
+
+export const HelloLastname = define<State, Msg>('gy-hello-lastname', {
+  init: () => ({ first: '', last: '' }),
+  intent: {
+    First: ({ value }) => ({ _tag: 'First', value: value ?? '' }),
+    Last: ({ value }) => ({ _tag: 'Last', value: value ?? '' }),
+  },
+  update: {
+    First: (s, m) => ({ ...s, first: m.value }),
+    Last: (s, m) => ({ ...s, last: m.value }),
+  },
+  view: (s, i) => html`
+    <fieldset>
+      <legend>Your name</legend>
+      <p>
+        <label for="first">First name</label>
+        <input id="first" type="text" autocomplete="given-name" data-intent=${i.First} />
+      </p>
+      <p>
+        <label for="last">Last name</label>
+        <input
+          id="last"
+          type="text"
+          autocomplete="family-name"
+          minlength=${MIN_LAST}
+          aria-describedby="last-hint"
+          data-intent=${i.Last}
+        />
+        <small id="last-hint">At least ${MIN_LAST} letters.</small>
+      </p>
+    </fieldset>
+    <h2><output for="first last" aria-live="polite">Hello ${fullName(s)}</output></h2>
+  `,
+  styles: css`…`,
+});
