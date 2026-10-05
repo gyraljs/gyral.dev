@@ -1,5 +1,6 @@
 // A reader for Cloudflare Pages' `_headers` file, enough for the preview server: path
-// patterns with a trailing `*` and headers indented beneath them. Later matches add headers.
+// patterns with one `*` splat (`/assets/*`, `/*.md`) and headers indented beneath them. Later
+// matches add headers.
 
 export interface HeaderRule {
   readonly pattern: string;
@@ -22,8 +23,14 @@ export function parseHeaders(text: string): readonly HeaderRule[] {
   return rules;
 }
 
-const matches = (pattern: string, path: string): boolean =>
-  pattern.endsWith('*') ? path.startsWith(pattern.slice(0, -1)) : pattern === path;
+const matches = (pattern: string, path: string): boolean => {
+  const splat = pattern.indexOf('*');
+  if (splat === -1) return pattern === path;
+  const [before, after] = [pattern.slice(0, splat), pattern.slice(splat + 1)];
+  return (
+    path.length >= before.length + after.length && path.startsWith(before) && path.endsWith(after)
+  );
+};
 
 /** The headers for a path, in file order. */
 export const headersFor = (rules: readonly HeaderRule[], path: string): [string, string][] =>

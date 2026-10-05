@@ -14,6 +14,8 @@ export interface Post {
   readonly date: string;
   readonly author: string;
   readonly html: string;
+  /** The post as Markdown, for its `index.md` twin (src/content/llms.ts). */
+  readonly markdown: string;
 }
 
 export const BLOG_DIR = new URL('../../content/blog/', import.meta.url);
@@ -41,6 +43,7 @@ export async function loadPost(file: string, source: string): Promise<Post> {
     date: date as string,
     author: author as string,
     html,
+    markdown: body,
   };
 }
 

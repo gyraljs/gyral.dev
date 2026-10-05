@@ -21,6 +21,7 @@ export function docMeta(doc: DocPage): PageMeta {
     description: doc.description,
     type: 'article',
     searchable: true,
+    markdown: true,
     jsonLd: [
       {
         '@context': 'https://schema.org',

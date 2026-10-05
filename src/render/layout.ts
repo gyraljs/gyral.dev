@@ -29,6 +29,8 @@ export interface PageMeta {
   readonly searchable?: boolean;
   /** Not indexed by search engines and left out of the sitemap (404, search results). */
   readonly noindex?: boolean;
+  /** The page has a Markdown twin at `<path>index.md` (src/content/llms.ts). */
+  readonly markdown?: boolean;
 }
 
 export const fullTitle = (meta: Pick<PageMeta, 'path' | 'title'>): string =>
@@ -47,6 +49,7 @@ const head = (meta: PageMeta, assets: Assets) => {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href=${assets.stylesheet}>
+    ${meta.markdown === true ? serverHtml`<link rel="alternate" type="text/markdown" href=${`${meta.path}index.md`}>` : nothing}
     <meta property="og:type" content=${meta.type ?? 'website'}>
     <meta property="og:site_name" content=${SITE_NAME}>
     <meta property="og:title" content=${title}>

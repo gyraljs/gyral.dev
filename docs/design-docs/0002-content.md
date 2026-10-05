@@ -46,3 +46,23 @@ Status: **accepted** (2026-10-05)
 - **Blog posts** are `content/blog/*.md` with `title`, `description` (50–160 characters),
   `date` (`YYYY-MM-DD`) and `author`; they render with `BlogPosting` structured data.
 - Docs code blocks may use Vite's client types (`?raw` imports) in `check-snippets`.
+
+## Addendum: content for agents (gyral-7se.3, 2026-10-05)
+
+Coding agents read docs as Markdown, so `scripts/build.ts` writes, from the same content the HTML
+pages use (`src/content/llms.ts`):
+
+- **`/llms.txt`** in the [llmstxt.org](https://llmstxt.org) format: a summary with the current
+  Gyral version, how to start (`npm create gyral`, the Claude Code skill), then links to every
+  docs, API reference and examples page's Markdown twin; background pages and the blog under
+  "Optional".
+- **`/llms-full.txt`**: every docs page in reading order, the API reference and the examples
+  with their code excerpts, one section per page with its source URL.
+- **A Markdown twin** at `<page>/index.md` for every docs, API, examples and blog page, linked
+  from the page's head with `<link rel="alternate" type="text/markdown">`. Site links in twins
+  are absolute, so a twin read on its own still points somewhere real.
+
+The build fails (`src/content/llms-check.ts`) when a docs page has no twin or is missing from
+`llms-full.txt`, when an `llms.txt` link points at a file the build didn't write, or when a file
+has HTML tags or template leftovers (`${`, `[object Object]`) outside code. These files are not
+in the sitemap; `robots.txt` allows them.

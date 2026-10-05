@@ -271,7 +271,8 @@ export function loadApiPages(): Promise<readonly DocPage[]> {
     const symbols = new Map(files.map((f) => [f, describeExports(program, f)]));
     return Promise.all(
       packages.map(async (pkg, index): Promise<DocPage> => {
-        const { html, headings } = await renderMarkdown(packageMarkdown(pkg, symbols));
+        const markdown = packageMarkdown(pkg, symbols);
+        const { html, headings } = await renderMarkdown(markdown);
         return {
           slug: `api/${pkg.name}`,
           path: `/docs/api/${pkg.name}/`,
@@ -281,6 +282,8 @@ export function loadApiPages(): Promise<readonly DocPage[]> {
           order: 10 + index,
           draft: false,
           html,
+          // Symbol headings are `<h4 id>` for stable anchors; the Markdown twin uses `####`.
+          markdown: markdown.replace(/<h4 id="[^"]*"><code>([^<]+)<\/code><\/h4>/g, '#### `$1`'),
           // The outline lists entry points and groups; symbols are in each group's table.
           headings,
           source: apiSourceUrl(pkg.name),

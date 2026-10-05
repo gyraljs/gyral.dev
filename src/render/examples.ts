@@ -14,6 +14,7 @@ export const examplesMeta: PageMeta = {
   path: '/examples/',
   title: 'Examples',
   searchable: true,
+  markdown: true,
   description:
     'Gyral examples, from a counter to a server-rendered app: ports of the Cycle.js examples with their source, plus gyral-shop, a full store.',
   jsonLd: [

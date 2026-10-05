@@ -39,6 +39,18 @@ describe('pages', () => {
     expect(html).toContain('<main id="main" data-pagefind-body');
     expect(html).toContain('<form action="/search/" method="get">');
     expect(html).toContain('<details class="docs-menu" data-pagefind-ignore>');
+    expect(html).toContain(
+      '<link rel="alternate" type="text/markdown" href="/docs/getting-started/index.md">',
+    );
+  });
+
+  it('links a Markdown twin only from pages that have one', async () => {
+    for (const path of ['/examples/', '/blog/', '/blog/introducing-gyral/', '/docs/api/core/']) {
+      expect((await get(path)).html, path).toContain(`href="${path}index.md"`);
+    }
+    for (const path of ['/', '/brand/', '/search/']) {
+      expect((await get(path)).html, path).not.toContain('type="text/markdown"');
+    }
   });
 
   it('answers unknown paths with the 404 page', async () => {
@@ -112,5 +124,11 @@ describe('_headers', () => {
       ['B', '2'],
     ]);
     expect(headersFor(rules, '/')).toEqual([['A', '1']]);
+  });
+
+  it('matches a splat in the middle of a pattern', () => {
+    const rules = parseHeaders('/*.md\n  C: 3\n');
+    expect(headersFor(rules, '/docs/x/index.md')).toEqual([['C', '3']]);
+    expect(headersFor(rules, '/docs/x/')).toEqual([]);
   });
 });

@@ -21,6 +21,8 @@ export interface DocPage {
   readonly order: number;
   readonly draft: boolean;
   readonly html: string;
+  /** The page as Markdown, for its `index.md` twin and llms-full.txt (src/content/llms.ts). */
+  readonly markdown: string;
   readonly headings: readonly Heading[];
   /** Where the page's content comes from, when it isn't a Markdown file (generated pages). */
   readonly source?: string;
@@ -54,6 +56,7 @@ export async function loadDoc(file: string, source: string): Promise<DocPage> {
     order: order as number,
     draft: draft as boolean,
     html,
+    markdown: body,
     headings,
   };
 }

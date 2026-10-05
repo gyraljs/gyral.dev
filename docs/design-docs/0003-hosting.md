@@ -29,6 +29,9 @@ Status: **accepted** (2026-10-05)
 - HSTS (two years, subdomains), `nosniff`, strict referrer policy, a restrictive
   Permissions-Policy, COOP same-origin.
 - `/assets/*` is content-hashed: cached for a year, immutable.
+- `/llms.txt` and `/llms-full.txt` are `text/plain; charset=utf-8`, Markdown twins (`/*.md`)
+  `text/markdown; charset=utf-8` (ADR 0002, "content for agents"). They keep Cloudflare's
+  default caching, like the HTML pages.
 
 ## Search (site-54d.23, 2026-10-05)
 

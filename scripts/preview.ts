@@ -17,6 +17,7 @@ const TYPES: Record<string, string> = {
   '.webmanifest': 'application/manifest+json',
   '.xml': 'application/xml',
   '.txt': 'text/plain; charset=utf-8',
+  '.md': 'text/markdown; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -38,9 +39,14 @@ export function createPreview(dist: string): http.Server {
       const path = decodeURIComponent(url.pathname);
       const local = normalize(join(dist, path));
       const send = async (file: string, status: number) => {
+        // `_headers` may set Content-Type; header names are case-insensitive, so it replaces ours.
+        const extra = headersFor(rules, path).map(([k, v]): [string, string] => [
+          k.toLowerCase(),
+          v,
+        ]);
         res.writeHead(status, {
           'content-type': TYPES[extname(file)] ?? 'application/octet-stream',
-          ...Object.fromEntries(headersFor(rules, path)),
+          ...Object.fromEntries(extra),
         });
         res.end(await readFile(file));
       };

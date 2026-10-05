@@ -13,3 +13,11 @@
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Files for agents (src/content/llms.ts). Cached like the HTML pages (Cloudflare's default).
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+/*.md
+  Content-Type: text/markdown; charset=utf-8

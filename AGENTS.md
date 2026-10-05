@@ -39,6 +39,7 @@ First run needs `pnpm exec playwright install chromium`.
 | `content/blog/*.md`                            | Blog posts (front matter: title, description, date, author)          |
 | `content/examples/`                            | Example excerpts, synced from Gyral (never edit by hand)             |
 | `src/content/api.ts`                           | The API reference, generated from the packages' types at build time  |
+| `src/content/llms.ts`                          | llms.txt, llms-full.txt and Markdown twins for agents (checked)      |
 | `src/render/`                                  | Server-only page templates: layout, home, docs, route table          |
 | `src/content/`                                 | Build-time Markdown, front matter, Shiki highlighting                |
 | `src/islands/`                                 | Browser code: Gyral components hydrated on a page (counter, search)  |

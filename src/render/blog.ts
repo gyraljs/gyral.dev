@@ -8,6 +8,7 @@ import type { PageMeta } from './layout.js';
 export const blogMeta: PageMeta = {
   path: '/blog/',
   title: 'Blog',
+  markdown: true,
   description:
     'News and writing about Gyral: releases, design decisions, and what we learn building it.',
   jsonLd: [
@@ -46,6 +47,7 @@ export const postMeta = (post: Post): PageMeta => ({
   description: post.description,
   type: 'article',
   searchable: true,
+  markdown: true,
   jsonLd: [
     {
       '@context': 'https://schema.org',
