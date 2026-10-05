@@ -49,6 +49,7 @@
     "globals": "17.13.0",
     "hono": "4.13.13",
     "marked": "18.0.14",
+    "pagefind": "^1.5.2",
     "playwright": "1.63.0",
     "prettier": "3.9.9",
     "shiki": "4.5.0",

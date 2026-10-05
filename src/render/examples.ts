@@ -13,6 +13,7 @@ const EXAMPLES_SOURCE = `${LINKS.github}/tree/main/examples`;
 export const examplesMeta: PageMeta = {
   path: '/examples/',
   title: 'Examples',
+  searchable: true,
   description:
     'Gyral examples, from a counter to a server-rendered app: ports of the Cycle.js examples with their source, plus gyral-shop, a full store.',
   jsonLd: [
@@ -70,7 +71,7 @@ export async function examplesBody(): Promise<unknown> {
         <a href=${LINKS.github} rel="external">the repository</a>, then
         <code>pnpm install</code> and <code>pnpm examples</code>.
       </p>
-      <nav aria-label="Example groups">
+      <nav aria-label="Example groups" data-pagefind-ignore>
         <ul role="list" class="chips">
           ${EXAMPLE_GROUPS.map((g) => serverHtml`<li><a href=${`#${g.id}`}>${g.title}</a></li>`)}
           <li><a href="#gyral-shop">A whole application</a></li>

@@ -11,6 +11,8 @@ export interface Assets {
   readonly stylesheet: string;
   /** The client entry; only pages with islands load it. */
   readonly clientEntry: string;
+  /** The keyboard shortcut for search (`/`, Ctrl/⌘+K): tiny, on every page. */
+  readonly shortcuts: string;
 }
 
 export interface PageMeta {
@@ -23,7 +25,9 @@ export interface PageMeta {
   readonly jsonLd?: readonly JsonLd[];
   /** True when the body contains islands that need the client entry. */
   readonly islands?: boolean;
-  /** Not indexed (the 404 page). */
+  /** Indexed by the site search (Pagefind reads `<main data-pagefind-body>`). */
+  readonly searchable?: boolean;
+  /** Not indexed by search engines and left out of the sitemap (404, search results). */
   readonly noindex?: boolean;
 }
 
@@ -77,8 +81,29 @@ const siteHeader = (path: string) => serverHtml`
               >${item.label}</a>
           </li>`,
         )}
+        <li class="nav-search">
+          <a href="/search/" aria-current=${path === '/search/' ? 'page' : nothing}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+              <path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <span class="visually-hidden">Search</span>
+          </a>
+        </li>
       </ul>
     </nav>
+    ${
+      path === '/search/'
+        ? nothing
+        : serverHtml`<search class="site-search">
+          <form action="/search/" method="get">
+            <label for="site-search-q" class="visually-hidden">Search the site</label>
+            <input id="site-search-q" name="q" type="search" placeholder="Search" autocomplete="off"
+              aria-keyshortcuts="/ Control+K Meta+K">
+            <kbd aria-hidden="true">/</kbd>
+          </form>
+        </search>`
+    }
   </header>
 `;
 
@@ -124,9 +149,9 @@ export function layout(meta: PageMeta, body: unknown, assets: Assets): unknown {
     title: fullTitle(meta),
     description: meta.description,
     head: head(meta, assets),
-    scripts: meta.islands === true ? [assets.clientEntry] : [],
+    scripts: meta.islands === true ? [assets.shortcuts, assets.clientEntry] : [assets.shortcuts],
     body: serverHtml`${siteHeader(meta.path)}
-      <main id="main">${body}</main>
+      <main id="main" data-pagefind-body=${meta.searchable === true ? '' : nothing}>${body}</main>
       ${siteFooter()}`,
   });
 }

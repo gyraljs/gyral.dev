@@ -20,6 +20,7 @@ export function docMeta(doc: DocPage): PageMeta {
     title: doc.slug === 'index' ? 'Documentation' : doc.title,
     description: doc.description,
     type: 'article',
+    searchable: true,
     jsonLd: [
       {
         '@context': 'https://schema.org',
@@ -45,7 +46,7 @@ export function docMeta(doc: DocPage): PageMeta {
 }
 
 const sidebar = (docs: readonly DocPage[], current: DocPage) => serverHtml`
-  <nav class="docs-nav" aria-label="Documentation">
+  <nav class="docs-nav" aria-label="Documentation" data-pagefind-ignore>
     ${SECTIONS.map((section) => {
       const pages = docs.filter((d) => d.section === section);
       if (pages.length === 0) return nothing;
@@ -68,7 +69,7 @@ const sidebar = (docs: readonly DocPage[], current: DocPage) => serverHtml`
 const outline = (doc: DocPage) =>
   doc.headings.length < 2
     ? nothing
-    : serverHtml`<nav class="outline" aria-labelledby="outline-title">
+    : serverHtml`<nav class="outline" aria-labelledby="outline-title" data-pagefind-ignore>
         <h2 id="outline-title">On this page</h2>
         <ol role="list">
           ${doc.headings.map(
@@ -114,7 +115,7 @@ export function docBody(docs: readonly DocPage[], doc: DocPage): unknown {
       <article class="doc prose">
         ${unsafeHTML(doc.html)}
         ${doc.slug === 'index' ? docsIndex(docs) : nothing}
-        <footer class="doc-footer">
+        <footer class="doc-footer" data-pagefind-ignore>
           <p>
             ${
               doc.source === undefined

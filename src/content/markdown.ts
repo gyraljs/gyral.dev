@@ -36,6 +36,20 @@ export const slugify = (text: string): string =>
 const escapeHtml = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+const ENTITIES: Readonly<Record<string, string>> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  '#39': "'",
+};
+
+/** Plain text from rendered inline HTML: tags dropped, entities decoded (the outline escapes it again). */
+const toText = (html: string): string =>
+  html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&(amp|lt|gt|quot|#39);/g, (whole, name: string) => ENTITIES[name] ?? whole);
+
 const isLang = (lang: string): lang is (typeof LANGS)[number] =>
   (LANGS as readonly string[]).includes(lang);
 
@@ -62,7 +76,7 @@ export async function renderMarkdown(source: string): Promise<Rendered> {
         used.set(base, seen + 1);
         const id = seen === 0 ? base : `${base}-${String(seen)}`;
         if (token.depth === 2 || token.depth === 3) {
-          headings.push({ depth: token.depth, id, text: inner.replace(/<[^>]+>/g, '') });
+          headings.push({ depth: token.depth, id, text: toText(inner) });
         }
         return `<h${String(token.depth)} id="${id}"><a class="anchor" href="#${id}">${inner}</a></h${String(token.depth)}>\n`;
       },

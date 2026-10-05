@@ -35,7 +35,7 @@ export default tseslint.config(
   },
   {
     // Browser code: the islands and the client entry. Baseline policy via .browserslistrc.
-    files: ['src/islands/**/*.ts', 'src/entry-client.ts'],
+    files: ['src/islands/**/*.ts', 'src/entry-client.ts', 'src/shortcuts.ts'],
     plugins: { compat },
     languageOptions: { globals: globals.browser },
     rules: {

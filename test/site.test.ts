@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { createSite, sitemap } from '../src/render/site.js';
 import { headersFor, parseHeaders } from '../scripts/lib/headers.js';
 
-const assets = { stylesheet: '/assets/site.css', clientEntry: '/assets/entry.js' };
+const assets = {
+  stylesheet: '/assets/site.css',
+  clientEntry: '/assets/entry.js',
+  shortcuts: '/assets/shortcuts.js',
+};
+/** Pages without islands load only the search shortcut, never the islands' entry. */
+const NO_ISLANDS = /<script type="module" src="(?!\/assets\/shortcuts\.js")/;
 const get = async (path: string) => {
   const site = await createSite(assets);
   const res = await site.fetch(new Request(`http://localhost${path}`));
@@ -22,13 +28,16 @@ describe('pages', () => {
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
   });
 
-  it('renders docs pages without JavaScript, with a canonical trailing slash', async () => {
+  it('renders docs pages without island JavaScript, with a canonical trailing slash', async () => {
     const { status, html } = await get('/docs/getting-started');
     expect(status).toBe(200);
     expect(html).toContain('href="https://gyral.dev/docs/getting-started/"');
     expect(html).toContain('<title>Getting started · Gyral</title>');
     expect(html).toContain('aria-current="page"');
-    expect(html).not.toContain('<script type="module"');
+    expect(html).toContain('<script type="module" src="/assets/shortcuts.js">');
+    expect(html).not.toMatch(NO_ISLANDS);
+    expect(html).toContain('<main id="main" data-pagefind-body');
+    expect(html).toContain('<form action="/search/" method="get">');
   });
 
   it('answers unknown paths with the 404 page', async () => {
@@ -55,7 +64,7 @@ describe('pages', () => {
     }
   });
 
-  it('renders the examples, blog and brand pages without JavaScript', async () => {
+  it('renders the examples, blog and brand pages without island JavaScript', async () => {
     for (const path of [
       '/examples/',
       '/blog/',
@@ -65,11 +74,32 @@ describe('pages', () => {
     ]) {
       const { status, html } = await get(path);
       expect(status, path).toBe(200);
-      expect(html, path).not.toContain('<script type="module"');
+      expect(html, path).not.toMatch(NO_ISLANDS);
       expect(html.match(/<h1[\s>]/g), path).toHaveLength(1);
     }
     const post = await get('/blog/introducing-gyral/');
     expect(post.html).toContain('"@type":"BlogPosting"');
+  });
+});
+
+describe('search', () => {
+  it('renders /search/ with the island, unindexed and out of the sitemap', async () => {
+    const { status, html } = await get('/search/');
+    expect(status).toBe(200);
+    expect(html).toContain('<gd-site-search');
+    expect(html).toContain('needs JavaScript');
+    expect(html).toContain('<meta name="robots" content="noindex">');
+    expect(html).not.toContain('data-pagefind-body');
+    expect(html).not.toContain('id="site-search-q"'); // no second box in the header
+    const site = await createSite(assets);
+    expect(site.paths).toContain('/search/');
+    expect(sitemap(site.sitemapPaths)).not.toContain('/search/');
+  });
+
+  it('keeps the home and brand pages out of the search index', async () => {
+    for (const path of ['/', '/brand/']) {
+      expect((await get(path)).html, path).not.toContain('data-pagefind-body');
+    }
   });
 });
 

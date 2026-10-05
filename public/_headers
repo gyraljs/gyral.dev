@@ -1,8 +1,10 @@
 # Cloudflare Pages response headers (docs/design-docs/0003-hosting.md).
 # scripts/preview.ts applies this file too, so `pnpm smoke` runs the pages under this CSP.
 # style-src needs 'unsafe-inline': Declarative Shadow DOM styles are inline <style> elements.
+# script-src 'wasm-unsafe-eval' lets the search index (Pagefind, WebAssembly) compile; it does
+# not allow eval() or inline scripts.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=63072000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

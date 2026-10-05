@@ -35,6 +35,11 @@ describe('markdown', () => {
     expect(headings.map((h) => h.id)).toEqual(['set-up', 'set-up-1', 'code-here']);
   });
 
+  it('keeps outline text plain: "Parse, don\'t validate" isn\'t escaped twice', async () => {
+    const { headings } = await renderMarkdown("## Parse, don't validate\n\n### A <b>&</b> B\n");
+    expect(headings.map((h) => h.text)).toEqual(["Parse, don't validate", 'A & B']);
+  });
+
   it('highlights known languages with both themes and escapes unknown ones', async () => {
     const { html } = await renderMarkdown('```ts\nconst a = 1;\n```\n\n```text\n<b>\n```\n');
     expect(html).toContain('data-lang="ts"');

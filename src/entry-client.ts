@@ -2,3 +2,4 @@
 // (gyral consumer setup, "Server rendering checklist").
 import '@gyral/ssr/hydrate';
 import './islands/loop-counter.js';
+import './islands/site-search.js';

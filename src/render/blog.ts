@@ -45,6 +45,7 @@ export const postMeta = (post: Post): PageMeta => ({
   title: post.title,
   description: post.description,
   type: 'article',
+  searchable: true,
   jsonLd: [
     {
       '@context': 'https://schema.org',
@@ -68,7 +69,7 @@ export const postBody = (post: Post) => serverHtml`
       <p class="byline"><time datetime=${post.date}>${longDate(post.date)}</time> · ${post.author}</p>
     </header>
     ${unsafeHTML(post.html.replace(/^<h1>.*?<\/h1>\n?/, ''))}
-    <footer>
+    <footer data-pagefind-ignore>
       <p><a href="/blog/">More posts</a></p>
     </footer>
   </article>

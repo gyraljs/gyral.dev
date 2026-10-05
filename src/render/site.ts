@@ -11,6 +11,7 @@ import { brandBody, brandMeta } from './brand.js';
 import { examplesBody, examplesMeta } from './examples.js';
 import { homeBody, homeMeta } from './home.js';
 import { layout, type Assets, type PageMeta } from './layout.js';
+import { searchBody, searchMeta } from './search.js';
 
 interface Route {
   readonly meta: PageMeta;
@@ -18,8 +19,10 @@ interface Route {
 }
 
 export interface Site {
-  /** Every indexable path, for the prerender step and the sitemap. */
+  /** Every page, for the prerender step. */
   readonly paths: readonly string[];
+  /** The indexable pages (no `noindex`), for the sitemap. */
+  readonly sitemapPaths: readonly string[];
   /** A full page Response for a GET; unknown paths get the 404 page. */
   readonly fetch: (request: Request) => Promise<Response>;
   /** The 404 document (written to 404.html, which Cloudflare Pages serves for unknown URLs). */
@@ -59,6 +62,7 @@ export async function createSite(
     ['/examples/', { meta: examplesMeta, body: examplesBody }],
     ['/blog/', { meta: blogMeta, body: () => blogBody(posts) }],
     ['/brand/', { meta: brandMeta, body: brandBody }],
+    ['/search/', { meta: searchMeta, body: searchBody }],
   ]);
   for (const post of posts) {
     table.set(post.path, { meta: postMeta(post), body: () => postBody(post) });
@@ -71,6 +75,7 @@ export async function createSite(
 
   return {
     paths: [...table.keys()],
+    sitemapPaths: [...table].filter(([, r]) => r.meta.noindex !== true).map(([path]) => path),
     notFound,
     async fetch(request) {
       const { pathname } = new URL(request.url);

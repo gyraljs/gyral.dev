@@ -255,6 +255,87 @@
     padding-block: 0.25rem;
   }
 
+  /* Header search: a plain GET form to /search/ (works without JavaScript). The kbd hint
+     shows the `/` shortcut (src/shortcuts.ts) on pointer devices only. */
+  .site-header > nav {
+    margin-inline-start: auto;
+  }
+
+  .site-search {
+    flex: 0 1 13rem;
+    padding-block: 0.5rem;
+
+    & form {
+      position: relative;
+    }
+
+    & input {
+      inline-size: 100%;
+      padding: 0.4rem 2rem 0.4rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-sunken);
+      color: var(--text);
+      font-size: var(--step--1);
+
+      &::placeholder {
+        color: var(--text-muted);
+        opacity: 1;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 1px;
+      }
+    }
+
+    & kbd {
+      position: absolute;
+      inset-block: 0;
+      inset-inline-end: 0.6rem;
+      margin-block: auto;
+      block-size: fit-content;
+      padding: 0 0.35rem;
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      line-height: 1.4;
+      pointer-events: none;
+    }
+
+    & input:focus + kbd,
+    & input:not(:placeholder-shown) + kbd {
+      display: none;
+    }
+
+    @media (pointer: coarse) {
+      & kbd {
+        display: none;
+      }
+    }
+  }
+
+  /* Narrow screens: the search box would take a row of its own in the sticky header, so it
+     becomes a magnifier link to /search/ in the nav (which the wide layout hides). */
+  .nav-search a {
+    display: inline-flex;
+    vertical-align: middle;
+  }
+
+  @media (width >= 48rem) {
+    .nav-search {
+      display: none;
+    }
+  }
+
+  @media (width < 48rem) {
+    .site-search {
+      display: none;
+    }
+  }
+
   .site-footer {
     display: grid;
     gap: var(--space);
@@ -784,6 +865,10 @@
     }
   }
 
+  .search-page > gd-site-search {
+    max-inline-size: 52rem;
+  }
+
   .chips {
     display: flex;
     flex-wrap: wrap;
@@ -1032,5 +1117,17 @@
 
   .not-found {
     padding-block: var(--section);
+  }
+}
+
+@layer utilities {
+  /* Hidden visually, still read by screen readers (labels the header search box). */
+  .visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

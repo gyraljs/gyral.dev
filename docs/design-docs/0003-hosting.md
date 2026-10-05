@@ -21,13 +21,30 @@ Status: **accepted** (2026-10-05)
 
 ## Headers (`public/_headers`)
 
-- CSP: `default-src 'self'`; `script-src 'self'` (JSON-LD and hydration seeds are data blocks,
-  which CSP doesn't block); `style-src 'self' 'unsafe-inline'` because Declarative Shadow DOM
+- CSP: `default-src 'self'`; `script-src 'self' 'wasm-unsafe-eval'` (JSON-LD and hydration
+  seeds are data blocks, which CSP doesn't block; `'wasm-unsafe-eval'` lets the search index's
+  WebAssembly compile and allows neither `eval()` nor inline script); `style-src 'self' 'unsafe-inline'` because Declarative Shadow DOM
   styles are inline `<style>` elements; no third-party origins at all. `pnpm smoke` runs every
   page under this CSP, so a violation fails the gate.
 - HSTS (two years, subdomains), `nosniff`, strict referrer policy, a restrictive
   Permissions-Policy, COOP same-origin.
 - `/assets/*` is content-hashed: cached for a year, immutable.
+
+## Search (site-54d.23, 2026-10-05)
+
+- **Pagefind**, run by `scripts/build.ts` after prerendering: it indexes the `<main
+data-pagefind-body>` of docs, API reference, examples and blog posts (`PageMeta.searchable`)
+  and writes static files to `dist/pagefind/`. No service, no third-party origin; navigation,
+  outlines and footers are `data-pagefind-ignore`. Pagefind's own UI isn't used or published.
+- **The header form** is a plain `GET /search/?q=` form, so it works without JavaScript. Below
+  48rem it becomes a magnifier link to `/search/`. `src/shortcuts.ts` (≈0.3 kB, every page)
+  focuses it on `/` or Ctrl/⌘+K.
+- **`/search/`** is a page with the `<gd-site-search>` island (`noindex`, not in the sitemap).
+  Server-rendered it says search needs JavaScript and links the docs index; once hydrated it
+  reads `?q=`, searches as you type (debounced, newer queries cancel older ones), keeps `?q=` in
+  the address bar, and supports arrows/Escape. Excerpts reach the view as text runs, never HTML.
+- `pnpm smoke` searches for `intent`, `hydrate` and `formAction` through the header form and
+  checks the expected pages are in the top five.
 
 ## One-time setup (owner)
 
