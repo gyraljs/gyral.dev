@@ -1,7 +1,14 @@
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseFrontmatter } from '../src/content/frontmatter.js';
 import { renderMarkdown, slugify } from '../src/content/markdown.js';
 import { loadAllDocs, loadDoc, loadDocs } from '../src/content/docs.js';
+import { API_PACKAGES, loadApiPages } from '../src/content/api.js';
+import { longDate, loadPost, loadPosts } from '../src/content/blog.js';
+import { ALL_EXAMPLES, excerpt } from '../src/content/examples.js';
 
 describe('front matter', () => {
   it('reads strings, numbers and booleans', () => {
@@ -55,16 +62,88 @@ describe('docs collection', () => {
   });
 
   it('keeps drafts out of the shipped pages', async () => {
-    const all = await loadAllDocs();
-    const shipped = await loadDocs();
-    expect(shipped.every((p) => !p.draft)).toBe(true);
-    expect(shipped.length).toBeLessThan(all.length);
-    expect(shipped.map((p) => p.path)).toContain('/docs/getting-started/');
+    const dir = await mkdtemp(join(tmpdir(), 'gyral-docs-'));
+    const page = (draft: boolean) =>
+      `---\ntitle: T\ndescription: ${'d'.repeat(60)}\nsection: Guides\norder: 1\ndraft: ${String(draft)}\n---\n# T\n`;
+    await writeFile(join(dir, 'ready.md'), page(false));
+    await writeFile(join(dir, 'later.md'), page(true));
+    const url = pathToFileURL(`${dir}/`);
+    expect((await loadAllDocs(url)).map((p) => p.slug).sort()).toEqual(['later', 'ready']);
+    expect((await loadDocs(url)).map((p) => p.slug)).toEqual(['ready']);
+    expect((await loadDocs()).map((p) => p.path)).toContain('/docs/getting-started/');
   });
 
   it('gives every page a unique path and a description', async () => {
     const all = await loadAllDocs();
     expect(new Set(all.map((p) => p.path)).size).toBe(all.length);
-    expect(all.every((p) => p.description.length >= 50)).toBe(true);
+    expect(all.filter((p) => p.description.length < 50 || p.description.length > 160)).toEqual([]);
+  });
+});
+
+describe('blog', () => {
+  it('validates front matter, naming the file', async () => {
+    await expect(loadPost('p.md', '---\ntitle: P\n---\n')).rejects.toThrow('content/blog/p.md');
+    await expect(
+      loadPost(
+        'p.md',
+        `---\ntitle: P\ndescription: ${'d'.repeat(60)}\ndate: 5 Oct\nauthor: A\n---\n`,
+      ),
+    ).rejects.toThrow('date must be YYYY-MM-DD');
+  });
+
+  it('lists posts newest first with a fixed date format', async () => {
+    const posts = await loadPosts();
+    expect(posts.length).toBeGreaterThan(0);
+    expect([...posts].sort((a, b) => b.date.localeCompare(a.date))).toEqual(posts);
+    expect(longDate('2026-10-05')).toBe('5 October 2026');
+  });
+});
+
+describe('examples', () => {
+  it('leaves out styles blocks and the global tag map', () => {
+    const source = [
+      "import { css, define } from '@gyral/core';",
+      "export const X = define('x', {",
+      '  view: () => null,',
+      '  styles: [',
+      '    shared,',
+      '    css`',
+      '      p { color: red; }',
+      '    `,',
+      '  ],',
+      '});',
+      '',
+      'declare global {',
+      '  interface HTMLElementTagNameMap {',
+      "    'x-x': unknown;",
+      '  }',
+      '}',
+      '',
+    ].join('\n');
+    expect(excerpt(source)).toBe(
+      [
+        "import { css, define } from '@gyral/core';",
+        "export const X = define('x', {",
+        '  view: () => null,',
+        '  styles: css`…`,',
+        '});',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('has a unique slug per example', () => {
+    expect(new Set(ALL_EXAMPLES.map((e) => e.slug)).size).toBe(ALL_EXAMPLES.length);
+  });
+});
+
+describe('API reference', () => {
+  it('generates a page per package, with every entry point', async () => {
+    const pages = await loadApiPages();
+    expect(pages.map((p) => p.path)).toEqual(API_PACKAGES.map((p) => `/docs/api/${p.name}/`));
+    const core = pages[0];
+    expect(core?.html).toContain('<code>define</code>');
+    expect(core?.html).toContain('@gyral/core/vite');
+    expect(core?.headings.map((h) => h.text)).toContain('Functions');
   });
 });

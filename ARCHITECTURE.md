@@ -3,9 +3,11 @@
 One route table, one renderer, two ways to run it.
 
 ```
-content/docs/*.md ──► src/content (front matter, Markdown, Shiki) ─┐
-                                                                    ├─► src/render/site.ts ─► Response
-src/site.ts (origin, nav, links) ──► src/render (layout, home, docs) ┘        │
+content/docs, content/blog ──► src/content (front matter, Markdown, Shiki) ─┐
+@gyral/* type declarations ──► src/content/api.ts (TypeScript compiler) ────┤
+content/examples (excerpts) ──► src/content/examples.ts ────────────────────┤
+                                                                             ├─► src/render/site.ts ─► Response
+src/site.ts (origin, nav) ──► src/render (layout, home, docs, examples, blog, brand) ┘   │
                                                                               ├─ scripts/dev.ts: per request (Vite middleware)
 src/islands/*.ts ──► src/entry-client.ts ──► vite build ──► dist/assets/      └─ scripts/build.ts: prerender every path → dist/
 src/styles/site.css ───────────────────────► vite build ──► dist/assets/
@@ -17,7 +19,7 @@ public/ ────────────────────────
 | Layer         | Runs                 | May import                                                         |
 | ------------- | -------------------- | ------------------------------------------------------------------ |
 | `src/site.ts` | server and browser   | nothing                                                            |
-| `src/content` | build (Node)         | `marked`, `shiki`, Node built-ins                                  |
+| `src/content` | build (Node)         | `marked`, `shiki`, `typescript`, Node built-ins                    |
 | `src/render`  | build (Node)         | `src/content`, `src/islands` (to server-render them), `@gyral/ssr` |
 | `src/islands` | browser (and server) | `@gyral/core`, `src/site.ts` only                                  |
 | `scripts/`    | Node                 | anything                                                           |

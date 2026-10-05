@@ -23,7 +23,8 @@ export const LINKS = {
 /** The primary navigation, in order. `match` is the path prefix that marks the link current. */
 export const NAV = [
   { label: 'Docs', href: '/docs/', match: '/docs/' },
-  { label: 'Showcase', href: '/#showcase', match: null },
+  { label: 'Examples', href: '/examples/', match: '/examples/' },
+  { label: 'Blog', href: '/blog/', match: '/blog/' },
   { label: 'GitHub', href: LINKS.github, match: null },
 ] as const;
 

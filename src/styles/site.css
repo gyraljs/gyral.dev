@@ -220,9 +220,14 @@
       border-block-end: 1px solid var(--border);
     }
 
+    /* Narrow screens: the nav wraps under the logo instead of overflowing. */
+    flex-wrap: wrap;
+    row-gap: 0;
+
     & nav ul {
       display: flex;
-      gap: clamp(0.75rem, 0.4rem + 1.5vw, 1.75rem);
+      flex-wrap: wrap;
+      gap: 0 clamp(0.75rem, 0.4rem + 1.5vw, 1.75rem);
       padding: 0;
       list-style: none;
     }
@@ -760,6 +765,269 @@
       font-size: 0.8em;
       font-weight: 400;
     }
+  }
+
+  /* Examples, blog and brand */
+  .page-intro {
+    display: grid;
+    gap: 1rem;
+    padding-block: calc(var(--section) * 0.5) var(--space);
+
+    & h1 {
+      font-size: var(--step-3);
+    }
+
+    & > p {
+      max-inline-size: 46rem;
+      color: var(--text-muted);
+      font-size: var(--step-1);
+    }
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+
+    & a {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text);
+      font-size: var(--step--1);
+      text-decoration: none;
+
+      &:hover {
+        border-color: var(--brand);
+        color: var(--brand);
+      }
+    }
+  }
+
+  .example-group,
+  .brand-section {
+    padding-block: var(--space) calc(var(--space) * 1.5);
+
+    & > h2 {
+      margin-block-end: var(--space);
+    }
+  }
+
+  .example-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 30rem), 1fr));
+    gap: var(--space);
+    padding: 0;
+    list-style: none;
+  }
+
+  .example {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    block-size: 100%;
+    padding: var(--space);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-raised);
+    scroll-margin-block-start: calc(var(--header-block-size) + 1rem);
+
+    & h3 {
+      font-size: var(--step-1);
+    }
+
+    & > p:first-of-type {
+      color: var(--text-muted);
+    }
+
+    & details {
+      min-inline-size: 0;
+    }
+
+    & summary {
+      cursor: pointer;
+      font-size: var(--step--1);
+    }
+
+    & details[open] summary {
+      margin-block-end: 0.75rem;
+    }
+
+    & .code pre {
+      max-block-size: 28rem;
+    }
+  }
+
+  .example-facts {
+    display: grid;
+    gap: 0.25rem;
+    font-size: var(--step--1);
+
+    & div {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    & dt {
+      min-inline-size: 3.5rem;
+      color: var(--text-muted);
+    }
+  }
+
+  .post-list {
+    padding-block-end: var(--section);
+
+    & ol {
+      display: grid;
+      gap: calc(var(--space) * 1.5);
+      max-inline-size: 46rem;
+      padding: 0;
+      list-style: none;
+    }
+
+    & h2 {
+      font-size: var(--step-2);
+
+      & a {
+        color: var(--text);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--brand);
+        }
+      }
+    }
+
+    & p:last-child {
+      margin-block-start: 0.5rem;
+    }
+  }
+
+  .byline {
+    color: var(--text-muted);
+    font-size: var(--step--1);
+  }
+
+  .post {
+    max-inline-size: 46rem;
+    margin-inline: auto;
+    padding-block: calc(var(--section) * 0.5) var(--section);
+    inline-size: min(100% - 2 * var(--gutter), 46rem);
+
+    & header {
+      display: grid;
+      gap: 0.5rem;
+      margin-block-end: calc(var(--space) * 1.5);
+    }
+
+    & h1 {
+      font-size: var(--step-3);
+    }
+
+    & footer {
+      margin-block-start: calc(var(--space) * 2);
+      padding-block-start: var(--space);
+      border-block-start: 1px solid var(--border);
+    }
+  }
+
+  /* Columns side by side start level: prose spacing applies within a column, not between. */
+  .brand-section .split {
+    align-items: start;
+
+    & > * {
+      margin-block-start: 0;
+    }
+  }
+
+  .brand-mark img {
+    inline-size: min(10rem, 40vw);
+    block-size: auto;
+    margin-inline: auto;
+  }
+
+  .downloads {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space);
+    margin-block-start: var(--space);
+    padding: 0;
+    list-style: none;
+
+    & figure {
+      display: grid;
+      gap: 0.75rem;
+      min-inline-size: 0;
+    }
+
+    & figcaption {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1rem;
+      align-items: baseline;
+
+      & strong {
+        flex-basis: 100%;
+      }
+    }
+  }
+
+  .download-preview {
+    display: block;
+    aspect-ratio: 16 / 9;
+
+    /* Without these, a tall logo's intrinsic height widens the box through the aspect ratio. */
+    min-block-size: 0;
+    overflow: clip;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    &[data-background='light'] {
+      background: oklch(100% 0 0);
+    }
+
+    &[data-background='dark'] {
+      background: oklch(18.7% 0.008 274.5);
+    }
+
+    & img {
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space);
+    margin-block: 0.75rem var(--space);
+    padding: 0;
+    list-style: none;
+
+    & li {
+      display: grid;
+      gap: 0.15rem;
+      font-size: var(--step--1);
+    }
+
+    & code {
+      color: var(--text-muted);
+    }
+  }
+
+  .swatch {
+    display: block;
+    block-size: 4rem;
+    margin-block-end: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--swatch);
   }
 
   .not-found {

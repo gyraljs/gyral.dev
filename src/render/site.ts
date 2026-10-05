@@ -1,9 +1,14 @@
 // The route table and the request handler: one function renders every page, and it serves
 // both the dev server (per request) and the build (prerendered to files).
 import { renderToStream, renderToString, serverHtml } from '@gyral/ssr';
-import { loadDocs, type DocPage } from '../content/docs.js';
+import { loadApiPages } from '../content/api.js';
+import { byReadingOrder, loadDocs, type DocPage } from '../content/docs.js';
 import { absolute } from '../site.js';
 import { docBody, docMeta } from './docs.js';
+import { loadPosts, type Post } from '../content/blog.js';
+import { blogBody, blogMeta, postBody, postMeta } from './blog.js';
+import { brandBody, brandMeta } from './brand.js';
+import { examplesBody, examplesMeta } from './examples.js';
 import { homeBody, homeMeta } from './home.js';
 import { layout, type Assets, type PageMeta } from './layout.js';
 
@@ -42,9 +47,22 @@ const HTML = { 'content-type': 'text/html; charset=utf-8' };
 const normalise = (pathname: string): string =>
   pathname.endsWith('/') ? pathname : `${pathname}/`;
 
-export async function createSite(assets: Assets, docs?: readonly DocPage[]): Promise<Site> {
-  const pages = docs ?? (await loadDocs());
-  const table = new Map<string, Route>([['/', { meta: homeMeta, body: homeBody }]]);
+export async function createSite(
+  assets: Assets,
+  docs?: readonly DocPage[],
+  blog?: readonly Post[],
+): Promise<Site> {
+  const pages = docs ?? [...(await loadDocs()), ...(await loadApiPages())].sort(byReadingOrder);
+  const posts = blog ?? (await loadPosts());
+  const table = new Map<string, Route>([
+    ['/', { meta: homeMeta, body: homeBody }],
+    ['/examples/', { meta: examplesMeta, body: examplesBody }],
+    ['/blog/', { meta: blogMeta, body: () => blogBody(posts) }],
+    ['/brand/', { meta: brandMeta, body: brandBody }],
+  ]);
+  for (const post of posts) {
+    table.set(post.path, { meta: postMeta(post), body: () => postBody(post) });
+  }
   for (const doc of pages) {
     table.set(doc.path, { meta: docMeta(doc), body: () => docBody(pages, doc) });
   }

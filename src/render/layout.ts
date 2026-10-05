@@ -90,7 +90,9 @@ const siteFooter = () => serverHtml`
         <ul role="list">
           <li><a href="/docs/">Documentation</a></li>
           <li><a href="/docs/getting-started/">Getting started</a></li>
-          <li><a href="/#showcase">Showcase</a></li>
+          <li><a href="/docs/api/">API reference</a></li>
+          <li><a href="/examples/">Examples</a></li>
+          <li><a href="/blog/">Blog</a></li>
         </ul>
       </section>
       <section aria-labelledby="footer-project">
@@ -99,7 +101,7 @@ const siteFooter = () => serverHtml`
           <li><a href=${LINKS.github} rel="external">GitHub</a></li>
           <li><a href=${LINKS.npm} rel="external">npm</a></li>
           <li><a href=${LINKS.shop} rel="external">gyral-shop</a></li>
-          <li><a href=${LINKS.brand} rel="external">Brand and logos</a></li>
+          <li><a href="/brand/">Brand and press</a></li>
         </ul>
       </section>
     </nav>

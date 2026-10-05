@@ -7,18 +7,39 @@ order: 1
 
 # Getting started
 
-In this guide you'll install Gyral, write a counter component, put it on a page, and test it.
-You need [Node.js](https://nodejs.org) 24 or later and a package manager. The examples use
-pnpm; npm and yarn work the same way.
+In this guide you'll create a Gyral app, write a counter component, put it on a page, and test
+it. You need [Node.js](https://nodejs.org) 24 or later and a package manager. The examples use
+npm; pnpm and yarn work the same way.
 
 ## Create a project
 
-Gyral works with any bundler. [Vite](https://vite.dev) is the quickest start:
+The quickest start is `create-gyral`. It sets up a Vite project with Gyral, Lit, TypeScript
+and a first test:
 
 ```sh
-pnpm create vite my-app --template vanilla-ts
+npm create gyral@latest my-app -- --template ssr
 cd my-app
-pnpm add @gyral/core lit
+npm install
+npm run dev
+```
+
+There are two templates:
+
+- **`basic`**: a client-rendered app. The page loads and your components render in the
+  browser.
+- **`ssr`**: the same component rendered on the server first, so the page works before any
+  JavaScript loads, then [hydrated](/docs/server-rendering/) in place.
+
+Leave out `--template` and it asks you which one you want.
+
+### Or set it up by hand
+
+Gyral works with any bundler. To add it to a [Vite](https://vite.dev) project yourself:
+
+```sh
+npm create vite@latest my-app -- --template vanilla-ts
+cd my-app
+npm install @gyral/core lit
 ```
 
 Gyral renders with [Lit](https://lit.dev), and your app provides the one copy of Lit that every
@@ -98,7 +119,7 @@ Read it from the bottom up:
 </body>
 ```
 
-Run `pnpm dev` and open the address it prints. The counter is a standard custom element with
+Run `npm run dev` and open the address it prints. The counter is a standard custom element with
 its own Shadow DOM, so it works in any page and alongside any framework.
 
 ## Read input
@@ -150,7 +171,7 @@ Gyral wants it.
 gives you `step` (one message) and `run` (a sequence):
 
 ```sh
-pnpm add -D @gyral/testing vitest
+npm install -D @gyral/testing vitest
 ```
 
 ```ts
@@ -177,7 +198,7 @@ focus, rendering) run in a browser with [Vitest browser mode](https://vitest.dev
 
 ## Next steps
 
-- Read the [documentation overview](/docs/) for the rest of the guides as they're published.
-- Browse the [examples](https://github.com/gyraljs/gyral/tree/main/examples) in the Gyral
-  repository: forms, HTTP, routing, shared state and server rendering.
+- Learn the three parts in depth: [Intent](/docs/intent/), [Model and update](/docs/update/)
+  and [Views](/docs/views/).
+- Browse the [examples](/examples/): forms, HTTP, routing, shared state and server rendering.
 - See a whole application in [gyral-shop](https://github.com/gyraljs/gyral-shop).

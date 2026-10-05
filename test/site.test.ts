@@ -31,20 +31,45 @@ describe('pages', () => {
     expect(html).not.toContain('<script type="module"');
   });
 
-  it('answers unknown paths and drafts with the 404 page', async () => {
-    for (const path of ['/nope/', '/docs/forms/']) {
+  it('answers unknown paths with the 404 page', async () => {
+    for (const path of ['/nope/', '/docs/no-such-page/', '/blog/no-such-post/']) {
       const { status, html } = await get(path);
       expect(status).toBe(404);
       expect(html).toContain('<meta name="robots" content="noindex">');
     }
   });
 
-  it('lists every shipped page in the sitemap, and no drafts', async () => {
+  it('lists every page in the sitemap', async () => {
     const site = await createSite(assets);
     const xml = sitemap(site.paths);
-    expect(xml).toContain('<loc>https://gyral.dev/</loc>');
-    expect(xml).toContain('<loc>https://gyral.dev/docs/getting-started/</loc>');
-    expect(xml).not.toContain('/docs/forms/');
+    for (const path of [
+      '/',
+      '/docs/getting-started/',
+      '/docs/api/core/',
+      '/examples/',
+      '/blog/',
+      '/blog/introducing-gyral/',
+      '/brand/',
+    ]) {
+      expect(xml).toContain(`<loc>https://gyral.dev${path}</loc>`);
+    }
+  });
+
+  it('renders the examples, blog and brand pages without JavaScript', async () => {
+    for (const path of [
+      '/examples/',
+      '/blog/',
+      '/blog/introducing-gyral/',
+      '/brand/',
+      '/docs/api/core/',
+    ]) {
+      const { status, html } = await get(path);
+      expect(status, path).toBe(200);
+      expect(html, path).not.toContain('<script type="module"');
+      expect(html.match(/<h1[\s>]/g), path).toHaveLength(1);
+    }
+    const post = await get('/blog/introducing-gyral/');
+    expect(post.html).toContain('"@type":"BlogPosting"');
   });
 });
 

@@ -13,18 +13,19 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 ## Commands
 
-| Command           | What it does                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------ |
-| `pnpm install`    | Install. Gyral is linked from `../cyclejs-web-framework` until 0.1 is on npm               |
-| `pnpm check`      | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke |
-| `pnpm dev`        | Dev server on http://localhost:5400 (renders per request, Vite for assets)                 |
-| `pnpm build`      | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)          |
-| `pnpm preview`    | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401             |
-| `pnpm smoke`      | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, island       |
-| `pnpm showcase`   | Re-capture the gyral-shop theme screenshots (start the shop first)                         |
-| `pnpm ci:local`   | Run `.github/workflows/ci.yml` locally via `gh act`                                        |
-| `pnpm run deploy` | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)              |
-| `pnpm sync:brand` | Copy logos and icons from a `../gyral-brand` checkout into `public/`                       |
+| Command              | What it does                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| `pnpm install`       | Install. Gyral is linked from `../cyclejs-web-framework` until 0.1 is on npm               |
+| `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke |
+| `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                 |
+| `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)          |
+| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401             |
+| `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, island       |
+| `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                         |
+| `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                        |
+| `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)              |
+| `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                       |
+| `pnpm sync:examples` | Copy example excerpts from `../cyclejs-web-framework` into `content/examples/`             |
 
 First run needs `pnpm exec playwright install chromium`.
 
@@ -34,6 +35,9 @@ First run needs `pnpm exec playwright install chromium`.
 | ---------------------------------------------- | -------------------------------------------------------------------- |
 | [ARCHITECTURE.md](ARCHITECTURE.md)             | Modules, layers, what runs where                                     |
 | `content/docs/*.md`                            | Docs pages (front matter: title, description, section, order, draft) |
+| `content/blog/*.md`                            | Blog posts (front matter: title, description, date, author)          |
+| `content/examples/`                            | Example excerpts, synced from Gyral (never edit by hand)             |
+| `src/content/api.ts`                           | The API reference, generated from the packages' types at build time  |
 | `src/render/`                                  | Server-only page templates: layout, home, docs, route table          |
 | `src/content/`                                 | Build-time Markdown, front matter, Shiki highlighting                |
 | `src/islands/`                                 | The only browser code: Gyral components hydrated on a page           |
@@ -67,3 +71,4 @@ First run needs `pnpm exec playwright install chromium`.
 - CSS is Baseline newly available; newer features go inside `@supports` (stylelint).
 - Workflows trigger on `workflow_dispatch` only (`scripts/check-workflows.mjs`).
 - Brand files in `public/` are copies; change them in gyraljs/brand and re-sync.
+- Example excerpts match the Gyral examples (`sync-examples.mjs --check`).

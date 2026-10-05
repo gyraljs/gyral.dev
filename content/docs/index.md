@@ -15,4 +15,5 @@ out at the edges of your app.
 New here? Start with [Getting started](/docs/getting-started/). It takes about ten minutes and
 ends with a working, tested component.
 
-> Gyral is pre-release. The API is settling toward 0.1, and these docs grow with it.
+The guides build on each other, but each one stands alone. The [API reference](/docs/api/) is
+generated from the published type declarations, so it always matches the code.
