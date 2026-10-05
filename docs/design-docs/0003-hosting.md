@@ -9,11 +9,13 @@ Status: **accepted** (2026-10-05)
   gyral.dev. `www.` on both domains redirects too.
 - **Cloudflare Pages** serves `dist/`: static HTML, `404.html` for unknown paths, trailing-slash
   URLs, and `_headers` (from `public/`) for security and cache headers.
-- **Deploys are direct uploads from the owner's machine**, after the gate:
-  `pnpm run deploy` = `pnpm check && wrangler pages deploy dist --project-name gyral-dev`.
-  Cloudflare's Git-connected builds can't resolve the `link:` dependency on Gyral, and CI runs
-  locally only (as in gyral and gyral-shop). After Gyral 0.1 is on npm, Git-connected builds
-  become possible; that is a separate decision.
+- **Deploys are Cloudflare Git-connected builds** of `main` (decided 2026-10-05, when the
+  owner connected the repo; supersedes "direct uploads only"). Until Gyral 0.1 is on npm the
+  `link:` dependency is satisfied by `scripts/cloudflare-build.sh`, which clones the public
+  gyraljs/gyral next to the site (`GYRAL_REF`, default `main`) and builds. Pages settings:
+  build command `bash scripts/cloudflare-build.sh`, output `dist`, env `NODE_VERSION=24`,
+  `SKIP_DEPENDENCY_INSTALL=1`. The gate still runs locally before pushing (`pnpm check`);
+  `pnpm run deploy` (wrangler direct upload) remains for manual deploys.
 - **CI** is `.github/workflows/ci.yml`, `workflow_dispatch` only, run with `pnpm ci:local`.
 
 ## Headers (`public/_headers`)
@@ -30,9 +32,9 @@ Status: **accepted** (2026-10-05)
 
 1. Cloudflare: add both zones (`gyral.dev`, `gyraljs.com`) and point the registrar's
    nameservers at Cloudflare.
-2. `pnpm dlx wrangler login`, then
-   `pnpm dlx wrangler pages project create gyral-dev --production-branch main`.
-3. First deploy: `pnpm run deploy`. Then in Pages → Custom domains add `gyral.dev` and
+2. Workers & Pages → Create → Pages → Connect to Git → `gyraljs/gyral.dev`, production
+   branch `main`, with the build settings above.
+3. After the first successful build, Pages → Custom domains: add `gyral.dev` and
    `www.gyral.dev`.
 4. Redirects: a Bulk Redirect list with `gyraljs.com` → `https://gyral.dev`,
    `www.gyraljs.com` → `https://gyral.dev` and `www.gyral.dev` → `https://gyral.dev`
