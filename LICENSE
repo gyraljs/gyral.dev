@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 The Zoop Troop, Inc.
+Copyright (c) 2026 Mike Zupper
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,5 +24,5 @@ SOFTWARE.
 
 The brand files in public/ (favicon.*, apple-touch-icon.png, icon-*.png, og.png,
 site.webmanifest and public/brand/) are not covered by this licence. They are
-© 2026 The Zoop Troop, Inc. and licensed under the terms in
+© 2026 Mike Zupper and licensed under the terms in
 https://github.com/gyraljs/brand/blob/main/LICENSE.

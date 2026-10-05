@@ -28,7 +28,7 @@ export function docMeta(doc: DocPage): PageMeta {
         description: doc.description,
         url: absolute(doc.path),
         isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: absolute('/') },
-        author: { '@type': 'Organization', name: 'The Zoop Troop, Inc.' },
+        author: { '@type': 'Person', name: 'Mike Zupper' },
       },
       {
         '@context': 'https://schema.org',

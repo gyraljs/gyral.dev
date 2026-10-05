@@ -111,8 +111,8 @@ const siteFooter = () => serverHtml`
     </p>
     <p class="legal">
       <small>
-        Code under the MIT licence. © ${COPYRIGHT_YEAR} The Zoop Troop, Inc. Gyral, gyraljs and
-        the Gyral logo are trademarks of The Zoop Troop, Inc.
+        Code under the MIT licence. © ${COPYRIGHT_YEAR} Mike Zupper. Gyral, gyraljs and
+        the Gyral logo are trademarks of Mike Zupper.
       </small>
     </p>
   </footer>

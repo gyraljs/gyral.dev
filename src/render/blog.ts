@@ -54,7 +54,7 @@ export const postMeta = (post: Post): PageMeta => ({
       datePublished: post.date,
       url: absolute(post.path),
       author: { '@type': 'Person', name: post.author },
-      publisher: { '@type': 'Organization', name: 'The Zoop Troop, Inc.' },
+      publisher: { '@type': 'Person', name: 'Mike Zupper' },
       isPartOf: { '@type': 'Blog', name: `${SITE_NAME} blog`, url: absolute('/blog/') },
     },
   ],

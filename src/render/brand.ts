@@ -185,7 +185,7 @@ export function brandBody(): unknown {
     <section class="brand-section prose" aria-labelledby="trademark-title">
       <h2 id="trademark-title">Trademarks</h2>
       <p>
-        Gyral, gyraljs and the Gyral logo are trademarks of The Zoop Troop, Inc. The code is
+        Gyral, gyraljs and the Gyral logo are trademarks of Mike Zupper. The code is
         open source under the MIT licence; the artwork is not, so that the logo only ever means
         "this is Gyral".
       </p>

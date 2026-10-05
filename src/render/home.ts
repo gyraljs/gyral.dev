@@ -108,7 +108,7 @@ export const homeMeta: PageMeta = {
       codeRepository: LINKS.github,
       programmingLanguage: 'TypeScript',
       license: 'https://opensource.org/license/mit',
-      author: { '@type': 'Organization', name: 'The Zoop Troop, Inc.' },
+      author: { '@type': 'Person', name: 'Mike Zupper' },
     },
   ],
 };

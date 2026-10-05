@@ -28,5 +28,5 @@ with a file comment, such as `// src/counter.ts`, are typechecked by `pnpm check
 ## License
 
 Code and docs text: MIT, see [LICENSE](LICENSE). Gyral, gyraljs and the Gyral logo are
-trademarks of The Zoop Troop, Inc.; the logo files in `public/` come from
+trademarks of Mike Zupper; the logo files in `public/` come from
 [gyraljs/brand](https://github.com/gyraljs/brand) and follow its usage guidelines.
