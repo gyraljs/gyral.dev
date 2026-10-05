@@ -22,6 +22,8 @@ export interface DocPage {
   readonly draft: boolean;
   readonly html: string;
   readonly headings: readonly Heading[];
+  /** Where the page's content comes from, when it isn't a Markdown file (generated pages). */
+  readonly source?: string;
 }
 
 export const DOCS_DIR = new URL('../../content/docs/', import.meta.url);

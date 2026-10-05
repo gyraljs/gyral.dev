@@ -116,9 +116,13 @@ export function docBody(docs: readonly DocPage[], doc: DocPage): unknown {
         ${doc.slug === 'index' ? docsIndex(docs) : nothing}
         <footer class="doc-footer">
           <p>
-            <a href=${`${SOURCE_REPO}/edit/main/content/docs/${doc.slug}.md`} rel="external"
-              >Edit this page on GitHub</a
-            >
+            ${
+              doc.source === undefined
+                ? serverHtml`<a href=${`${SOURCE_REPO}/edit/main/content/docs/${doc.slug}.md`} rel="external"
+                  >Edit this page on GitHub</a
+                >`
+                : serverHtml`<a href=${doc.source} rel="external">View the source on GitHub</a>`
+            }
             · <a href=${`${LINKS.github}/issues`} rel="external">Report a problem</a>
           </p>
           ${pager(docs, doc)}
