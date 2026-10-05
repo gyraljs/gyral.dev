@@ -12,6 +12,16 @@ if (!existsSync(brand)) {
   process.exit(1);
 }
 
+/** Logo files offered for download on /brand/, as SVG and 1024 px PNG (keep in sync with src/render/brand.ts). */
+const DOWNLOADS = [
+  'gyral-lockup-horizontal-gyral-on-white',
+  'gyral-lockup-horizontal-gyral-on-black',
+  'gyral-lockup-stacked-gyral-on-white',
+  'gyral-lockup-stacked-gyral-on-black',
+  'gyral-mark-on-white',
+  'gyral-mark-on-black',
+];
+
 /** [source in the brand kit, destination in public/] */
 const FILES = [
   ['web/favicon.ico', 'favicon.ico'],
@@ -30,8 +40,17 @@ const FILES = [
   ['lockup-horizontal/gyral-lockup-horizontal-gyral-transparent-dark.svg', 'brand/lockup-dark.svg'],
   ['mark/gyral-mark-transparent-light.svg', 'brand/mark-light.svg'],
   ['mark/gyral-mark-transparent-dark.svg', 'brand/mark-dark.svg'],
+  // Downloads on /brand/ (the full kit, with print masters, is in gyraljs/brand).
+  ...DOWNLOADS.flatMap((name) => {
+    const [layout] = /^gyral-(mark|lockup-horizontal|lockup-stacked)/.exec(name) ?? [];
+    const dir = layout?.replace(/^gyral-/, '') ?? '';
+    return [
+      [`${dir}/${name}.svg`, `brand/download/${name}.svg`],
+      [`${dir}/${name}-1024.png`, `brand/download/${name}-1024.png`],
+    ];
+  }),
 ];
 
-mkdirSync('public/brand', { recursive: true });
+mkdirSync('public/brand/download', { recursive: true });
 for (const [from, to] of FILES) copyFileSync(join(brand, from), join('public', to));
 console.log(`brand: copied ${String(FILES.length)} files from ${brand}`);
