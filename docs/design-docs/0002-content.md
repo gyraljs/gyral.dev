@@ -92,3 +92,12 @@ there with `pnpm demos:record`.
   most of it is on screen and pauses it off screen, so only watched videos download; nothing
   plays for `prefers-reduced-motion: reduce`, and a video the visitor paused stays paused.
   Sources are listed smallest first; browsers that can't decode AV1 take the MP4.
+
+## Addendum: interop claims are tested (gyral-1zd.3, 2026-10-05)
+
+The "Using Gyral in other frameworks" and "Using third-party web components" pages make claims
+about runtime behaviour that the snippet typecheck can't prove (attribute conversion,
+`gyral-output` bubbling and its shadow-boundary stop, third-party events reaching a parser).
+`pnpm interop` (`scripts/check-interop.mjs`, in `pnpm check`) bundles `test/interop/entry.ts`
+with the published `@gyral/core` and checks each claim in Chromium. React, Vue and Svelte
+recipes on those pages are marked "not yet tested by Gyral" until a test covers them.
