@@ -122,7 +122,7 @@ export async function homeBody(): Promise<unknown> {
 
   return serverHtml`
     <section class="hero" aria-labelledby="hero-title">
-      <p class="eyebrow">Pre-release · 0.1 is on its way</p>
+      <p class="eyebrow">Version 0.1 is on npm</p>
       <h1 id="hero-title">Model-View-Intent web components on the modern web platform.</h1>
       <p class="lead">
         Gyral keeps the best idea of Cycle.js: your app is a pure function, and side effects

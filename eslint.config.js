@@ -30,7 +30,7 @@ export default tseslint.config(
   },
   {
     // Playwright scripts: page.evaluate() callbacks run in the browser.
-    files: ['scripts/smoke.mjs', 'scripts/capture-showcase.mjs'],
+    files: ['scripts/smoke.mjs', 'scripts/visual.mjs', 'scripts/capture-showcase.mjs'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
   {

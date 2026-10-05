@@ -45,8 +45,12 @@ export function docMeta(doc: DocPage): PageMeta {
   };
 }
 
+// On phones the page list is a collapsed menu, so the page itself comes first; from 52rem the
+// stylesheet shows it as an always-open sidebar (site.css, "Docs").
 const sidebar = (docs: readonly DocPage[], current: DocPage) => serverHtml`
-  <nav class="docs-nav" aria-label="Documentation" data-pagefind-ignore>
+  <details class="docs-menu" data-pagefind-ignore>
+  <summary>Documentation menu</summary>
+  <nav class="docs-nav" aria-label="Documentation">
     ${SECTIONS.map((section) => {
       const pages = docs.filter((d) => d.section === section);
       if (pages.length === 0) return nothing;
@@ -64,6 +68,7 @@ const sidebar = (docs: readonly DocPage[], current: DocPage) => serverHtml`
       </section>`;
     })}
   </nav>
+  </details>
 `;
 
 const outline = (doc: DocPage) =>

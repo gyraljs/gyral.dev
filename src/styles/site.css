@@ -745,20 +745,50 @@
     }
   }
 
+  /* Phones: the page list is a collapsed <details> above the page. From 52rem it is the
+     sticky sidebar: the summary goes and the content shows even though <details> is closed. */
+  .docs-menu {
+    border-block-end: 1px solid var(--border);
+
+    & > summary {
+      padding-block: 0.6rem;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    &[open] > summary {
+      margin-block-end: 0.5rem;
+    }
+
+    @media (width >= 52rem) {
+      position: sticky;
+      inset-block-start: calc(var(--header-block-size) + 1.5rem);
+      align-self: start;
+      border-block-end: 0;
+
+      & > summary {
+        display: none;
+      }
+
+      &::details-content {
+        content-visibility: visible;
+        block-size: auto;
+      }
+    }
+  }
+
   .docs-nav {
     display: grid;
     align-content: start;
     gap: var(--space);
     padding-block-end: var(--space);
-    border-block-end: 1px solid var(--border);
 
+    /* The nav scrolls, not the <details>: a closed <details> reads as hidden to axe. */
     @media (width >= 52rem) {
-      position: sticky;
-      inset-block-start: calc(var(--header-block-size) + 1.5rem);
       max-block-size: calc(100dvh - var(--header-block-size) - 3rem);
       overflow-y: auto;
       padding-block-end: 0;
-      border-block-end: 0;
     }
   }
 

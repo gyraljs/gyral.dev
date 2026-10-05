@@ -38,6 +38,7 @@ describe('pages', () => {
     expect(html).not.toMatch(NO_ISLANDS);
     expect(html).toContain('<main id="main" data-pagefind-body');
     expect(html).toContain('<form action="/search/" method="get">');
+    expect(html).toContain('<details class="docs-menu" data-pagefind-ignore>');
   });
 
   it('answers unknown paths with the 404 page', async () => {

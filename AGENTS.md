@@ -13,19 +13,20 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 ## Commands
 
-| Command              | What it does                                                                                  |
-| -------------------- | --------------------------------------------------------------------------------------------- |
-| `pnpm install`       | Install. `@gyral/*` comes from npm                                                            |
-| `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke    |
-| `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                    |
-| `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)             |
-| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                |
-| `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search |
-| `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                            |
-| `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                           |
-| `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                 |
-| `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                          |
-| `pnpm sync:examples` | Copy example excerpts from a `../cyclejs-web-framework` checkout into `content/examples/`     |
+| Command              | What it does                                                                                        |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| `pnpm install`       | Install. `@gyral/*` comes from npm                                                                  |
+| `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual |
+| `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                          |
+| `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                   |
+| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                      |
+| `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search       |
+| `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally) |
+| `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                                  |
+| `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                                 |
+| `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                       |
+| `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                                |
+| `pnpm sync:examples` | Copy example excerpts from a `../cyclejs-web-framework` checkout into `content/examples/`           |
 
 First run needs `pnpm exec playwright install chromium`.
 
@@ -69,6 +70,8 @@ First run needs `pnpm exec playwright install chromium`.
   real Gyral packages (`scripts/check-snippets.mjs`).
 - Pages pass axe in light and dark, have no console errors under the production CSP, and don't
   overflow at 360 px (`pnpm smoke`).
+- Gate pages match their screenshot baselines (`pnpm visual`); update them only for an intended
+  change, after looking at the diffs ([0004-design.md](docs/design-docs/0004-design.md)).
 - CSS is Baseline newly available; newer features go inside `@supports` (stylelint).
 - Workflows trigger on `workflow_dispatch` only (`scripts/check-workflows.mjs`).
 - Brand files in `public/` are copies; change them in gyraljs/brand and re-sync.
