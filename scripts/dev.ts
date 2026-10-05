@@ -15,6 +15,7 @@ const DEV_ASSETS = {
   stylesheet: '/src/styles/site.css',
   clientEntry: '/src/entry-client.ts',
   shortcuts: '/src/shortcuts.ts',
+  demoVideos: '/src/demo-videos.ts',
 };
 
 async function render(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {

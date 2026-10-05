@@ -78,9 +78,11 @@ export const areaOf = (url: string): string =>
       ? 'Docs'
       : url.startsWith('/examples/')
         ? 'Examples'
-        : url.startsWith('/blog/')
-          ? 'Blog'
-          : 'Site';
+        : url.startsWith('/what-you-can-build/')
+          ? 'Demos'
+          : url.startsWith('/blog/')
+            ? 'Blog'
+            : 'Site';
 
 /** Link to the section with the most matches (a heading anchor) when there is one. */
 export const toHit = (d: PagefindResult): Hit => {

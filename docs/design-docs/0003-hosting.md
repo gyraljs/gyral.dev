@@ -32,6 +32,8 @@ Status: **accepted** (2026-10-05)
 - `/llms.txt` and `/llms-full.txt` are `text/plain; charset=utf-8`, Markdown twins (`/*.md`)
   `text/markdown; charset=utf-8` (ADR 0002, "content for agents"). They keep Cloudflare's
   default caching, like the HTML pages.
+- `/demos/*` (demo recordings and posters) has content-hashed names: cached for a year, immutable
+  (gyral-7se.7).
 
 ## Search (site-54d.23, 2026-10-05)
 

@@ -6,3 +6,4 @@ dist/
 .pnpm-store/
 .visual/
 test/visual/
+content/demos.json

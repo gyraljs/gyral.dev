@@ -27,34 +27,37 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 | `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                       |
 | `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                                |
 | `pnpm sync:examples` | Copy example excerpts from a `../cyclejs-web-framework` checkout into `content/examples/`           |
+| `pnpm sync:demos`    | Encode demo recordings from the Gyral checkout into `public/demos/` (`--record` re-records first)   |
 
 First run needs `pnpm exec playwright install chromium`.
 
 ## Where things are
 
-| Path                                           | Contents                                                             |
-| ---------------------------------------------- | -------------------------------------------------------------------- |
-| [ARCHITECTURE.md](ARCHITECTURE.md)             | Modules, layers, what runs where                                     |
-| `content/docs/*.md`                            | Docs pages (front matter: title, description, section, order, draft) |
-| `content/blog/*.md`                            | Blog posts (front matter: title, description, date, author)          |
-| `content/examples/`                            | Example excerpts, synced from Gyral (never edit by hand)             |
-| `src/content/api.ts`                           | The API reference, generated from the packages' types at build time  |
-| `src/content/llms.ts`                          | llms.txt, llms-full.txt and Markdown twins for agents (checked)      |
-| `src/render/`                                  | Server-only page templates: layout, home, docs, route table          |
-| `src/content/`                                 | Build-time Markdown, front matter, Shiki highlighting                |
-| `src/islands/`                                 | Browser code: Gyral components hydrated on a page (counter, search)  |
-| `src/shortcuts.ts`                             | The `/` and Ctrl/⌘+K search shortcut, on every page                  |
-| `src/styles/site.css`                          | The one site stylesheet (layers, brand tokens, light/dark)           |
-| `public/`                                      | Copied as-is: icons, logos, showcase images, `_headers`, robots      |
-| `scripts/`                                     | Dev, build, preview, smoke, invariants                               |
-| [docs/design-docs/](docs/design-docs/index.md) | Decisions (ADRs)                                                     |
+| Path                                           | Contents                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------- |
+| [ARCHITECTURE.md](ARCHITECTURE.md)             | Modules, layers, what runs where                                      |
+| `content/docs/*.md`                            | Docs pages (front matter: title, description, section, order, draft)  |
+| `content/blog/*.md`                            | Blog posts (front matter: title, description, date, author)           |
+| `content/examples/`                            | Example excerpts, synced from Gyral (never edit by hand)              |
+| `src/content/api.ts`                           | The API reference, generated from the packages' types at build time   |
+| `src/content/llms.ts`                          | llms.txt, llms-full.txt and Markdown twins for agents (checked)       |
+| `src/render/`                                  | Server-only page templates: layout, home, docs, route table           |
+| `src/content/`                                 | Build-time Markdown, front matter, Shiki highlighting                 |
+| `src/islands/`                                 | Browser code: Gyral components hydrated on a page (counter, search)   |
+| `src/shortcuts.ts`                             | The `/` and Ctrl/⌘+K search shortcut, on every page                   |
+| `src/content/demos.ts`                         | /what-you-can-build/: titles, descriptions, crops (videos are synced) |
+| `src/demo-videos.ts`                           | Plays demo videos on screen; nothing under reduced motion             |
+| `src/styles/site.css`                          | The one site stylesheet (layers, brand tokens, light/dark)            |
+| `public/`                                      | Copied as-is: icons, logos, showcase images, `_headers`, robots       |
+| `scripts/`                                     | Dev, build, preview, smoke, invariants                                |
+| [docs/design-docs/](docs/design-docs/index.md) | Decisions (ADRs)                                                      |
 
 ## Design docs to read before changing…
 
 | Area                                       | Read                                                |
 | ------------------------------------------ | --------------------------------------------------- |
 | Anything                                   | [0001-stack.md](docs/design-docs/0001-stack.md)     |
-| Docs content, drafts, writing style        | [0002-content.md](docs/design-docs/0002-content.md) |
+| Docs content, drafts, writing style, demos | [0002-content.md](docs/design-docs/0002-content.md) |
 | Domains, deploys, headers, CSP, CI         | [0003-hosting.md](docs/design-docs/0003-hosting.md) |
 | CSS, brand, accessibility, browser support | [0004-design.md](docs/design-docs/0004-design.md)   |
 

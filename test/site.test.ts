@@ -6,6 +6,7 @@ const assets = {
   stylesheet: '/assets/site.css',
   clientEntry: '/assets/entry.js',
   shortcuts: '/assets/shortcuts.js',
+  demoVideos: '/assets/demo-videos.js',
 };
 /** Pages without islands load only the search shortcut, never the islands' entry. */
 const NO_ISLANDS = /<script type="module" src="(?!\/assets\/shortcuts\.js")/;
@@ -92,6 +93,44 @@ describe('pages', () => {
     }
     const post = await get('/blog/introducing-gyral/');
     expect(post.html).toContain('"@type":"BlogPosting"');
+  });
+});
+
+describe('what you can build', () => {
+  it('renders every demo with a poster, controls, no preload and a text description', async () => {
+    const { status, html } = await get('/what-you-can-build/');
+    expect(status).toBe(200);
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    const videos = html.match(/<video[^>]*>/g) ?? [];
+    expect(videos).toHaveLength(6); // five demos, one of them with two scenes
+    for (const v of videos) {
+      expect(v).toMatch(/poster="\/demos\/[\w-]+\.[0-9a-f]{8}\.webp"/);
+      expect(v).toContain('preload="none"');
+      expect(v).toContain('controls');
+      expect(v).toContain('muted');
+      expect(v).not.toContain('autoplay');
+      const described = /aria-describedby="([^"]+)"/.exec(v)?.[1];
+      expect(html).toContain(`id="${described ?? 'missing'}"`);
+    }
+    expect(html.match(/<source src="\/demos\/[^"]+\.(?:webm|mp4)" type="video\//g)).toHaveLength(
+      12,
+    );
+    expect(html).toContain('The usual way:');
+    expect(html).toContain('https://github.com/gyraljs/gyral/tree/main/examples/typeahead-race');
+    expect(html).toContain('<script type="module" src="/assets/demo-videos.js">');
+    expect(html).toContain('href="/what-you-can-build/index.md"');
+  });
+
+  it('loads the video script only on the demos page', async () => {
+    for (const path of ['/', '/docs/', '/examples/']) {
+      expect((await get(path)).html, path).not.toContain('demo-videos.js');
+    }
+  });
+
+  it('teases the demos on the home page and lists the page in the nav', async () => {
+    const { html } = await get('/');
+    expect(html).toContain('href="/what-you-can-build/#undo-replay"');
+    expect(html).toContain('<a href="/what-you-can-build/"');
   });
 });
 

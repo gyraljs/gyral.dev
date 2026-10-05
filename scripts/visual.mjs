@@ -30,6 +30,7 @@ const GATE = [
   '/docs/getting-started/',
   '/docs/api/core/',
   '/examples/',
+  '/what-you-can-build/',
   '/blog/introducing-gyral/',
   '/brand/',
   '/search/?q=hydrate',

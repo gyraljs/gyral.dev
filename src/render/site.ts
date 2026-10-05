@@ -8,6 +8,7 @@ import { docBody, docMeta } from './docs.js';
 import { loadPosts, type Post } from '../content/blog.js';
 import { blogBody, blogMeta, postBody, postMeta } from './blog.js';
 import { brandBody, brandMeta } from './brand.js';
+import { demosBody, demosMeta, DEMOS_PATH } from './demos.js';
 import { examplesBody, examplesMeta } from './examples.js';
 import { homeBody, homeMeta } from './home.js';
 import { layout, type Assets, type PageMeta } from './layout.js';
@@ -59,6 +60,7 @@ export async function createSite(
   const posts = blog ?? (await loadPosts());
   const table = new Map<string, Route>([
     ['/', { meta: homeMeta, body: homeBody }],
+    [DEMOS_PATH, { meta: demosMeta, body: demosBody }],
     ['/examples/', { meta: examplesMeta, body: examplesBody }],
     ['/blog/', { meta: blogMeta, body: () => blogBody(posts) }],
     ['/brand/', { meta: brandMeta, body: brandBody }],

@@ -3,7 +3,9 @@
 import { html } from '@gyral/core';
 import { serverHtml } from '@gyral/ssr';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { loadDemos } from '../content/demos.js';
 import { highlight } from '../content/markdown.js';
+import { DEMOS_PATH } from './demos.js';
 import { DESCRIPTION, LINKS, ORIGIN, SITE_NAME, TAGLINE } from '../site.js';
 import type { PageMeta } from './layout.js';
 import '../islands/loop-counter.js'; // registers <gd-loop-counter> for server rendering
@@ -114,10 +116,11 @@ export const homeMeta: PageMeta = {
 };
 
 export async function homeBody(): Promise<unknown> {
-  const [counterCode, testCode, installCode] = await Promise.all([
+  const [counterCode, testCode, installCode, demos] = await Promise.all([
     highlight(COUNTER_SOURCE, 'ts'),
     highlight(TEST_SOURCE, 'ts'),
     highlight(INSTALL, 'sh'),
+    loadDemos(),
   ]);
 
   return serverHtml`
@@ -151,6 +154,34 @@ export async function homeBody(): Promise<unknown> {
           <figcaption>Live: server-rendered, then hydrated in place. Click and watch the loop.</figcaption>
         </figure>
       </div>
+    </section>
+
+    <section class="demo-teaser" aria-labelledby="demo-teaser-title">
+      <hgroup>
+        <h2 id="demo-teaser-title">See what it makes easy</h2>
+        <p>
+          Every interaction is data, so undo, race-free search, pages that work before
+          JavaScript, live themes and animated transitions take a few lines.
+          <a href=${DEMOS_PATH}>Watch the demos</a>.
+        </p>
+      </hgroup>
+      <ul role="list" class="demo-cards">
+        ${demos.map(
+          (d) => serverHtml`<li>
+            <a href=${`${DEMOS_PATH}#${d.slug}`}>
+              <img
+                src=${d.scenes.at(-1)?.files.poster}
+                alt=""
+                width=${d.scenes.at(-1)?.files.width}
+                height=${d.scenes.at(-1)?.files.height}
+                loading="lazy"
+                decoding="async"
+              >
+              <span>${d.title}</span>
+            </a>
+          </li>`,
+        )}
+      </ul>
     </section>
 
     <section class="features" aria-labelledby="features-title">

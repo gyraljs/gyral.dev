@@ -18,7 +18,7 @@
     "lint": "eslint . && stylelint \"src/**/*.css\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "invariants": "node scripts/check-docs.mjs && node scripts/check-workflows.mjs && node scripts/sync-examples.mjs --check",
+    "invariants": "node scripts/check-docs.mjs && node scripts/check-workflows.mjs && node scripts/sync-examples.mjs --check && node scripts/sync-demos.mjs --check",
     "test": "vitest run",
     "smoke": "node scripts/smoke.mjs",
     "visual": "node scripts/visual.mjs",
@@ -27,7 +27,8 @@
     "ci:local": "gh act workflow_dispatch -W .github/workflows/ci.yml",
     "deploy": "pnpm check && pnpm dlx wrangler@4.147.0 pages deploy dist --project-name gyral-dev --branch main",
     "sync:brand": "node scripts/sync-brand.mjs",
-    "sync:examples": "node scripts/sync-examples.mjs"
+    "sync:examples": "node scripts/sync-examples.mjs",
+    "sync:demos": "node scripts/sync-demos.mjs"
   },
   "dependencies": {
     "@fontsource-variable/sora": "5.3.0",

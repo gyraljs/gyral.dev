@@ -8,6 +8,7 @@
 import { readFile } from 'node:fs/promises';
 import { SECTIONS, type DocPage } from './docs.js';
 import type { Post } from './blog.js';
+import { loadDemos, usualWay } from './demos.js';
 import { EXAMPLE_GROUPS, excerptPath } from './examples.js';
 import { absolute, DESCRIPTION, LINKS, ORIGIN } from '../site.js';
 
@@ -136,6 +137,35 @@ async function examplesTwin(root: URL): Promise<Twin> {
   };
 }
 
+/** /what-you-can-build/ as text: what each recording shows, for readers who can't watch it. */
+async function demosTwin(): Promise<Twin> {
+  const page = '/what-you-can-build/';
+  const description =
+    'What Gyral makes easy, shown as short recordings of examples: undo and replay, type-ahead without stale results, pages that work before JavaScript, live themes and animated transitions.';
+  const intro =
+    'Gyral treats every interaction as data. That makes these easy. Each demo is a recording of an example in the Gyral repository; the text below describes what each recording shows.';
+  const parts = [`${intro}\n`];
+  for (const demo of await loadDemos()) {
+    parts.push(
+      `## ${demo.title}\n`,
+      `${demo.pitch}\n`,
+      `The usual way: ${usualWay(demo.usual)}\n`,
+      ...demo.scenes.map(
+        (scene) =>
+          `${scene.label === undefined ? 'The recording' : `Recording (${scene.label})`}: ${scene.description}\n`,
+      ),
+      `- Source: ${EXAMPLES_SOURCE}/${demo.slug}\n- Explained in: [${demo.docs[0]}](${demo.docs[1]})\n`,
+    );
+  }
+  return {
+    page,
+    path: twinPath(page),
+    title: 'What you can build with Gyral',
+    description,
+    markdown: document('What you can build with Gyral', description, page, parts.join('\n')),
+  };
+}
+
 const link = (twin: Twin): string =>
   `- [${twin.title}](${absolute(twin.path)}): ${twin.description}`;
 
@@ -144,7 +174,7 @@ export function llmsTxt(
   version: string,
   docs: readonly Twin[],
   api: readonly Twin[],
-  examples: Twin,
+  examples: readonly Twin[],
   optional: readonly Twin[],
 ): string {
   return `# Gyral
@@ -163,7 +193,7 @@ ${api.map(link).join('\n')}
 
 ## Examples
 
-${link(examples)}
+${examples.map(link).join('\n')}
 
 ## Optional
 
@@ -197,11 +227,12 @@ export async function buildLlmsFiles(
   const api = docTwins.filter(isApi);
   const background = docTwins.filter(isBackground);
   const examples = await examplesTwin(root);
+  const demos = await demosTwin();
   const postTwins = posts.map(postTwin);
   const blog = blogIndexTwin(posts);
   return {
-    twins: [...docTwins, examples, blog, ...postTwins],
-    llmsTxt: llmsTxt(version, guides, api, examples, [...background, blog, ...postTwins]),
-    llmsFull: llmsFull(version, [...guides, ...api, ...background, examples]),
+    twins: [...docTwins, examples, demos, blog, ...postTwins],
+    llmsTxt: llmsTxt(version, guides, api, [examples, demos], [...background, blog, ...postTwins]),
+    llmsFull: llmsFull(version, [...guides, ...api, ...background, examples, demos]),
   };
 }

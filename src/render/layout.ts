@@ -13,6 +13,8 @@ export interface Assets {
   readonly clientEntry: string;
   /** The keyboard shortcut for search (`/`, Ctrl/⌘+K): tiny, on every page. */
   readonly shortcuts: string;
+  /** Plays the demo recordings while they are on screen (src/demo-videos.ts). */
+  readonly demoVideos: string;
 }
 
 export interface PageMeta {
@@ -31,6 +33,8 @@ export interface PageMeta {
   readonly noindex?: boolean;
   /** The page has a Markdown twin at `<path>index.md` (src/content/llms.ts). */
   readonly markdown?: boolean;
+  /** The page has demo videos (`video.demo-video`) and loads their playback script. */
+  readonly demoVideos?: boolean;
 }
 
 export const fullTitle = (meta: Pick<PageMeta, 'path' | 'title'>): string =>
@@ -119,6 +123,7 @@ const siteFooter = () => serverHtml`
           <li><a href="/docs/">Documentation</a></li>
           <li><a href="/docs/getting-started/">Getting started</a></li>
           <li><a href="/docs/api/">API reference</a></li>
+          <li><a href="/what-you-can-build/">What you can build</a></li>
           <li><a href="/examples/">Examples</a></li>
           <li><a href="/blog/">Blog</a></li>
         </ul>
@@ -152,7 +157,11 @@ export function layout(meta: PageMeta, body: unknown, assets: Assets): unknown {
     title: fullTitle(meta),
     description: meta.description,
     head: head(meta, assets),
-    scripts: meta.islands === true ? [assets.shortcuts, assets.clientEntry] : [assets.shortcuts],
+    scripts: [
+      assets.shortcuts,
+      ...(meta.islands === true ? [assets.clientEntry] : []),
+      ...(meta.demoVideos === true ? [assets.demoVideos] : []),
+    ],
     body: serverHtml`${siteHeader(meta.path)}
       <main id="main" data-pagefind-body=${meta.searchable === true ? '' : nothing}>${body}</main>
       ${siteFooter()}`,

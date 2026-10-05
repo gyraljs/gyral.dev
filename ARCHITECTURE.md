@@ -30,7 +30,9 @@ islands: Gyral components rendered with Declarative Shadow DOM inside a page and
 `src/entry-client.ts`. A page that contains islands sets `islands: true` in its `PageMeta`,
 which adds the client entry script. The islands are the home page's `<gd-loop-counter>` and the
 search page's `<gd-site-search>`. Every page also loads `src/shortcuts.ts`, a few hundred
-bytes with no framework, for the search keyboard shortcut.
+bytes with no framework, for the search keyboard shortcut. `/what-you-can-build/` also loads
+`src/demo-videos.ts`, which plays its demo recordings (`public/demos/`, from `pnpm sync:demos`)
+while they are on screen.
 
 After prerendering, `scripts/build.ts` runs Pagefind over `dist/` and writes the search index
 to `dist/pagefind/` (pages opt in with `PageMeta.searchable`).

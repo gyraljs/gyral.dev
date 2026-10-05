@@ -23,6 +23,7 @@ export async function buildSite(dist: string): Promise<readonly string[]> {
     clientEntry: await clientEntryFromManifest(manifest, 'src/entry-client.ts'),
     stylesheet: await clientEntryFromManifest(manifest, 'src/styles/site.css'),
     shortcuts: await clientEntryFromManifest(manifest, 'src/shortcuts.ts'),
+    demoVideos: await clientEntryFromManifest(manifest, 'src/demo-videos.ts'),
   };
   const docs = [...(await loadDocs()), ...(await loadApiPages())].sort(byReadingOrder);
   const posts = await loadPosts();

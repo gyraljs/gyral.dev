@@ -14,6 +14,7 @@ describe('search results', () => {
     expect(areaOf('/docs/api/core/')).toBe('API');
     expect(areaOf('/docs/intent/')).toBe('Docs');
     expect(areaOf('/examples/')).toBe('Examples');
+    expect(areaOf('/what-you-can-build/')).toBe('Demos');
     expect(areaOf('/blog/introducing-gyral/')).toBe('Blog');
   });
 

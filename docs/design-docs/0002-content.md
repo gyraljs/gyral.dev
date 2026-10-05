@@ -66,3 +66,29 @@ The build fails (`src/content/llms-check.ts`) when a docs page has no twin or is
 `llms-full.txt`, when an `llms.txt` link points at a file the build didn't write, or when a file
 has HTML tags or template leftovers (`${`, `[object Object]`) outside code. These files are not
 in the sitemap; `robots.txt` allows them.
+
+## Addendum: demo recordings (gyral-7se.7, 2026-10-05)
+
+`/what-you-can-build/` shows what Gyral makes easy as short recordings, for readers who learn
+from pictures rather than code. Each demo is an example in the Gyral repository with a
+`demo.mjs` (a scripted Playwright path, a one-line pitch and the "usual way" contrast), recorded
+there with `pnpm demos:record`.
+
+- **What the site owns** (`src/content/demos.ts`): the title, the docs link, a text description
+  of every recording (also its `aria-describedby` and its Markdown twin) and a **crop box**: the
+  recordings are 1280×720 with the example in the middle, so the site keeps only the content
+  plus 24 px, which makes the interface readable at page size. Re-measure the box when a
+  recording's layout changes (bounding box of non-background pixels over frames sampled every
+  half second).
+- **What is copied** by `pnpm sync:demos` (`--record` re-records first): the pitch and contrast
+  into `content/demos.json`, and each recording encoded into `public/demos/` as AV1 WebM, H.264
+  MP4 (High, level 3.1) and a WebP poster, trimmed by 0.7 s (the recordings open on the page
+  before its CSS loads) and cropped. File names carry a hash of the source, the trim, the crop
+  and the encoder settings, so they are cached forever and only changed recordings re-encode.
+  `pnpm invariants` fails when the text drifts from `demo.mjs` or a listed file is missing; it
+  skips without a Gyral checkout (Cloudflare builds).
+- **Playback**: each `<video>` is muted, looping, `preload="none"`, with a poster and controls, so
+  the page works without JavaScript. `src/demo-videos.ts` (that page only) plays a video while
+  most of it is on screen and pauses it off screen, so only watched videos download; nothing
+  plays for `prefers-reduced-motion: reduce`, and a video the visitor paused stays paused.
+  Sources are listed smallest first; browsers that can't decode AV1 take the MP4.
