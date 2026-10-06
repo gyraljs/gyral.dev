@@ -84,6 +84,10 @@ search starts. [Effect](https://effect.website) does that very well, but I didn'
 users to have to learn it. So Effect lives in a private part of `@gyral/core`, a lint rule keeps
 it there, and a build check fails if the published types ever mention it.
 
+> **Update, 2026-10-06:** that boundary paid off. When benchmarks showed Effect was about 80% of
+> a small app's JavaScript, Gyral 0.2.0 replaced it with a plain-TypeScript runtime without
+> changing a single public type.
+
 **The server is part of the design.** Server rendering was designed in rather than added on.
 Commands never run on the server; route handlers do the async work and pass data as props.
 Each server-rendered element carries its state, and the browser resumes from it and starts the

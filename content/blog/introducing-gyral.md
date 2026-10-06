@@ -65,6 +65,11 @@ Under the hood, `@gyral/core` uses [Effect](https://effect.website) 3 to run com
 gives it structured cancellation and retries. You won't see it: the public API is plain
 TypeScript, and the published types never mention Effect.
 
+> **Update, 2026-10-06:** Gyral 0.2.0 no longer uses Effect. Benchmarks showed that the Effect
+> runtime was most of a small app's JavaScript without making rendering faster, so commands now
+> run on a small plain-TypeScript runtime with the same cancellation, lanes and retries. An empty
+> app went from about 49 KB to 11.9 KB gzipped. The public API did not change.
+
 ## Built on the platform
 
 Gyral leans on what browsers now do well. Components are custom elements with Shadow DOM.

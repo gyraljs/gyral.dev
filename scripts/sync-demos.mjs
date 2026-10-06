@@ -78,11 +78,10 @@ function ffmpeg(args) {
 }
 
 /**
- * The recordings start with half a second of the page before its CSS has loaded; skip it.
- * Part of the file hash, like the crop and the encoder settings, so changing any of them
- * re-encodes.
+ * Gyral's `demos:record` trims the blank and unstyled first frames itself (since 0.2.0,
+ * gyral-xpd), so recordings are encoded from their first frame. The hash covers the crop and the
+ * encoder settings, so changing any of them re-encodes.
  */
-const TRIM_START = '0.7';
 const AV1 = [
   '-c:v',
   'libsvtav1',
@@ -122,12 +121,12 @@ function encode(name, crop) {
   const vf = `crop=${String(crop.width)}:${String(crop.height)}:${String(crop.x)}:${String(crop.y)}`;
   const hash = createHash('sha256')
     .update(readFileSync(video))
-    .update(JSON.stringify([TRIM_START, vf, AV1, H264]))
+    .update(JSON.stringify([vf, AV1, H264]))
     .digest('hex')
     .slice(0, 8);
   const base = `${name}.${hash}`;
   const target = (ext) => join(OUT, `${base}.${ext}`);
-  const input = ['-ss', TRIM_START, '-i', video, '-an', '-vf', vf, '-pix_fmt', 'yuv420p'];
+  const input = ['-i', video, '-an', '-vf', vf, '-pix_fmt', 'yuv420p'];
   if (!existsSync(target('webm'))) ffmpeg([...input, ...AV1, target('webm')]);
   if (!existsSync(target('mp4'))) ffmpeg([...input, ...H264, target('mp4')]);
   if (!existsSync(target('webp'))) {

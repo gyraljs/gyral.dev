@@ -80,6 +80,9 @@ With npm, the same object goes under a top-level `"overrides"` key:
 `"overrides": { "lit-html": "3.3.0" }`. Then reinstall and check that only one version is
 installed (`pnpm why lit-html` or `npm ls lit-html`).
 
+Since Gyral 0.2.0, development builds warn once in the console when an affected lit-html is
+loaded, and apps created with `npm create gyral` come with the pin already in place.
+
 ## The Vite preset
 
 `gyralVitePreset()` from `@gyral/core/vite` holds the two settings every Gyral app needs:
@@ -105,11 +108,12 @@ For Vitest browser tests, spread the preset into each browser project's config t
 
 ## What's inside
 
-`@gyral/core` runs commands with [Effect](https://effect.website) 3, which handles cancellation,
-concurrency lanes and retries. It is an implementation detail: Gyral's public API is plain
-TypeScript with plain functions, objects and promises, the published type declarations never
-mention Effect (a check in Gyral's build enforces it), and you never need to learn it. It is a
-regular dependency of `@gyral/core`, bundled into your app like any other.
+`@gyral/core` has no runtime dependencies besides Lit. Commands run on a small built-in runtime
+(one `AbortController` per task) that handles cancellation, concurrency lanes and retries; a
+check in Gyral's build fails if another runtime dependency is added. Gyral 0.1 used
+[Effect](https://effect.website) for this; 0.2.0 replaced it without changing the public API,
+which cut an empty app from about 49 KB to 11.9 KB gzipped
+([why](https://github.com/gyraljs/gyral/blob/main/docs/design-docs/0015-runtime-size-spike.md)).
 
 Browser code targets [Baseline](https://web.dev/baseline) "widely available" features. Newer
 APIs, such as the Navigation API, URLPattern, invoker commands and View Transitions, are
