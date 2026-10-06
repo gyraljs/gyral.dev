@@ -164,10 +164,10 @@ describe('API reference', () => {
     expect(md).toContain('- item\n  continues the item');
   });
 
-  it('writes code spans with escaped backticks as double-backtick spans', () => {
-    expect(docMarkdown('The tag: `html\\`<p>${s.text}</p>\\``.')).toBe(
-      'The tag: `` html`<p>${s.text}</p>` ``.',
-    );
+  it('keeps double-backtick code spans (html and css summaries)', async () => {
+    const core = (await loadApiPages())[0];
+    expect(core?.html).toContain('<code>html`&lt;p&gt;${s.text}&lt;/p&gt;`</code>');
+    expect(core?.html).toContain('<code>css`p { margin-block: ${GAP}px; }`</code>');
   });
 
   it('generates a page per package, with every entry point', async () => {

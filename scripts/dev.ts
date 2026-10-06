@@ -22,7 +22,7 @@ const DEV_ASSETS = {
 async function render(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
   try {
     const mod = (await vite.ssrLoadModule('/src/render/site.ts')) as typeof SiteModule;
-    const site = await mod.createSite(DEV_ASSETS, undefined, undefined, { dev: true });
+    const site = await mod.createSite(DEV_ASSETS);
     const response = await site.fetch(
       new Request(new URL(req.url ?? '/', `http://localhost:${String(port)}`)),
     );

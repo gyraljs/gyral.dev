@@ -150,15 +150,6 @@ function describeExports(program: ts.Program, file: string): ApiSymbol[] {
 const DESIGN_DOCS = 'https://github.com/gyraljs/gyral/blob/main/docs/design-docs';
 
 /**
- * Code spans that contain backticks: Gyral's comments write them escaped (`html\`<p>…</p>\``),
- * which Markdown doesn't support inside a code span. They become double-backtick spans.
- */
-const codeSpans = (line: string): string =>
-  line.replace(/`((?:\\`|[^`])+)`/g, (whole, inner: string) =>
-    inner.includes('\\`') ? `\`\` ${inner.replace(/\\`/g, '`')} \`\`` : whole,
-  );
-
-/**
  * A doc comment as Markdown. Gyral's comments indent code examples by two spaces, after a line
  * ending in a colon or after a blank line; those become code blocks (Markdown would need four
  * spaces). Indented lines continuing a list item stay prose. References to the repo's design
@@ -189,7 +180,7 @@ export function docMarkdown(doc: string): string {
       out.push('', '```ts', ...block, '```', '');
       continue;
     }
-    out.push(codeSpans(line));
+    out.push(line);
   }
   return out
     .join('\n')
@@ -203,7 +194,7 @@ const summary = (doc: string): string => {
       .split(/\n\s*\n/)[0]
       ?.replace(/\s+/g, ' ')
       .trim() ?? '';
-  const sentence = codeSpans(/^(.+?[.!?])(\s|$)/.exec(first)?.[1] ?? first);
+  const sentence = /^(.+?[.!?])(\s|$)/.exec(first)?.[1] ?? first;
   return sentence.replace(/\|/g, '\\|');
 };
 

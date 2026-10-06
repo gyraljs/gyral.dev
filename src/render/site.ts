@@ -52,22 +52,11 @@ const HTML = { 'content-type': 'text/html; charset=utf-8' };
 const normalise = (pathname: string): string =>
   pathname.endsWith('/') ? pathname : `${pathname}/`;
 
-export interface SiteOptions {
-  /**
-   * Development output: `<!--gyral:ID-->` markers, which the browser's development hydration
-   * checks, and the server's development checks. The dev server sets it: its SSR imports
-   * @gyral/core through Node, without the `development` condition. Default: production.
-   */
-  readonly dev?: boolean;
-}
-
 export async function createSite(
   assets: Assets,
   docs?: readonly DocPage[],
   blog?: readonly Post[],
-  options: SiteOptions = {},
 ): Promise<Site> {
-  const render = options.dev === undefined ? {} : { dev: options.dev };
   const pages = docs ?? [...(await loadDocs()), ...(await loadApiPages())].sort(byReadingOrder);
   const posts = blog ?? (await loadPosts());
   const table = new Map<string, Route>([
@@ -85,7 +74,7 @@ export async function createSite(
     table.set(doc.path, { meta: docMeta(doc), body: () => docBody(pages, doc) });
   }
 
-  const notFound = async () => renderToString(layout(notFoundMeta, notFoundBody(), assets), render);
+  const notFound = async () => renderToString(layout(notFoundMeta, notFoundBody(), assets));
 
   return {
     paths: [...table.keys()],
@@ -98,7 +87,7 @@ export async function createSite(
         return new Response(await notFound(), { status: 404, headers: HTML });
       }
       const document = layout(route.meta, await route.body(), assets);
-      return new Response(renderToStream(document, render), { headers: HTML });
+      return new Response(renderToStream(document), { headers: HTML });
     },
   };
 }
