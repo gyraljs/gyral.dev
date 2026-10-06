@@ -2,11 +2,11 @@
 // through the preview server (Cloudflare Pages rules and the real `_headers` CSP) and checks
 // every page in the sitemap, plus the 404 page:
 // - status 200 (404 for the 404 page), no console errors or page errors (CSP violations
-//   are console errors);
+//   are console errors), and no Gyral warnings (a production hydration mismatch is a warning);
 // - axe finds no violations, in light and dark;
 // - no horizontal overflow at phone width;
 // - every internal link and fragment resolves;
-// - the home page's counter hydrates in place (one copy of its DOM) and counts;
+// - the home page's counter hydrates in place (it keeps the server's nodes) and counts;
 // - /search/ (not in the sitemap) finds the expected pages through the header form, and its
 //   keys work: arrows move through results, Escape clears.
 // Report: .smoke/report.md. Exit 1 on any failure.
@@ -75,6 +75,18 @@ async function checkPage({ scheme, path, status }, links) {
     page.on('console', (m) => {
       if (m.type() === 'error' && !(status === 404 && /404/.test(m.text())))
         fail(where, `console: ${m.text()}`);
+      if (m.type() === 'warning' && /gyral|hydrat/i.test(m.text()))
+        fail(where, `console warning: ${m.text()}`);
+    });
+    // The server's <output> in the counter, taken before any module script runs, so the
+    // counter check can tell hydration (nodes kept) from a fresh render (nodes replaced).
+    await page.addInitScript(() => {
+      document.addEventListener('readystatechange', () => {
+        if (document.readyState === 'interactive')
+          window.__serverOutput = document
+            .querySelector('gd-loop-counter')
+            ?.shadowRoot?.querySelector('output');
+      });
     });
     page.on('pageerror', (e) => fail(where, `page error: ${e.message}`));
     const response = await page.goto(base + path, { waitUntil: 'networkidle' });
@@ -116,6 +128,13 @@ async function checkCounter(page, where) {
   );
   if (copies !== 1)
     fail(where, `counter renders ${String(copies)} outputs after hydration, expected 1`);
+  const adopted = await counter.evaluate(
+    (el) =>
+      window.__serverOutput instanceof Element &&
+      window.__serverOutput === el.shadowRoot?.querySelector('output') &&
+      el.shadowRoot.querySelector('style') === null, // swapped for the shared sheet
+  );
+  if (!adopted) fail(where, "counter didn't hydrate in place: the server's <output> was replaced");
   await counter.getByRole('button', { name: 'Increment' }).click();
   await counter.getByRole('button', { name: 'Increment' }).click();
   await counter.getByRole('button', { name: 'Decrement' }).click();

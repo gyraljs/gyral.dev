@@ -1,8 +1,6 @@
 // Docs pages: sidebar, the rendered Markdown, an outline of the page, previous/next links.
 // Docs pages ship no JavaScript.
-import { nothing } from 'lit';
-import { serverHtml } from '@gyral/ssr';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { html, nothing, raw, type ChildValue } from '@gyral/core';
 import { SECTIONS, type DocPage } from '../content/docs.js';
 import { absolute, LINKS, SITE_NAME } from '../site.js';
 import type { PageMeta } from './layout.js';
@@ -48,38 +46,40 @@ export function docMeta(doc: DocPage): PageMeta {
 
 // On phones the page list is a collapsed menu, so the page itself comes first; from 52rem the
 // stylesheet shows it as an always-open sidebar (site.css, "Docs").
-const sidebar = (docs: readonly DocPage[], current: DocPage) => serverHtml`
+const sidebar = (docs: readonly DocPage[], current: DocPage) => html`
   <details class="docs-menu" data-pagefind-ignore>
-  <summary>Documentation menu</summary>
-  <nav class="docs-nav" aria-label="Documentation">
-    ${SECTIONS.map((section) => {
-      const pages = docs.filter((d) => d.section === section);
-      if (pages.length === 0) return nothing;
-      const id = `nav-${section.toLowerCase().replace(/\s+/g, '-')}`;
-      return serverHtml`<section aria-labelledby=${id}>
-        <h2 id=${id}>${section}</h2>
-        <ul role="list">
-          ${pages.map(
-            (p) => serverHtml`<li>
-              <a href=${p.path} aria-current=${p.path === current.path ? 'page' : nothing}
-                >${p.slug === 'index' ? 'Overview' : p.title}</a>
-            </li>`,
-          )}
-        </ul>
-      </section>`;
-    })}
-  </nav>
+    <summary>Documentation menu</summary>
+    <nav class="docs-nav" aria-label="Documentation">
+      ${SECTIONS.map((section) => {
+        const pages = docs.filter((d) => d.section === section);
+        if (pages.length === 0) return nothing;
+        const id = `nav-${section.toLowerCase().replace(/\s+/g, '-')}`;
+        return html`<section aria-labelledby=${id}>
+          <h2 id=${id}>${section}</h2>
+          <ul role="list">
+            ${pages.map(
+              (p) =>
+                html`<li>
+                  <a href=${p.path} aria-current=${p.path === current.path ? 'page' : nothing}
+                    >${p.slug === 'index' ? 'Overview' : p.title}</a
+                  >
+                </li>`,
+            )}
+          </ul>
+        </section>`;
+      })}
+    </nav>
   </details>
 `;
 
 const outline = (doc: DocPage) =>
   doc.headings.length < 2
     ? nothing
-    : serverHtml`<nav class="outline" aria-labelledby="outline-title" data-pagefind-ignore>
+    : html`<nav class="outline" aria-labelledby="outline-title" data-pagefind-ignore>
         <h2 id="outline-title">On this page</h2>
         <ol role="list">
           ${doc.headings.map(
-            (h) => serverHtml`<li data-depth=${h.depth}><a href=${`#${h.id}`}>${h.text}</a></li>`,
+            (h) => html`<li data-depth=${h.depth}><a href=${`#${h.id}`}>${h.text}</a></li>`,
           )}
         </ol>
       </nav>`;
@@ -89,46 +89,48 @@ const pager = (docs: readonly DocPage[], doc: DocPage) => {
   const prev = at > 0 ? docs[at - 1] : undefined;
   const next = at >= 0 && at < docs.length - 1 ? docs[at + 1] : undefined;
   if (prev === undefined && next === undefined) return nothing;
-  return serverHtml`<nav class="pager" aria-label="Previous and next page">
-    ${prev === undefined ? nothing : serverHtml`<a rel="prev" href=${prev.path}><span>Previous</span> ${prev.title}</a>`}
-    ${next === undefined ? nothing : serverHtml`<a rel="next" href=${next.path}><span>Next</span> ${next.title}</a>`}
+  return html`<nav class="pager" aria-label="Previous and next page">
+    ${prev === undefined ? nothing : html`<a rel="prev" href=${prev.path}><span>Previous</span> ${prev.title}</a>`}
+    ${next === undefined ? nothing : html`<a rel="next" href=${next.path}><span>Next</span> ${next.title}</a>`}
   </nav>`;
 };
 
 /** The docs home lists every page under its section, with its description. */
-const docsIndex = (docs: readonly DocPage[]) => serverHtml`
+const docsIndex = (docs: readonly DocPage[]) => html`
   ${SECTIONS.map((section) => {
     const pages = docs.filter((d) => d.section === section && d.slug !== 'index');
     if (pages.length === 0) return nothing;
-    return serverHtml`<section class="doc-section">
+    return html`<section class="doc-section">
       <h2>${section}</h2>
       <ul role="list" class="doc-cards">
         ${pages.map(
-          (p) => serverHtml`<li>
-            <a href=${p.path}><strong>${p.title}</strong></a>
-            <p>${p.description}</p>
-          </li>`,
+          (p) =>
+            html`<li>
+              <a href=${p.path}><strong>${p.title}</strong></a>
+              <p>${p.description}</p>
+            </li>`,
         )}
       </ul>
     </section>`;
   })}
 `;
 
-export function docBody(docs: readonly DocPage[], doc: DocPage): unknown {
-  return serverHtml`
+export function docBody(docs: readonly DocPage[], doc: DocPage): ChildValue {
+  return html`
     <div class="docs">
       ${sidebar(docs, doc)}
       <article class="doc prose">
-        ${unsafeHTML(doc.html)}
-        ${doc.slug === 'index' ? docsIndex(docs) : nothing}
+        ${raw(doc.html)} ${doc.slug === 'index' ? docsIndex(docs) : nothing}
         <footer class="doc-footer" data-pagefind-ignore>
           <p>
             ${
               doc.source === undefined
-                ? serverHtml`<a href=${`${SOURCE_REPO}/edit/main/content/docs/${doc.slug}.md`} rel="external"
-                  >Edit this page on GitHub</a
-                >`
-                : serverHtml`<a href=${doc.source} rel="external">View the source on GitHub</a>`
+                ? html`<a
+                    href=${`${SOURCE_REPO}/edit/main/content/docs/${doc.slug}.md`}
+                    rel="external"
+                    >Edit this page on GitHub</a
+                  >`
+                : html`<a href=${doc.source} rel="external">View the source on GitHub</a>`
             }
             · <a href=${`${LINKS.github}/issues`} rel="external">Report a problem</a>
           </p>

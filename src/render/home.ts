@@ -1,8 +1,6 @@
 // The home page. Static except for one island, the live counter, which is server-rendered
 // with Declarative Shadow DOM and hydrated by the client entry.
-import { html } from '@gyral/core';
-import { serverHtml } from '@gyral/ssr';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { html, raw, type ChildValue } from '@gyral/core';
 import { loadDemos } from '../content/demos.js';
 import { highlight } from '../content/markdown.js';
 import { DEMOS_PATH } from './demos.js';
@@ -115,7 +113,7 @@ export const homeMeta: PageMeta = {
   ],
 };
 
-export async function homeBody(): Promise<unknown> {
+export async function homeBody(): Promise<ChildValue> {
   const [counterCode, testCode, installCode, demos] = await Promise.all([
     highlight(COUNTER_SOURCE, 'ts'),
     highlight(TEST_SOURCE, 'ts'),
@@ -123,35 +121,41 @@ export async function homeBody(): Promise<unknown> {
     loadDemos(),
   ]);
 
-  return serverHtml`
+  return html`
     <section class="hero" aria-labelledby="hero-title">
       <p class="eyebrow">Version 0.2 is on npm</p>
       <h1 id="hero-title">Model-View-Intent web components on the modern web platform.</h1>
       <p class="lead">
-        Gyral keeps the best idea of Cycle.js: your app is a pure function, and side effects
-        happen at the edges, as data. It rebuilds that loop on custom elements, Lit templates,
-        semantic HTML and modern CSS.
+        Gyral keeps the best idea of Cycle.js: your app is a pure function, and side effects happen
+        at the edges, as data. It rebuilds that loop on custom elements, Lit templates, semantic
+        HTML and modern CSS.
       </p>
       <div class="actions">
         <a class="button primary" href="/docs/getting-started/">Get started</a>
         <a class="button" href=${LINKS.github} rel="external">View on GitHub</a>
       </div>
-      <div class="install">${unsafeHTML(installCode)}</div>
+      <div class="install">${raw(installCode)}</div>
     </section>
 
     <section class="loop" aria-labelledby="loop-title">
       <hgroup>
         <h2 id="loop-title">One loop, three pure parts</h2>
-        <p>Events become messages, messages become state, state becomes HTML. That's the whole app.</p>
+        <p>
+          Events become messages, messages become state, state becomes HTML. That's the whole app.
+        </p>
       </hgroup>
       <div class="loop-grid">
         <figure class="loop-code">
-          ${unsafeHTML(counterCode)}
-          <figcaption>A complete component. The view names intents; it never holds a handler.</figcaption>
+          ${raw(counterCode)}
+          <figcaption>
+            A complete component. The view names intents; it never holds a handler.
+          </figcaption>
         </figure>
         <figure class="demo">
           <div class="demo-frame">${html`<gd-loop-counter></gd-loop-counter>`}</div>
-          <figcaption>Live: server-rendered, then hydrated in place. Click and watch the loop.</figcaption>
+          <figcaption>
+            Live: server-rendered, then hydrated in place. Click and watch the loop.
+          </figcaption>
         </figure>
       </div>
     </section>
@@ -160,26 +164,27 @@ export async function homeBody(): Promise<unknown> {
       <hgroup>
         <h2 id="demo-teaser-title">See what it makes easy</h2>
         <p>
-          Every interaction is data, so undo, race-free search, pages that work before
-          JavaScript, live themes and animated transitions take a few lines.
+          Every interaction is data, so undo, race-free search, pages that work before JavaScript,
+          live themes and animated transitions take a few lines.
           <a href=${DEMOS_PATH}>Watch the demos</a>.
         </p>
       </hgroup>
       <ul role="list" class="demo-cards">
         ${demos.map(
-          (d) => serverHtml`<li>
-            <a href=${`${DEMOS_PATH}#${d.slug}`}>
-              <img
-                src=${d.scenes.at(-1)?.files.poster}
-                alt=""
-                width=${d.scenes.at(-1)?.files.width}
-                height=${d.scenes.at(-1)?.files.height}
-                loading="lazy"
-                decoding="async"
-              >
-              <span>${d.title}</span>
-            </a>
-          </li>`,
+          (d) =>
+            html`<li>
+              <a href=${`${DEMOS_PATH}#${d.slug}`}>
+                <img
+                  src=${d.scenes.at(-1)?.files.poster}
+                  alt=""
+                  width=${d.scenes.at(-1)?.files.width}
+                  height=${d.scenes.at(-1)?.files.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span>${d.title}</span>
+              </a>
+            </li>`,
         )}
       </ul>
     </section>
@@ -188,10 +193,11 @@ export async function homeBody(): Promise<unknown> {
       <h2 id="features-title">Built on the platform, not around it</h2>
       <ul role="list" class="feature-grid">
         ${FEATURES.map(
-          (f) => serverHtml`<li>
-            <h3>${f.title}</h3>
-            <p>${f.body}</p>
-          </li>`,
+          (f) =>
+            html`<li>
+              <h3>${f.title}</h3>
+              <p>${f.body}</p>
+            </li>`,
         )}
       </ul>
     </section>
@@ -203,11 +209,10 @@ export async function homeBody(): Promise<unknown> {
           <p>
             Update and view are plain functions, so you test behaviour by calling them. When you
             need the browser, <code>@gyral/testing</code> mounts real components in Chromium,
-            renders them on the server and checks they hydrate, and runs timers on a virtual
-            clock.
+            renders them on the server and checks they hydrate, and runs timers on a virtual clock.
           </p>
         </div>
-        ${unsafeHTML(testCode)}
+        ${raw(testCode)}
       </div>
     </section>
 
@@ -215,26 +220,27 @@ export async function homeBody(): Promise<unknown> {
       <hgroup>
         <h2 id="showcase-title">One store, four looks</h2>
         <p>
-          <a href=${LINKS.shop} rel="external">gyral-shop</a> is a full department store built
-          with Gyral: catalog, search, accounts, cart, checkout, orders and admin. Its themes
-          change only CSS. The markup stays the same, the way the CSS Zen Garden proved it could.
+          <a href=${LINKS.shop} rel="external">gyral-shop</a> is a full department store built with
+          Gyral: catalog, search, accounts, cart, checkout, orders and admin. Its themes change only
+          CSS. The markup stays the same, the way the CSS Zen Garden proved it could.
         </p>
       </hgroup>
       <ul role="list" class="shots">
         ${THEMES.map(
-          (t) => serverHtml`<li>
-            <figure>
-              <img
-                src=${`/showcase/shop-${t.id}.jpg`}
-                alt=${`gyral-shop home page in the ${t.label} theme`}
-                width="1280"
-                height="800"
-                loading="lazy"
-                decoding="async"
-              >
-              <figcaption><strong>${t.label}</strong>, ${t.note}</figcaption>
-            </figure>
-          </li>`,
+          (t) =>
+            html`<li>
+              <figure>
+                <img
+                  src=${`/showcase/shop-${t.id}.jpg`}
+                  alt=${`gyral-shop home page in the ${t.label} theme`}
+                  width="1280"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption><strong>${t.label}</strong>, ${t.note}</figcaption>
+              </figure>
+            </li>`,
         )}
       </ul>
     </section>
@@ -243,9 +249,9 @@ export async function homeBody(): Promise<unknown> {
       <h2 id="lineage-title">Standing on Cycle.js</h2>
       <p>
         <a href=${LINKS.cyclejs} rel="external">Cycle.js</a> showed that a web app can be one
-        visible loop with every effect at the edge. Gyral is a new framework that carries that
-        idea forward. It replaces streams with plain functions and the virtual DOM with the
-        platform's own components, and credits the original in its licence notice.
+        visible loop with every effect at the edge. Gyral is a new framework that carries that idea
+        forward. It replaces streams with plain functions and the virtual DOM with the platform's
+        own components, and credits the original in its licence notice.
       </p>
     </section>
 

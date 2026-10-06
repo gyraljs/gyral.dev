@@ -37,3 +37,17 @@ export const headersFor = (rules: readonly HeaderRule[], path: string): [string,
   rules
     .filter((r) => matches(r.pattern, path))
     .flatMap((r) => r.headers.map(([k, v]): [string, string] => [k, v]));
+
+/**
+ * `_headers` with a Content-Security-Policy added to the `/*` rule (scripts/build.ts: the
+ * policy carries style hashes, so it is computed at build time, not written in public/).
+ */
+export function withCsp(text: string, csp: string): string {
+  const lines = text.split('\n');
+  const at = lines.findIndex((line) => line.trimEnd() === '/*');
+  if (at === -1) throw new Error('_headers: no "/*" rule to add the Content-Security-Policy to');
+  if (/^\s+content-security-policy:/im.test(text))
+    throw new Error('_headers: public/_headers must not set a Content-Security-Policy itself');
+  lines.splice(at + 1, 0, `  Content-Security-Policy: ${csp}`);
+  return lines.join('\n');
+}

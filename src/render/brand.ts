@@ -1,6 +1,6 @@
 // /brand/: the logo, colours and usage rules, from the brand guide in gyraljs/brand (BRAND.md).
 // The download files are copies made by scripts/sync-brand.mjs; the full kit lives in that repo.
-import { serverHtml } from '@gyral/ssr';
+import { html, type ChildValue } from '@gyral/core';
 import { absolute, LINKS } from '../site.js';
 import type { PageMeta } from './layout.js';
 
@@ -75,25 +75,28 @@ const NEUTRAL: readonly Colour[] = [
   { name: 'White', hex: '#FFFFFF', oklch: 'oklch(100% 0 0)' },
 ];
 
-const swatches = (title: string, note: string, colours: readonly Colour[]) => serverHtml`
+const swatches = (title: string, note: string, colours: readonly Colour[]) => html`
   <section aria-labelledby=${`palette-${title.toLowerCase()}`}>
     <h3 id=${`palette-${title.toLowerCase()}`}>${title}</h3>
     <p>${note}</p>
     <ul role="list" class="swatches">
       ${colours.map(
-        (c) => serverHtml`<li>
-          <span class="swatch" style=${`--swatch: ${c.hex}`}></span>
-          <strong>${c.name}</strong>
-          <code>${c.hex}</code>
-          <code>${c.oklch}</code>
-        </li>`,
+        (c) =>
+          html`<li>
+            <svg class="swatch" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true">
+              <rect width="1" height="1" fill=${c.hex}></rect>
+            </svg>
+            <strong>${c.name}</strong>
+            <code>${c.hex}</code>
+            <code>${c.oklch}</code>
+          </li>`,
       )}
     </ul>
   </section>
 `;
 
-export function brandBody(): unknown {
-  return serverHtml`
+export function brandBody(): ChildValue {
+  return html`
     <section class="page-intro prose" aria-labelledby="brand-title">
       <h1 id="brand-title">Brand and press</h1>
       <p>
@@ -110,14 +113,18 @@ export function brandBody(): unknown {
         <p>
           A gyre: a spiral that turns outward from a point in eight quarter-turns, each wider than
           the last. It stands for the loop at the heart of Model-View-Intent (intent feeds the
-          model, the model drives the view, the view produces new intent) and for that loop
-          growing with an application. The name means the same thing: <i>gyral</i>, of a gyre,
-          turning. Four colours travel round the spiral in a fixed order, blue, red, yellow,
-          green, twice.
+          model, the model drives the view, the view produces new intent) and for that loop growing
+          with an application. The name means the same thing: <i>gyral</i>, of a gyre, turning. Four
+          colours travel round the spiral in a fixed order, blue, red, yellow, green, twice.
         </p>
         <picture class="brand-mark">
-          <source srcset="/brand/mark-dark.svg" media="(prefers-color-scheme: dark)">
-          <img src="/brand/mark-light.svg" alt="The Gyral mark: a four-colour spiral" width="160" height="160">
+          <source srcset="/brand/mark-dark.svg" media="(prefers-color-scheme: dark)" />
+          <img
+            src="/brand/mark-light.svg"
+            alt="The Gyral mark: a four-colour spiral"
+            width="160"
+            height="160"
+          />
         </picture>
       </div>
     </section>
@@ -125,23 +132,29 @@ export function brandBody(): unknown {
     <section class="brand-section" aria-labelledby="downloads-title">
       <h2 id="downloads-title">Downloads</h2>
       <p>
-        Use the horizontal logo by default, the stacked logo in square or tall spaces, and the
-        mark alone where the name is already nearby (avatars, icons).
+        Use the horizontal logo by default, the stacked logo in square or tall spaces, and the mark
+        alone where the name is already nearby (avatars, icons).
       </p>
       <ul role="list" class="downloads">
         ${DOWNLOADS.map(
-          (d) => serverHtml`<li>
-            <figure>
-              <div class="download-preview" data-background=${d.background}>
-                <img src=${`/brand/download/${d.file}.svg`} alt="" loading="lazy" decoding="async">
-              </div>
-              <figcaption>
-                <strong>${d.label}</strong>
-                <a href=${`/brand/download/${d.file}.svg`} download>SVG</a>
-                <a href=${`/brand/download/${d.file}-1024.png`} download>PNG, 1024 px</a>
-              </figcaption>
-            </figure>
-          </li>`,
+          (d) =>
+            html`<li>
+              <figure>
+                <div class="download-preview" data-background=${d.background}>
+                  <img
+                    src=${`/brand/download/${d.file}.svg`}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <figcaption>
+                  <strong>${d.label}</strong>
+                  <a href=${`/brand/download/${d.file}.svg`} download>SVG</a>
+                  <a href=${`/brand/download/${d.file}-1024.png`} download>PNG, 1024 px</a>
+                </figcaption>
+              </figure>
+            </li>`,
         )}
       </ul>
     </section>
@@ -162,7 +175,9 @@ export function brandBody(): unknown {
             <li>Use the files as they are.</li>
             <li>Use the on-white versions on light backgrounds and the on-black ones on dark.</li>
             <li>Keep clear space of a quarter of the mark's height on every side.</li>
-            <li>Keep the horizontal logo at least 96 px wide on screen, the mark at least 16 px.</li>
+            <li>
+              Keep the horizontal logo at least 96 px wide on screen, the mark at least 16 px.
+            </li>
             <li>Use the one-colour versions from the full kit on photos and busy backgrounds.</li>
           </ul>
         </section>
@@ -171,29 +186,36 @@ export function brandBody(): unknown {
           <ul>
             <li>Recolour the mark, change its colour order, or swap the palettes.</li>
             <li>Rotate, mirror, stretch, outline it, or add shadows or glows.</li>
-            <li>Retype the word in another typeface or with a capital: the logo is always "gyral".</li>
+            <li>
+              Retype the word in another typeface or with a capital: the logo is always "gyral".
+            </li>
             <li>Use the mark as a pattern, a bullet, or decoration in other artwork.</li>
           </ul>
         </section>
       </div>
       <p>
-        In running text, write <strong>Gyral</strong>. Use <strong>gyraljs</strong> where the
-        plain word is ambiguous or taken: the GitHub organisation, social handles, search.
+        In running text, write <strong>Gyral</strong>. Use <strong>gyraljs</strong> where the plain
+        word is ambiguous or taken: the GitHub organisation, social handles, search.
       </p>
     </section>
 
     <section class="brand-section prose" aria-labelledby="trademark-title">
       <h2 id="trademark-title">Trademarks</h2>
       <p>
-        Gyral, gyraljs and the Gyral logo are trademarks of Mike Zupper. The code is
-        open source under the MIT licence; the artwork is not, so that the logo only ever means
-        "this is Gyral".
+        Gyral, gyraljs and the Gyral logo are trademarks of Mike Zupper. The code is open source
+        under the MIT licence; the artwork is not, so that the logo only ever means "this is Gyral".
       </p>
       <p>You may use the logos, without asking, to:</p>
       <ul>
         <li>refer to Gyral in articles, talks, tutorials, books and videos;</li>
-        <li>say your project works with, is built with, or supports Gyral, without suggesting endorsement;</li>
-        <li>make community material, such as meetup slides and non-commercial stickers, that follows these rules.</li>
+        <li>
+          say your project works with, is built with, or supports Gyral, without suggesting
+          endorsement;
+        </li>
+        <li>
+          make community material, such as meetup slides and non-commercial stickers, that follows
+          these rules.
+        </li>
       </ul>
       <p>
         Ask first, by opening an issue in <a href=${LINKS.brand} rel="external">gyraljs/brand</a>,

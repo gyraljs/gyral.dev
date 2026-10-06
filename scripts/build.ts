@@ -4,7 +4,7 @@
 // twin per page). dist/ is then exactly what Cloudflare Pages serves
 // (docs/design-docs/0003-hosting.md).
 import { existsSync, readFileSync } from 'node:fs';
-import { mkdir, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { clientEntryFromManifest, prerender } from '@gyral/ssr/static';
@@ -14,7 +14,9 @@ import { loadPosts, type Post } from '../src/content/blog.js';
 import { byReadingOrder, loadDocs, type DocPage } from '../src/content/docs.js';
 import { buildLlmsFiles } from '../src/content/llms.js';
 import { llmsProblems } from '../src/content/llms-check.js';
+import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
+import { withCsp } from './lib/headers.js';
 import type { Assets } from '../src/render/layout.js';
 
 export async function buildSite(dist: string): Promise<readonly string[]> {
@@ -36,6 +38,9 @@ export async function buildSite(dist: string): Promise<readonly string[]> {
   });
   await writeFile(join(dist, '404.html'), await site.notFound());
   await writeFile(join(dist, 'sitemap.xml'), sitemap(site.sitemapPaths));
+  // public/_headers (copied by Vite) plus the Content-Security-Policy with this build's hashes.
+  const headers = join(dist, '_headers');
+  await writeFile(headers, withCsp(await readFile(headers, 'utf8'), await siteCsp()));
   // The manifest is build metadata, not a page asset: don't publish it.
   await rm(join(dist, '.vite'), { recursive: true, force: true });
   await indexForSearch(dist);

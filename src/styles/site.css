@@ -2,6 +2,7 @@
    layered; colours come from the brand palette (gyraljs/brand BRAND.md) as oklch tokens.
    Islands style themselves in Shadow DOM and read the tokens through custom properties. */
 @import url('@fontsource-variable/sora/wght.css') layer(vendor);
+@import url('./code.css');
 
 @layer vendor, reset, tokens, base, layout, components, pages, utilities;
 
@@ -1258,13 +1259,14 @@
     }
   }
 
+  /* An inline SVG filled with the colour (a presentation attribute, so no inline style). */
   .swatch {
     display: block;
+    inline-size: 100%;
     block-size: 4rem;
     margin-block-end: 0.5rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--swatch);
   }
 
   .not-found {

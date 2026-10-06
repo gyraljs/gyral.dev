@@ -1,8 +1,8 @@
 // The document shell every page shares: head (SEO, icons, styles), header, footer.
-// Server-only: written with serverHtml, so none of it is hydrated. Interactive parts are
+// Server-only: written with core's html and rendered by @gyral/ssr, never hydrated. Interactive parts are
 // islands (src/islands) placed inside a page body as plain custom elements.
-import { nothing } from 'lit';
-import { page, serverHtml } from '@gyral/ssr';
+import { html, nothing, type ChildValue } from '@gyral/core';
+import { page } from '@gyral/ssr';
 import { jsonLdScript, type JsonLd } from './json-ld.js';
 import { absolute, COPYRIGHT_YEAR, LINKS, NAV, SITE_NAME, TAGLINE } from '../site.js';
 
@@ -43,27 +43,27 @@ export const fullTitle = (meta: Pick<PageMeta, 'path' | 'title'>): string =>
 const head = (meta: PageMeta, assets: Assets) => {
   const url = absolute(meta.path);
   const title = fullTitle(meta);
-  return serverHtml`
-    ${meta.noindex === true ? serverHtml`<meta name="robots" content="noindex">` : serverHtml`<link rel="canonical" href=${url}>`}
-    <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121317">
-    <link rel="icon" href="/favicon.ico" sizes="32x32">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="stylesheet" href=${assets.stylesheet}>
-    ${meta.markdown === true ? serverHtml`<link rel="alternate" type="text/markdown" href=${`${meta.path}index.md`}>` : nothing}
-    <meta property="og:type" content=${meta.type ?? 'website'}>
-    <meta property="og:site_name" content=${SITE_NAME}>
-    <meta property="og:title" content=${title}>
-    <meta property="og:description" content=${meta.description}>
-    <meta property="og:url" content=${url}>
-    <meta property="og:image" content=${absolute('/og.png')}>
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content=${`${SITE_NAME}: ${TAGLINE}`}>
-    <meta name="twitter:card" content="summary_large_image">
+  return html`
+    ${meta.noindex === true ? html`<meta name="robots" content="noindex" />` : html`<link rel="canonical" href=${url} />`}
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121317" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href=${assets.stylesheet} />
+    ${meta.markdown === true ? html`<link rel="alternate" type="text/markdown" href=${`${meta.path}index.md`} />` : nothing}
+    <meta property="og:type" content=${meta.type ?? 'website'} />
+    <meta property="og:site_name" content=${SITE_NAME} />
+    <meta property="og:title" content=${title} />
+    <meta property="og:description" content=${meta.description} />
+    <meta property="og:url" content=${url} />
+    <meta property="og:image" content=${absolute('/og.png')} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content=${`${SITE_NAME}: ${TAGLINE}`} />
+    <meta name="twitter:card" content="summary_large_image" />
     ${jsonLdScript(meta.jsonLd ?? [])}
   `;
 };
@@ -71,28 +71,42 @@ const head = (meta: PageMeta, assets: Assets) => {
 const isCurrent = (path: string, match: string | null): boolean =>
   match !== null && path.startsWith(match);
 
-const siteHeader = (path: string) => serverHtml`
+const siteHeader = (path: string) => html`
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
     <a class="brand" href="/" aria-current=${path === '/' ? 'page' : nothing}>
       <picture>
-        <source srcset="/brand/lockup-dark.svg" media="(prefers-color-scheme: dark)">
-        <img src="/brand/lockup-light.svg" alt="Gyral home" width="107" height="36">
+        <source srcset="/brand/lockup-dark.svg" media="(prefers-color-scheme: dark)" />
+        <img src="/brand/lockup-light.svg" alt="Gyral home" width="107" height="36" />
       </picture>
     </a>
     <nav aria-label="Primary">
       <ul role="list">
         ${NAV.map(
-          (item) => serverHtml`<li>
-            <a href=${item.href} aria-current=${isCurrent(path, item.match) ? 'page' : nothing}
-              >${item.label}</a>
-          </li>`,
+          (item) =>
+            html`<li>
+              <a href=${item.href} aria-current=${isCurrent(path, item.match) ? 'page' : nothing}
+                >${item.label}</a
+              >
+            </li>`,
         )}
         <li class="nav-search">
           <a href="/search/" aria-current=${path === '/search/' ? 'page' : nothing}>
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
-              <path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <circle
+                cx="10.5"
+                cy="10.5"
+                r="6.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="m15.5 15.5 5 5"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
             </svg>
             <span class="visually-hidden">Search</span>
           </a>
@@ -102,19 +116,25 @@ const siteHeader = (path: string) => serverHtml`
     ${
       path === '/search/'
         ? nothing
-        : serverHtml`<search class="site-search">
-          <form action="/search/" method="get">
-            <label for="site-search-q" class="visually-hidden">Search the site</label>
-            <input id="site-search-q" name="q" type="search" placeholder="Search" autocomplete="off"
-              aria-keyshortcuts="/ Control+K Meta+K">
-            <kbd aria-hidden="true">/</kbd>
-          </form>
-        </search>`
+        : html`<search class="site-search">
+            <form action="/search/" method="get">
+              <label for="site-search-q" class="visually-hidden">Search the site</label>
+              <input
+                id="site-search-q"
+                name="q"
+                type="search"
+                placeholder="Search"
+                autocomplete="off"
+                aria-keyshortcuts="/ Control+K Meta+K"
+              />
+              <kbd aria-hidden="true">/</kbd>
+            </form>
+          </search>`
     }
   </header>
 `;
 
-const siteFooter = () => serverHtml`
+const siteFooter = () => html`
   <footer class="site-footer">
     <nav aria-label="Footer">
       <section aria-labelledby="footer-learn">
@@ -144,15 +164,15 @@ const siteFooter = () => serverHtml`
     </p>
     <p class="legal">
       <small>
-        Code under the MIT licence. © ${COPYRIGHT_YEAR} Mike Zupper. Gyral, gyraljs and
-        the Gyral logo are trademarks of Mike Zupper.
+        Code under the MIT licence. © ${COPYRIGHT_YEAR} Mike Zupper. Gyral, gyraljs and the Gyral
+        logo are trademarks of Mike Zupper.
       </small>
     </p>
   </footer>
 `;
 
 /** A complete HTML document for one page. */
-export function layout(meta: PageMeta, body: unknown, assets: Assets): unknown {
+export function layout(meta: PageMeta, body: ChildValue, assets: Assets): ChildValue {
   return page({
     title: fullTitle(meta),
     description: meta.description,
@@ -162,7 +182,7 @@ export function layout(meta: PageMeta, body: unknown, assets: Assets): unknown {
       ...(meta.islands === true ? [assets.clientEntry] : []),
       ...(meta.demoVideos === true ? [assets.demoVideos] : []),
     ],
-    body: serverHtml`${siteHeader(meta.path)}
+    body: html`${siteHeader(meta.path)}
       <main id="main" data-pagefind-body=${meta.searchable === true ? '' : nothing}>${body}</main>
       ${siteFooter()}`,
   });

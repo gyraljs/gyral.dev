@@ -14,7 +14,7 @@ export function prose(markdown: string): string {
       else if (open.startsWith(fence)) fence = undefined;
       continue;
     }
-    if (fence === undefined) lines.push(line.replace(/(`+)[^`]*?\1/g, ''));
+    if (fence === undefined) lines.push(line.replace(/(`+).+?\1(?!`)/g, ''));
   }
   return lines.join('\n');
 }

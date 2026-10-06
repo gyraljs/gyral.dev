@@ -1,12 +1,20 @@
 // Browser fixtures for `pnpm interop` (scripts/check-interop.mjs): the claims made by the
 // "Using Gyral in other frameworks" and "Using third-party web components" docs pages, run in
 // Chromium against the published @gyral/core.
-import { define, emit, html } from '@gyral/core';
+import * as v from 'valibot';
+import { define, each, emit, html, intents, prop } from '@gyral/core';
+
+/** The page awaits this instead of polling: every component has rendered. */
+export { settled } from '@gyral/core';
 
 /** A Gyral component used from outside Gyral: props in, outputs out. */
 export type PickerOut = { readonly _tag: 'Picked'; readonly id: string };
 
 type PickerMsg = { readonly _tag: 'Pick'; readonly id: string };
+
+const pickerIntents = intents<PickerMsg>();
+const PickerItem = (id: string) =>
+  html`<li><button value=${id} data-intent=${pickerIntents.Pick}>${id}</button></li>`;
 
 interface PickerProps {
   readonly label: string;
@@ -18,21 +26,19 @@ export const Picker = define<{ readonly picks: number }, PickerMsg, PickerProps,
   'interop-picker',
   {
     props: {
-      label: { type: String, default: 'Pick one' },
-      max: { type: Number, default: 0 },
-      items: { attribute: false, default: [] },
+      label: prop.string({ default: 'Pick one' }),
+      max: prop.number({ default: 0 }),
+      items: prop.value(v.array(v.string()), { default: [] }),
     },
     init: () => ({ picks: 0 }),
     intent: { Pick: ({ value }) => (value ? { _tag: 'Pick', id: value } : undefined) },
     update: {
       Pick: (s, m) => [{ picks: s.picks + 1 }, [emit({ _tag: 'Picked', id: m.id })]],
     },
-    view: (_s, i, { props }) => html`
+    view: (_s, _i, { props }) => html`
       <p>${props.label} (max ${props.max})</p>
       <ul>
-        ${props.items.map(
-          (id) => html`<li><button value=${id} data-intent=${i.Pick}>${id}</button></li>`,
-        )}
+        ${each(props.items, (id) => id, PickerItem)}
       </ul>
     `,
   },

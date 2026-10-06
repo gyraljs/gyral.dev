@@ -1,6 +1,7 @@
 // The route table and the request handler: one function renders every page, and it serves
 // both the dev server (per request) and the build (prerendered to files).
-import { renderToStream, renderToString, serverHtml } from '@gyral/ssr';
+import { html, type ChildValue } from '@gyral/core';
+import { renderToStream, renderToString } from '@gyral/ssr';
 import { loadApiPages } from '../content/api.js';
 import { byReadingOrder, loadDocs, type DocPage } from '../content/docs.js';
 import { absolute } from '../site.js';
@@ -16,7 +17,7 @@ import { searchBody, searchMeta } from './search.js';
 
 interface Route {
   readonly meta: PageMeta;
-  readonly body: () => unknown;
+  readonly body: () => ChildValue | Promise<ChildValue>;
 }
 
 export interface Site {
@@ -37,7 +38,7 @@ const notFoundMeta: PageMeta = {
   noindex: true,
 };
 
-const notFoundBody = () => serverHtml`
+const notFoundBody = () => html`
   <section class="not-found prose" aria-labelledby="nf-title">
     <h1 id="nf-title">Page not found</h1>
     <p>There's no page at this address. It may have moved while the docs grow.</p>
@@ -51,11 +52,22 @@ const HTML = { 'content-type': 'text/html; charset=utf-8' };
 const normalise = (pathname: string): string =>
   pathname.endsWith('/') ? pathname : `${pathname}/`;
 
+export interface SiteOptions {
+  /**
+   * Development output: `<!--gyral:ID-->` markers, which the browser's development hydration
+   * checks, and the server's development checks. The dev server sets it: its SSR imports
+   * @gyral/core through Node, without the `development` condition. Default: production.
+   */
+  readonly dev?: boolean;
+}
+
 export async function createSite(
   assets: Assets,
   docs?: readonly DocPage[],
   blog?: readonly Post[],
+  options: SiteOptions = {},
 ): Promise<Site> {
+  const render = options.dev === undefined ? {} : { dev: options.dev };
   const pages = docs ?? [...(await loadDocs()), ...(await loadApiPages())].sort(byReadingOrder);
   const posts = blog ?? (await loadPosts());
   const table = new Map<string, Route>([
@@ -73,7 +85,7 @@ export async function createSite(
     table.set(doc.path, { meta: docMeta(doc), body: () => docBody(pages, doc) });
   }
 
-  const notFound = async () => renderToString(layout(notFoundMeta, notFoundBody(), assets));
+  const notFound = async () => renderToString(layout(notFoundMeta, notFoundBody(), assets), render);
 
   return {
     paths: [...table.keys()],
@@ -86,7 +98,7 @@ export async function createSite(
         return new Response(await notFound(), { status: 404, headers: HTML });
       }
       const document = layout(route.meta, await route.body(), assets);
-      return new Response(renderToStream(document), { headers: HTML });
+      return new Response(renderToStream(document, render), { headers: HTML });
     },
   };
 }

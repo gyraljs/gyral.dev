@@ -1,6 +1,8 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
+import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
-import { headersFor, parseHeaders } from '../scripts/lib/headers.js';
+import { headersFor, parseHeaders, withCsp } from '../scripts/lib/headers.js';
 
 const assets = {
   stylesheet: '/assets/site.css',
@@ -155,7 +157,40 @@ describe('search', () => {
   });
 });
 
+describe('Content-Security-Policy', () => {
+  it('allows every inline <style> by hash, without unsafe-inline', async () => {
+    const csp = await siteCsp();
+    expect(csp).not.toContain('unsafe-inline');
+    expect(csp).toMatch(/^default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; /);
+    const styleSrc = csp.split('; ').find((d) => d.startsWith('style-src '));
+    for (const path of ['/', '/search/']) {
+      const { html } = await get(path);
+      const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1] ?? '');
+      expect(styles.length, path).toBeGreaterThan(0);
+      for (const text of styles) {
+        const hash = createHash('sha256').update(text).digest('base64');
+        expect(styleSrc, `${path}: <style> not in style-src`).toContain(`'sha256-${hash}'`);
+      }
+    }
+  });
+
+  it('has no inline style attributes on any kind of page', async () => {
+    for (const path of ['/', '/docs/views/', '/docs/api/core/', '/examples/', '/brand/']) {
+      expect((await get(path)).html, path).not.toMatch(/<[a-z][^<>]*\sstyle=/i);
+    }
+  });
+});
+
 describe('_headers', () => {
+  it('gets the Content-Security-Policy on the /* rule', () => {
+    const text = withCsp('# c /*\n/*\n  A: 1\n/assets/*\n  B: 2\n', "default-src 'self'");
+    expect(headersFor(parseHeaders(text), '/')).toEqual([
+      ['Content-Security-Policy', "default-src 'self'"],
+      ['A', '1'],
+    ]);
+    expect(() => withCsp('/assets/*\n  B: 2\n', 'x')).toThrow(/no "\/\*" rule/);
+  });
+
   it('applies every matching rule in order', () => {
     const rules = parseHeaders('# c\n/*\n  A: 1\n/assets/*\n  B: 2\n');
     expect(headersFor(rules, '/assets/x.js')).toEqual([

@@ -1,6 +1,5 @@
 // The blog index (/blog/) and post pages (/blog/<slug>/). No JavaScript.
-import { serverHtml } from '@gyral/ssr';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { html, raw } from '@gyral/core';
 import { longDate, type Post } from '../content/blog.js';
 import { absolute, SITE_NAME } from '../site.js';
 import type { PageMeta } from './layout.js';
@@ -21,7 +20,7 @@ export const blogMeta: PageMeta = {
   ],
 };
 
-export const blogBody = (posts: readonly Post[]) => serverHtml`
+export const blogBody = (posts: readonly Post[]) => html`
   <section class="page-intro" aria-labelledby="blog-title">
     <h1 id="blog-title">Blog</h1>
     <p>News and writing about Gyral.</p>
@@ -29,13 +28,16 @@ export const blogBody = (posts: readonly Post[]) => serverHtml`
   <section class="post-list" aria-label="Posts">
     <ol role="list">
       ${posts.map(
-        (p) => serverHtml`<li>
-          <article aria-labelledby=${`post-${p.slug}`}>
-            <h2 id=${`post-${p.slug}`}><a href=${p.path}>${p.title}</a></h2>
-            <p class="byline"><time datetime=${p.date}>${longDate(p.date)}</time> · ${p.author}</p>
-            <p>${p.description}</p>
-          </article>
-        </li>`,
+        (p) =>
+          html`<li>
+            <article aria-labelledby=${`post-${p.slug}`}>
+              <h2 id=${`post-${p.slug}`}><a href=${p.path}>${p.title}</a></h2>
+              <p class="byline">
+                <time datetime=${p.date}>${longDate(p.date)}</time> · ${p.author}
+              </p>
+              <p>${p.description}</p>
+            </article>
+          </li>`,
       )}
     </ol>
   </section>
@@ -63,14 +65,16 @@ export const postMeta = (post: Post): PageMeta => ({
   ],
 });
 
-export const postBody = (post: Post) => serverHtml`
+export const postBody = (post: Post) => html`
   <article class="post prose" aria-labelledby="post-title">
     <header>
       <p class="eyebrow"><a href="/blog/">Blog</a></p>
       <h1 id="post-title">${post.title}</h1>
-      <p class="byline"><time datetime=${post.date}>${longDate(post.date)}</time> · ${post.author}</p>
+      <p class="byline">
+        <time datetime=${post.date}>${longDate(post.date)}</time> · ${post.author}
+      </p>
     </header>
-    ${unsafeHTML(post.html.replace(/^<h1>.*?<\/h1>\n?/, ''))}
+    ${raw(post.html.replace(/^<h1>.*?<\/h1>\n?/, ''))}
     <footer data-pagefind-ignore>
       <p><a href="/blog/">More posts</a></p>
     </footer>

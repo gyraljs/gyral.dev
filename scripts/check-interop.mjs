@@ -45,7 +45,7 @@ try {
     el.addEventListener('gyral-output', (e) => onHost.push(e.detail));
     document.addEventListener('gyral-output', (e) => onDocument.push(e.detail));
     document.body.append(el);
-    await el.updateComplete;
+    await window.Interop.settled();
     const text = el.shadowRoot.querySelector('p').textContent;
     el.shadowRoot.querySelector('button[value="b"]').click();
     await new Promise((r) => setTimeout(r, 0));
@@ -74,7 +74,7 @@ try {
     root.addEventListener('gyral-output', () => (seen.root += 1));
     wrapper.addEventListener('gyral-output', () => (seen.outside += 1));
     document.body.append(wrapper);
-    await el.updateComplete;
+    await window.Interop.settled();
     el.shadowRoot.querySelector('button').click();
     await new Promise((r) => setTimeout(r, 0));
     return seen;
@@ -86,9 +86,9 @@ try {
   const host = await page.evaluate(async () => {
     const el = document.createElement('interop-host');
     document.body.append(el);
-    await el.updateComplete;
+    await window.Interop.settled();
     el.shadowRoot.querySelector('fake-select').click();
-    await el.updateComplete;
+    await window.Interop.settled();
     return el.shadowRoot.querySelector('output').textContent;
   });
   check('third-party event reaches the parser with detail and target', host === 'b', host);
