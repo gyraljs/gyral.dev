@@ -16,7 +16,7 @@ export interface Rendered {
   readonly headings: readonly Heading[];
 }
 
-const LANGS = ['ts', 'js', 'html', 'css', 'sh', 'json'] as const;
+const LANGS = ['ts', 'tsx', 'js', 'html', 'css', 'sh', 'json', 'vue'] as const;
 const THEMES = { light: 'github-light-default', dark: 'github-dark-default' } as const;
 
 let highlighter: Promise<Highlighter> | undefined;
@@ -85,7 +85,7 @@ export async function renderMarkdown(source: string): Promise<Rendered> {
         const label = lang === '' ? 'text' : lang;
         const highlighted = isLang(lang)
           ? shiki.codeToHtml(token.text, { lang, themes: THEMES, defaultColor: false })
-          : `<pre class="shiki"><code>${escapeHtml(token.text)}</code></pre>`;
+          : `<pre class="shiki" tabindex="0"><code>${escapeHtml(token.text)}</code></pre>`;
         return `<figure class="code" data-lang="${escapeHtml(label)}">${highlighted}</figure>\n`;
       },
       link(this: { parser: { parseInline: (t: Tokens.Generic[]) => string } }, token) {

@@ -20,6 +20,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 | `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                          |
 | `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                   |
 | `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                      |
+| `pnpm interop`       | Docs interop claims in Chromium: props, `gyral-output`, third-party events (test/interop/)          |
 | `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search       |
 | `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally) |
 | `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                                  |

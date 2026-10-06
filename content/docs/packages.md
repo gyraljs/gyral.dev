@@ -58,6 +58,28 @@ Import Lit's helpers (`html`, `css`, `nothing`, `repeat`, `live`, …) from `@gy
 Validation in `@gyral/core`, `@gyral/http` and `@gyral/ssr` accepts any
 [Standard Schema](https://standardschema.dev) library; Gyral depends only on its types.
 
+## Known issues
+
+**Lists leak DOM nodes on lit-html 3.3.1 and later.** Since lit-html 3.3.1, removing items
+rendered with `repeat()` leaves one comment node behind per removed item
+([lit/lit#5010](https://github.com/lit/lit/issues/5010),
+[lit/lit#5298](https://github.com/lit/lit/issues/5298), both open as of October 2026). A list
+that changes often keeps growing the DOM, and bulk changes get slow: in Gyral's benchmark,
+clearing 1,000 rows took about 3.7 seconds on lit-html 3.3.3 and 56 ms on 3.3.0. It affects
+every Lit-based app, not only Gyral.
+
+Until Lit ships a fix, pin lit-html to 3.3.0 in your app. With pnpm, in `package.json`:
+
+```json
+{
+  "pnpm": { "overrides": { "lit-html": "3.3.0" } }
+}
+```
+
+With npm, the same object goes under a top-level `"overrides"` key:
+`"overrides": { "lit-html": "3.3.0" }`. Then reinstall and check that only one version is
+installed (`pnpm why lit-html` or `npm ls lit-html`).
+
 ## The Vite preset
 
 `gyralVitePreset()` from `@gyral/core/vite` holds the two settings every Gyral app needs:
