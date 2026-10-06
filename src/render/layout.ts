@@ -11,6 +11,12 @@ export interface Assets {
   readonly stylesheet: string;
   /** The client entry; only pages with islands load it. */
   readonly clientEntry: string;
+  /**
+   * Chunks the client entry needs, preloaded with it on pages with islands: its static imports
+   * and Gyral's lazily loaded hydration chunk, which the browser would otherwise find one round
+   * trip later (@gyral/ssr's clientAssetsFromManifest). Empty in dev.
+   */
+  readonly clientPreload: readonly string[];
   /** The keyboard shortcut for search (`/`, Ctrl/⌘+K): tiny, on every page. */
   readonly shortcuts: string;
   /** Plays the demo recordings while they are on screen (src/demo-videos.ts). */
@@ -177,6 +183,7 @@ export function layout(meta: PageMeta, body: ChildValue, assets: Assets): ChildV
     title: fullTitle(meta),
     description: meta.description,
     head: head(meta, assets),
+    modulepreload: meta.islands === true ? assets.clientPreload : [],
     scripts: [
       assets.shortcuts,
       ...(meta.islands === true ? [assets.clientEntry] : []),

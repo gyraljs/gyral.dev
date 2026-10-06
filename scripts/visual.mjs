@@ -113,6 +113,9 @@ async function capture({ path, device, viewport, scheme }) {
     colorScheme: scheme,
     reducedMotion: 'reduce',
     deviceScaleFactor: 1,
+    // The stabilising stylesheet below is an inline <style>, which the site's CSP (no
+    // 'unsafe-inline') blocks. `pnpm smoke` checks the pages under the real CSP.
+    bypassCSP: true,
   });
   try {
     const page = await context.newPage();

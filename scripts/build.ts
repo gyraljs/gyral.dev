@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { clientEntryFromManifest, prerender } from '@gyral/ssr/static';
+import { clientAssetsFromManifest, clientEntryFromManifest, prerender } from '@gyral/ssr/static';
 import * as pagefind from 'pagefind';
 import { loadApiPages } from '../src/content/api.js';
 import { loadPosts, type Post } from '../src/content/blog.js';
@@ -21,8 +21,10 @@ import type { Assets } from '../src/render/layout.js';
 
 export async function buildSite(dist: string): Promise<readonly string[]> {
   const manifest = join(dist, '.vite', 'manifest.json');
+  const client = await clientAssetsFromManifest(manifest, 'src/entry-client.ts');
   const assets: Assets = {
-    clientEntry: await clientEntryFromManifest(manifest, 'src/entry-client.ts'),
+    clientEntry: client.entry,
+    clientPreload: client.modulepreload,
     stylesheet: await clientEntryFromManifest(manifest, 'src/styles/site.css'),
     shortcuts: await clientEntryFromManifest(manifest, 'src/shortcuts.ts'),
     demoVideos: await clientEntryFromManifest(manifest, 'src/demo-videos.ts'),

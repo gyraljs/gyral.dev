@@ -74,10 +74,20 @@ import '../src/counter.js';
 /** Paths rendered at build time into dist/static. Everything else renders per request. */
 export const staticPaths: readonly string[] = ['/'];
 
-export function createApp({ clientEntry }: { readonly clientEntry: string }): Hono {
+export interface ClientAssets {
+  readonly clientEntry: string;
+  readonly modulepreload: readonly string[];
+}
+
+export function createApp({ clientEntry, modulepreload }: ClientAssets): Hono {
   const app = new Hono();
   app.get('/', () =>
-    renderPage({ title: 'Home', body: html`<my-counter></my-counter>`, scripts: [clientEntry] }),
+    renderPage({
+      title: 'Home',
+      body: html`<my-counter></my-counter>`,
+      scripts: [clientEntry],
+      modulepreload,
+    }),
   );
   app.get('/hello/:name', (c) =>
     renderPage({ title: 'Hello', body: html`<h1>Hello, ${c.req.param('name')}</h1>` }),
@@ -102,7 +112,9 @@ serve({ fetch: app.fetch, port: Number(process.env['PORT'] ?? 3000) });
 ```
 
 `productionServer({ distDir, createApp })` expects Vite's output in `dist/client/` (with
-`build.manifest: true`) and prerendered pages in `dist/static/`. It answers:
+`build.manifest: true`) and prerendered pages in `dist/static/`. It reads the manifest once and
+hands `createApp` the client entry and the chunks to preload with it, Gyral's hydration chunk
+included. It answers:
 
 | Request                        | Served from                | `cache-control`                       |
 | ------------------------------ | -------------------------- | ------------------------------------- |

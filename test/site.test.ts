@@ -7,6 +7,7 @@ import { headersFor, parseHeaders, withCsp } from '../scripts/lib/headers.js';
 const assets = {
   stylesheet: '/assets/site.css',
   clientEntry: '/assets/entry.js',
+  clientPreload: ['/assets/hydration-client.js'],
   shortcuts: '/assets/shortcuts.js',
   demoVideos: '/assets/demo-videos.js',
 };
@@ -28,6 +29,7 @@ describe('pages', () => {
     expect(html).toContain('<gd-loop-counter');
     expect(html).toContain('<template shadowroot'); // Declarative Shadow DOM
     expect(html).toContain('<script type="module" src="/assets/entry.js">');
+    expect(html).toContain('<link rel="modulepreload" href="/assets/hydration-client.js">');
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
   });
 
@@ -39,6 +41,7 @@ describe('pages', () => {
     expect(html).toContain('aria-current="page"');
     expect(html).toContain('<script type="module" src="/assets/shortcuts.js">');
     expect(html).not.toMatch(NO_ISLANDS);
+    expect(html).not.toContain('modulepreload');
     expect(html).toContain('<main id="main" data-pagefind-body');
     expect(html).toContain('<form action="/search/" method="get">');
     expect(html).toContain('<details class="docs-menu" data-pagefind-ignore>');

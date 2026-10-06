@@ -126,7 +126,10 @@ commands, so a router's first location or a timer's first tick can never make th
 render differ from the server's.
 
 The hydration code is its own chunk (about 2.8 KiB gzip), loaded the first time a
-server-rendered component connects. Pages without one never fetch it.
+server-rendered component connects. Pages without one never fetch it. In production, preload it
+with the entry: `clientAssetsFromManifest()` from `@gyral/ssr/static` reads the entry and the
+chunks it needs from Vite's manifest, and `renderPage({ modulepreload })` writes a
+`<link rel="modulepreload">` for each (see [Static sites](/docs/static-sites/#a-static-build)).
 
 Every client-side instance then gets the `Hydrated` message once. Use it for progressive
 enhancement: render the no-JavaScript version on the server and in the first client render, then
@@ -230,5 +233,6 @@ only from server code, never from a client entry, so client bundles carry no ser
   `.value=` or `.checked=`, which the server can't write.
 - Load data before rendering; never put a `Promise` in a view.
 - Send a CSP from `contentSecurityPolicy()`; you don't need `'unsafe-inline'`.
+- Preload the entry's chunks and the hydration chunk with `modulepreload`.
 - Test hydration against a production build, not only the dev server. `@gyral/testing`'s
   `mountSsr` and `hydrated` make that a unit test (see [Testing](/docs/testing/#ssr-and-hydration-tests)).

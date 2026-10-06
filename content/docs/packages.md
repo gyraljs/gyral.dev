@@ -133,5 +133,6 @@ feature-detected and used as enhancements.
   templates, or put them in `raw()` on the server.
 - **Deno and Cloudflare Workers are not tested yet** for server rendering (see
   [Deploying](/docs/deploying/#bun-deno-and-cloudflare-workers)).
-- **The hydration chunk loads one round trip after the entry** on server-rendered pages. The
-  page is already on screen and readable, but the first interaction can wait for it.
+- **Without a preload hint, the hydration chunk loads one round trip after the entry** on
+  server-rendered pages. Pass `clientAssetsFromManifest()`'s `modulepreload` to `renderPage` (see
+  [Static sites](/docs/static-sites/#a-static-build)); `productionServer` hands it to your app.

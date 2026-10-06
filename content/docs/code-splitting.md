@@ -111,7 +111,9 @@ component hydrates from its own seed and its own template whenever its element i
 Gyral splits itself the same way. Features load with the API that uses them, so an app that
 never calls `each`, `raw`, `defineHook`, `command()` or `defineStore()` doesn't bundle their
 code, and the hydration code is a chunk of its own (about 2.8 KiB gzip) that only pages with
-server-rendered components fetch, one round trip after the entry.
+server-rendered components fetch. Preload it with the entry: `clientAssetsFromManifest()` from
+`@gyral/ssr/static` lists it, and `renderPage({ modulepreload })` writes the hints (see
+[Static sites](/docs/static-sites/#a-static-build)).
 
 ## Measure
 

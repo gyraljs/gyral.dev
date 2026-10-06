@@ -51,7 +51,8 @@ Everything a view needs comes from `@gyral/core`:
 New in `@gyral/core`: `each`, `raw`, `defineHook`, `prop`, `intents`, `settled`,
 `HydrationMismatch`, the `renderOnFrame` spec field (messages from bursty sources render once
 per animation frame), and the entry points `@gyral/core/server` and `@gyral/core/eslint`. New in
-`@gyral/ssr`: `contentSecurityPolicy`.
+`@gyral/ssr`: `contentSecurityPolicy` and `page({ modulepreload })`; in `@gyral/ssr/static`:
+`clientAssets` and `clientAssetsFromManifest`.
 
 ## Build: the Vite preset compiles templates
 
@@ -334,6 +335,10 @@ export async function home(): Promise<Response> {
 - **The CSP helper** allows shadow components' `<style>` elements by hash, so `style-src`
   needs no `'unsafe-inline'` any more. See
   [Server rendering](/docs/server-rendering/#content-security-policy).
+- **Preloading:** in production, read the entry and its preloads from the Vite manifest with
+  `clientAssetsFromManifest()` and pass `modulepreload` to `renderPage`; `productionServer` now
+  hands `{ clientEntry, modulepreload }` to `createApp`. See
+  [Static sites](/docs/static-sites/#a-static-build).
 - A `Promise` anywhere in a view is an error: load data in the handler first, as before.
 - Development output (Vite's dev server, Vitest) carries `<!--gyral:ID-->` markers; production
   output is the template HTML plus values. Regenerate golden SSR fixtures. A server that imports
@@ -371,8 +376,9 @@ builders), so small apps shed the most. If you keep a size budget, budget the fi
 lazy hydration chunk (about 2.8 KiB) only loads on server-rendered pages.
 
 This site moved too. Its two islands, the home page counter and the search box, shipped as one
-17.9 KiB chunk on 0.2.0 (gzip, as `vite build` reports it). On 0.3 the entry is SITE_ENTRY KiB and
-the hydration chunk SITE_HYDRATION KiB, which pages fetch after the entry.
+17.2 KiB chunk on 0.2.0 (gzip at level 9). On 0.3 the entry is 13.9 KiB, and the hydration
+chunk, 2.8 KiB, is preloaded alongside it on the two pages that have islands. Docs pages still
+ship no framework JavaScript at all.
 
 ## What didn't change
 

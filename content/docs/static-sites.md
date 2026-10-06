@@ -45,9 +45,14 @@ import { html } from '@gyral/core';
 import { renderPage } from '@gyral/ssr';
 import '../src/counter.js';
 
-export const createApp = ({ clientEntry }: { readonly clientEntry: string }): Hono => {
+export interface ClientAssets {
+  readonly clientEntry: string;
+  readonly modulepreload: readonly string[];
+}
+
+export const createApp = ({ clientEntry, modulepreload }: ClientAssets): Hono => {
   const app = new Hono();
-  // A page with a live component loads the client entry...
+  // A page with a live component loads the client entry, and preloads what it needs...
   app.get('/', () =>
     renderPage({
       title: 'Home',
@@ -56,6 +61,7 @@ export const createApp = ({ clientEntry }: { readonly clientEntry: string }): Ho
         <my-counter></my-counter>
       </main>`,
       scripts: [clientEntry],
+      modulepreload,
     }),
   );
   // ...and a page without one ships no JavaScript at all.
@@ -70,15 +76,12 @@ After `vite build`, a script renders every path into the same folder:
 
 ```ts
 // scripts/prerender.ts
-import { clientEntryFromManifest, prerender } from '@gyral/ssr/static';
+import { clientAssetsFromManifest, prerender } from '@gyral/ssr/static';
 import { createApp } from '../server/create-app.js';
 
-const clientEntry = await clientEntryFromManifest(
-  'dist/.vite/manifest.json',
-  'src/entry-client.ts',
-);
+const client = await clientAssetsFromManifest('dist/.vite/manifest.json', 'src/entry-client.ts');
 const pages = await prerender({
-  app: createApp({ clientEntry }),
+  app: createApp({ clientEntry: client.entry, modulepreload: client.modulepreload }),
   paths: ['/', '/about/'],
   outDir: 'dist',
   origin: 'https://example.com',
@@ -96,7 +99,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    manifest: true, // clientEntryFromManifest reads it
+    manifest: true, // clientAssetsFromManifest reads it
     rollupOptions: { input: 'src/entry-client.ts' },
   },
 });
@@ -106,8 +109,11 @@ export default defineConfig({
   A path that doesn't answer `200` fails the build, so an error page can't ship by accident.
 - **`origin`** is the URL the requests are made with. Set it to your real site, so absolute
   URLs your pages build from the request (canonical links, Open Graph tags) come out right.
-- **`clientEntryFromManifest(manifest, entry)`** returns the hashed URL of your client entry,
-  for example `/assets/entry-client-Ab12.js`, from Vite's manifest.
+- **`clientAssetsFromManifest(manifest, entry)`** reads Vite's manifest and returns the hashed
+  URL of your client entry (`entry`, for example `/assets/entry-client-Ab12.js`) and the chunks
+  it needs (`modulepreload`): its static imports and Gyral's hydration chunk.
+  `renderPage({ modulepreload })` writes a `<link rel="modulepreload">` for each, so the browser
+  fetches them alongside the entry instead of a round trip later.
 - The client entry is the one from [Server rendering](/docs/server-rendering/#hydration-and-the-client-entry):
   it imports your components, and each one hydrates on its own.
 - `@gyral/ssr/static` reads and writes files, so it runs in Node at build time. Your pages
