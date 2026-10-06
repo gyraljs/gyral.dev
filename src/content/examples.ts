@@ -47,8 +47,8 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
         title: 'Checkbox',
         cycle: 'basic/checkbox',
         summary:
-          'A checkbox whose state the model owns, bound with liveBoolean so it is right on the server and in the browser.',
-        shows: [['Views', '/docs/views/#helpers-for-form-controls']],
+          'A checkbox whose state the model owns, bound with ?checked so it is right on the server and in the browser.',
+        shows: [['Views', '/docs/views/#form-state']],
         file: 'src/checkbox.ts',
       },
       {
@@ -136,15 +136,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
         file: 'src/bmi-nested.ts',
       },
       {
-        slug: 'many',
-        title: 'Many items',
-        cycle: 'advanced/many',
-        summary:
-          'A list of child components rendered with repeat(), each removing or recolouring itself through outputs.',
-        shows: [['Child components', '/docs/components/#child-components-and-outputs']],
-        file: 'src/list.ts',
-      },
-      {
         slug: 'nested-folders',
         title: 'Nested folders',
         cycle: 'advanced/nested-folders',
@@ -206,7 +197,7 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
         title: 'Animation',
         cycle: 'intermediate/animation',
         summary:
-          'The model counts runs and CSS does the motion: no per-frame state, restarted with keyed().',
+          'The model counts runs and CSS does the motion: no per-frame state, restarted by a one-item each().',
         shows: [['Views', '/docs/views/#lists']],
         file: 'src/animation.ts',
       },

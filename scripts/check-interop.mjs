@@ -82,7 +82,7 @@ try {
   check('output is heard inside the containing shadow root', contained.root === 1);
   check('output does not cross the shadow boundary', contained.outside === 0);
 
-  // 3. A third-party element's event as an intent: events + data-intent-on, detail.
+  // 3. A third-party element's event as an intent: data-intent-on alone (no `events`), detail.
   const host = await page.evaluate(async () => {
     const el = document.createElement('interop-host');
     document.body.append(el);

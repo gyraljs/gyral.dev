@@ -67,8 +67,8 @@ customElements.define('fake-select', FakeSelect);
 type HostMsg = { readonly _tag: 'Changed'; readonly value: string };
 
 /** A Gyral component hosting the third-party element. */
+/** No `events` field: a static data-intent-on value is enough (the docs say so). */
 export const Host = define<{ readonly value: string }, HostMsg>('interop-host', {
-  events: ['fake-change'],
   init: () => ({ value: '' }),
   intent: {
     Changed: ({ detail, target }) => {

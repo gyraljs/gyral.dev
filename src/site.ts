@@ -17,7 +17,6 @@ export const LINKS = {
   brand: 'https://github.com/gyraljs/brand',
   npm: 'https://www.npmjs.com/org/gyral',
   cyclejs: 'https://cycle.js.org',
-  lit: 'https://lit.dev',
 } as const;
 
 /** The primary navigation, in order. `match` is the path prefix that marks the link current. */

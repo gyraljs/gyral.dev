@@ -14,6 +14,10 @@ Status: **accepted** (2026-10-05)
   work: build command `pnpm run build`, output `dist`, env `NODE_VERSION=24`. Cloudflare
   installs with the committed lockfile. The gate still runs before pushing (`pnpm check`);
   `pnpm run deploy` (wrangler direct upload) remains for manual deploys.
+- **While on Gyral 0.3 prereleases** (branch `gyral-0.3`), `@gyral/*` resolve to tarballs in
+  `../gyral-tarballs`, which a Cloudflare Git build can't see: preview by building locally and
+  uploading `dist/` with wrangler (`pages deploy dist --branch gyral-0-3`), or vendor the
+  tarballs, until 0.3.0 is on npm.
 - **CI** is `.github/workflows/ci.yml`, `workflow_dispatch` only, run with `pnpm ci:local`.
 
 - **No analytics** (owner decision 2026-10-05, site-54d.32). Cloudflare Web Analytics stays
@@ -23,9 +27,14 @@ Status: **accepted** (2026-10-05)
 
 - CSP: `default-src 'self'`; `script-src 'self' 'wasm-unsafe-eval'` (JSON-LD and hydration
   seeds are data blocks, which CSP doesn't block; `'wasm-unsafe-eval'` lets the search index's
-  WebAssembly compile and allows neither `eval()` nor inline script); `style-src 'self' 'unsafe-inline'` because Declarative Shadow DOM
-  styles are inline `<style>` elements; no third-party origins at all. `pnpm smoke` runs every
-  page under this CSP, so a violation fails the gate.
+  WebAssembly compile and allows neither `eval()` nor inline script); `style-src 'self'` plus
+  the SHA-256 hash of each island's Declarative Shadow DOM `<style>`, **no `'unsafe-inline'`**
+  (Gyral 0.3, 2026-10-06); no third-party origins at all. The policy is built by
+  `src/render/csp.ts` with `@gyral/ssr`'s `contentSecurityPolicy()` and added to the `/*` rule
+  of `dist/_headers` by `scripts/build.ts`, so the hashes always match the build; `public/_headers`
+  must not set one. Pages carry no `style` attributes: Shiki's colours are classes
+  (`src/styles/code.css`, `pnpm sync:code-css`) and the brand swatches are SVG fills.
+  `pnpm smoke` runs every page under this CSP, so a violation fails the gate.
 - HSTS (two years, subdomains), `nosniff`, strict referrer policy, a restrictive
   Permissions-Policy, COOP same-origin.
 - `/assets/*` is content-hashed: cached for a year, immutable.

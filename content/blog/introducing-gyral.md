@@ -78,6 +78,13 @@ features such as the Navigation API, View Transitions and invoker commands are u
 browser has them, with a fallback where it doesn't. Styling is plain CSS: custom properties,
 cascade layers and `:state()` driven by the model.
 
+> **Update, 2026-10-06:** Gyral 0.3 replaces Lit with a view layer of its own, written for Gyral
+> alone. Views are still `html` tagged templates, now imported from `@gyral/core` and checked at
+> build time by a template compiler and an ESLint plugin. Server rendering and hydration are
+> built into core, a strict Content Security Policy needs no `'unsafe-inline'`, and the smallest
+> app's first load went from 12.2 KiB to 8.9 KiB gzipped. See
+> [Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/).
+
 ## A real application
 
 To find out where a framework falls short, you have to build something real with it. Alongside
@@ -91,7 +98,8 @@ the shop needed them.
 
 Gyral is inspired by [Cycle.js](https://cycle.js.org). It keeps Cycle's central idea, an app as
 a pure function with effects at the edges, and rebuilds it on today's platform: plain messages
-instead of streams, Shadow DOM instead of `isolate()`, Lit templates instead of a virtual DOM.
+instead of streams, Shadow DOM instead of `isolate()`, templates that update in place instead of
+a virtual DOM.
 Its examples are ports of the Cycle.js examples. There's more on that in
 [Why I rebuilt Cycle.js on web components](/blog/why-i-rebuilt-cyclejs/).
 

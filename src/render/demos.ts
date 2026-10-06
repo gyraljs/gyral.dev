@@ -18,7 +18,7 @@ export const demosMeta: PageMeta = {
   path: DEMOS_PATH,
   title: 'What you can build',
   description:
-    'See what Gyral makes easy: undo and replay, type-ahead without stale results, pages that work before JavaScript, live themes and animated transitions. Short recordings, with source.',
+    'See what Gyral makes easy: undo and replay, type-ahead without stale results, and pages that work before JavaScript. Short recordings, with source.',
   searchable: true,
   markdown: true,
   demoVideos: true,

@@ -41,7 +41,7 @@ export const Counter = define<{ readonly count: number }, Msg>('my-counter', {
 ```ts
 // server/create-app.ts
 import { Hono } from 'hono';
-import { html } from 'lit';
+import { html } from '@gyral/core';
 import { renderPage } from '@gyral/ssr';
 import '../src/counter.js';
 
@@ -109,7 +109,7 @@ export default defineConfig({
 - **`clientEntryFromManifest(manifest, entry)`** returns the hashed URL of your client entry,
   for example `/assets/entry-client-Ab12.js`, from Vite's manifest.
 - The client entry is the one from [Server rendering](/docs/server-rendering/#hydration-and-the-client-entry):
-  `@gyral/ssr/hydrate` first, then your components.
+  it imports your components, and each one hydrates on its own.
 - `@gyral/ssr/static` reads and writes files, so it runs in Node at build time. Your pages
   don't need Node: the output is plain files.
 
@@ -127,6 +127,31 @@ That makes "should this page have JavaScript?" a per-page decision. On this webs
 pages have none, and the home page loads one small entry for its counter. To delay even that,
 see [lazy hydration](/docs/server-rendering/#lazy-hydration) and
 [Code-splitting](/docs/code-splitting/).
+
+## Headers and CSP
+
+A static host can't compute headers per request, but most read a headers file from the output:
+Cloudflare Pages and Netlify read `_headers`. Build the `Content-Security-Policy` with
+`contentSecurityPolicy()` from `@gyral/ssr` in the same build step and write it there. Its
+`style-src` lists the hash of each component's Declarative Shadow DOM `<style>`, so it needs no
+`'unsafe-inline'`:
+
+```ts
+// scripts/headers.ts
+import { writeFile } from 'node:fs/promises';
+import { contentSecurityPolicy } from '@gyral/ssr';
+import '../src/counter.js'; // registers the components whose styles get hashed
+
+const csp = await contentSecurityPolicy({
+  directives: { 'default-src': "'self'", 'script-src': "'self'", 'object-src': "'none'" },
+});
+await writeFile('dist/_headers', `/*\n  Content-Security-Policy: ${csp}\n`);
+```
+
+The hashes change when a component's CSS changes, so write the file in every build, never by
+hand. Inline `style="…"` attributes in your own templates aren't covered: give them a class
+instead. This site works this way; its code blocks are coloured by classes rather than the
+inline styles a highlighter writes by default.
 
 ## Mixing static and per-request pages
 

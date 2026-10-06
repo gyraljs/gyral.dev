@@ -1,6 +1,6 @@
 ---
 title: Why I rebuilt Cycle.js on web components
-description: What Cycle.js got right, what made it hard, and the decisions behind Gyral, its successor in spirit built on custom elements, Lit and plain messages.
+description: What Cycle.js got right, what made it hard, and the decisions behind Gyral, its successor in spirit built on custom elements and plain messages.
 date: 2026-10-05
 author: Mike Zupper
 ---
@@ -110,6 +110,10 @@ were clean. The cause was the order in which a bundler evaluated modules, which 
 hydration support unpatched. The fix made Gyral hydrate its own components without depending on
 that order, and a new test now builds the examples for production and checks every page hydrates
 in place. Without a real application, that bug would have shipped.
+
+> **Update, 2026-10-06:** Bugs like that one led to Gyral 0.3, which replaces Lit with a view
+> layer of its own. Hydration is now part of each component, so module order can't break it at
+> all. The test that caught the bug still runs.
 
 ## Thanks
 

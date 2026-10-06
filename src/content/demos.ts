@@ -84,32 +84,6 @@ export const DEMOS: readonly Demo[] = [
       },
     ],
   },
-  {
-    slug: 'themes',
-    title: 'One app, four looks',
-    docs: ['Styling and themes', '/docs/styling/#a-whole-site-as-a-theme'],
-    crop: { x: 296, y: 26, width: 688, height: 694 },
-    scenes: [
-      {
-        id: 'main',
-        description:
-          'A task list switches live between four themes, Calm, Midnight, Paper and Brutalist, with completely different colours, type and shapes. Tasks ticked off along the way stay ticked through every switch.',
-      },
-    ],
-  },
-  {
-    slug: 'view-transitions',
-    title: 'Animated transitions between states',
-    docs: ['Model and update', '/docs/update/#state-in-css-and-in-transitions'],
-    crop: { x: 180, y: 32, width: 920, height: 688 },
-    scenes: [
-      {
-        id: 'main',
-        description:
-          'A grid of colour cards is sorted by hue, by lightness, reversed and sorted by name, and each time the cards glide to their new places. Opening a card grows its swatch into a detail view, and going back shrinks it into the grid again.',
-      },
-    ],
-  },
 ];
 
 /** demo.mjs says "Usually undo is…"; after the "The usual way:" label that reads "Undo is…". */

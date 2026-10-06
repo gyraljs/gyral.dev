@@ -104,7 +104,7 @@ describe('what you can build', () => {
     expect(status).toBe(200);
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
     const videos = html.match(/<video[^>]*>/g) ?? [];
-    expect(videos).toHaveLength(6); // five demos, one of them with two scenes
+    expect(videos).toHaveLength(4); // three demos, one of them with two scenes
     for (const v of videos) {
       expect(v).toMatch(/poster="\/demos\/[\w-]+\.[0-9a-f]{8}\.webp"/);
       expect(v).toContain('preload="none"');
@@ -114,9 +114,7 @@ describe('what you can build', () => {
       const described = /aria-describedby="([^"]+)"/.exec(v)?.[1];
       expect(html).toContain(`id="${described ?? 'missing'}"`);
     }
-    expect(html.match(/<source src="\/demos\/[^"]+\.(?:webm|mp4)" type="video\//g)).toHaveLength(
-      12,
-    );
+    expect(html.match(/<source src="\/demos\/[^"]+\.(?:webm|mp4)" type="video\//g)).toHaveLength(8);
     expect(html).toContain('The usual way:');
     expect(html).toContain('https://github.com/gyraljs/gyral/tree/main/examples/typeahead-race');
     expect(html).toContain('<script type="module" src="/assets/demo-videos.js">');

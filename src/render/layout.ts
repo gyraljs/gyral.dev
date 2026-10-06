@@ -1,6 +1,6 @@
 // The document shell every page shares: head (SEO, icons, styles), header, footer.
-// Server-only: written with core's html and rendered by @gyral/ssr, never hydrated. Interactive parts are
-// islands (src/islands) placed inside a page body as plain custom elements.
+// Server-only: written with core's html and rendered by @gyral/ssr, never hydrated. Interactive
+// parts are islands (src/islands) placed inside a page body as plain custom elements.
 import { html, nothing, type ChildValue } from '@gyral/core';
 import { page } from '@gyral/ssr';
 import { jsonLdScript, type JsonLd } from './json-ld.js';
@@ -159,8 +159,8 @@ const siteFooter = () => html`
       </section>
     </nav>
     <p class="credit">
-      Inspired by <a href=${LINKS.cyclejs} rel="external">Cycle.js</a>. Rendered with
-      <a href=${LINKS.lit} rel="external">Lit</a>. This site is built with Gyral.
+      Inspired by <a href=${LINKS.cyclejs} rel="external">Cycle.js</a>. This site is built with
+      Gyral.
     </p>
     <p class="legal">
       <small>

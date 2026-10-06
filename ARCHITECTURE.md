@@ -21,11 +21,12 @@ public/ ────────────────────────
 | `src/site.ts` | server and browser   | nothing                                                            |
 | `src/content` | build (Node)         | `marked`, `shiki`, `typescript`, Node built-ins                    |
 | `src/render`  | build (Node)         | `src/content`, `src/islands` (to server-render them), `@gyral/ssr` |
-| `src/islands` | browser (and server) | `@gyral/core`, `src/site.ts` only                                  |
+| `src/islands` | browser (and server) | `@gyral/core` (never `/server`), `src/site.ts` only                |
 | `scripts/`    | Node                 | anything                                                           |
 
 `src/render` is server-only: the shell, header, footer and docs pages are written with
-`serverHtml` and never hydrated, so docs pages ship **no JavaScript**. Interactive parts are
+`@gyral/core`'s `html`, rendered by `@gyral/ssr` and never hydrated, so docs pages ship **no
+JavaScript**. Interactive parts are
 islands: Gyral components rendered with Declarative Shadow DOM inside a page and hydrated by
 `src/entry-client.ts`. A page that contains islands sets `islands: true` in its `PageMeta`,
 which adds the client entry script. The islands are the home page's `<gd-loop-counter>` and the
@@ -41,5 +42,6 @@ to `dist/pagefind/` (pages opt in with `PageMeta.searchable`).
 
 `dist/` is a static site: `index.html` per path (`/docs/getting-started/` →
 `docs/getting-started/index.html`), `404.html`, `sitemap.xml`, hashed `assets/`, and `public/`
-copied verbatim (including `_headers`, which Cloudflare Pages applies). See
+copied verbatim (including `_headers`, which Cloudflare Pages applies; the build adds the
+Content-Security-Policy from `src/render/csp.ts`, with the islands' style hashes). See
 [0003-hosting.md](docs/design-docs/0003-hosting.md).

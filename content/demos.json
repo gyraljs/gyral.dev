@@ -64,41 +64,5 @@
         }
       }
     }
-  },
-  "themes": {
-    "pitch": "One app, four completely different looks, switched live without losing state: components read design tokens, and a theme is nothing but tokens.",
-    "usual": "Usually a redesign means touching every component: hard-coded colours, per-theme class names, or a second component library.",
-    "scenes": {
-      "main": {
-        "width": 688,
-        "height": 694,
-        "webm": "/demos/themes.457b8968.webm",
-        "mp4": "/demos/themes.457b8968.mp4",
-        "poster": "/demos/themes.457b8968.webp",
-        "bytes": {
-          "webm": 415079,
-          "mp4": 402888,
-          "poster": 29654
-        }
-      }
-    }
-  },
-  "view-transitions": {
-    "pitch": "Cards that glide to their new places when sorted and grow into a detail view: the component asks for View Transitions with one option, and the browser animates.",
-    "usual": "Usually this is FLIP code or an animation library: measure every element before and after, then tween positions by hand.",
-    "scenes": {
-      "main": {
-        "width": 920,
-        "height": 688,
-        "webm": "/demos/view-transitions.263bbe57.webm",
-        "mp4": "/demos/view-transitions.263bbe57.mp4",
-        "poster": "/demos/view-transitions.263bbe57.webp",
-        "bytes": {
-          "webm": 336354,
-          "mp4": 397080,
-          "poster": 15996
-        }
-      }
-    }
   }
 }

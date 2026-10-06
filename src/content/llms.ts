@@ -141,7 +141,7 @@ async function examplesTwin(root: URL): Promise<Twin> {
 async function demosTwin(): Promise<Twin> {
   const page = '/what-you-can-build/';
   const description =
-    'What Gyral makes easy, shown as short recordings of examples: undo and replay, type-ahead without stale results, pages that work before JavaScript, live themes and animated transitions.';
+    'What Gyral makes easy, shown as short recordings of examples: undo and replay, type-ahead without stale results, and pages that work before JavaScript.';
   const intro =
     'Gyral treats every interaction as data. That makes these easy. Each demo is a recording of an example in the Gyral repository; the text below describes what each recording shows.';
   const parts = [`${intro}\n`];
@@ -179,7 +179,7 @@ export function llmsTxt(
 ): string {
   return `# Gyral
 
-> ${DESCRIPTION} Components are standard custom elements rendered by Lit: messages come in from DOM events (intent), a pure \`update\` makes the next state and describes side effects as data (commands run by drivers), and a pure \`view\` renders it. Pages render on the server or prerender to static HTML and hydrate in place. The public API is plain TypeScript. Current version: ${version}.
+> ${DESCRIPTION} Components are standard custom elements rendered by Gyral's own view layer: messages come in from DOM events (intent), a pure \`update\` makes the next state and describes side effects as data (commands run by drivers), and a pure \`view\` renders it. Pages render on the server or prerender to static HTML and hydrate in place. The public API is plain TypeScript. Current version: ${version}.
 
 Start a project with \`npm create gyral@latest my-app -- --template ssr\` (or \`--template basic\`). In Claude Code, install the Gyral skill with \`/plugin marketplace add gyraljs/gyral\`, then \`/plugin install gyral@gyral\`. Every link below is a Markdown page; ${absolute('/llms-full.txt')} has the docs, API reference and examples in one file.
 

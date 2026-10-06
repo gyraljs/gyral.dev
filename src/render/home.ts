@@ -46,7 +46,7 @@ step(Counter.spec, { count: 1 }, inc).state;
 run(Counter.spec, [inc, inc, inc]).state;
 // → { count: 3 }`;
 
-const INSTALL = 'pnpm add @gyral/core lit';
+const INSTALL = 'pnpm add @gyral/core';
 
 interface Feature {
   readonly title: string;
@@ -56,7 +56,7 @@ interface Feature {
 const FEATURES: readonly Feature[] = [
   {
     title: 'Standard web components',
-    body: 'Every Gyral component is a custom element. Use it in any page, any framework, or none. Raw Lit elements live alongside.',
+    body: 'Every Gyral component is a custom element. Use it in any page, any framework, or none, next to any other custom element.',
   },
   {
     title: 'Typed, exhaustive updates',
@@ -64,7 +64,7 @@ const FEATURES: readonly Feature[] = [
   },
   {
     title: 'Server rendering that hydrates in place',
-    body: 'Pages render on the server with Declarative Shadow DOM and wake up in the browser without re-rendering.',
+    body: 'Pages render on the server with Declarative Shadow DOM and wake up in the browser without re-rendering, under a strict Content Security Policy.',
   },
   {
     title: 'Forms on the platform',
@@ -75,8 +75,8 @@ const FEATURES: readonly Feature[] = [
     body: 'Update returns commands; drivers run them. HTTP, routing, time and storage stay at the edges, and tests need no mocks.',
   },
   {
-    title: 'No streams to learn',
-    body: 'The Cycle.js loop, without the stream library. Plain functions, plain TypeScript, Promises where you need async.',
+    title: 'Templates checked before they run',
+    body: 'A template compiler and an ESLint plugin catch event bindings, broken markup and stale list rows at build time and in your editor, with the fix in the message.',
   },
 ];
 
@@ -123,12 +123,12 @@ export async function homeBody(): Promise<ChildValue> {
 
   return html`
     <section class="hero" aria-labelledby="hero-title">
-      <p class="eyebrow">Version 0.2 is on npm</p>
+      <p class="eyebrow">New in 0.3: Gyral's own view layer</p>
       <h1 id="hero-title">Model-View-Intent web components on the modern web platform.</h1>
       <p class="lead">
         Gyral keeps the best idea of Cycle.js: your app is a pure function, and side effects happen
-        at the edges, as data. It rebuilds that loop on custom elements, Lit templates, semantic
-        HTML and modern CSS.
+        at the edges, as data. It rebuilds that loop on custom elements, semantic HTML, modern CSS
+        and a small view layer of its own, with no runtime dependencies.
       </p>
       <div class="actions">
         <a class="button primary" href="/docs/getting-started/">Get started</a>
@@ -164,8 +164,8 @@ export async function homeBody(): Promise<ChildValue> {
       <hgroup>
         <h2 id="demo-teaser-title">See what it makes easy</h2>
         <p>
-          Every interaction is data, so undo, race-free search, pages that work before JavaScript,
-          live themes and animated transitions take a few lines.
+          Every interaction is data, so undo, race-free search and pages that work before JavaScript
+          take a few lines.
           <a href=${DEMOS_PATH}>Watch the demos</a>.
         </p>
       </hgroup>
@@ -257,7 +257,7 @@ export async function homeBody(): Promise<ChildValue> {
 
     <section class="cta" aria-labelledby="cta-title">
       <h2 id="cta-title">Build your first component</h2>
-      <p>Install two packages and write one function. The guide takes about ten minutes.</p>
+      <p>Install one package and write one function. The guide takes about ten minutes.</p>
       <a class="button primary" href="/docs/getting-started/">Read the guide</a>
     </section>
   `;

@@ -28,7 +28,12 @@ import { pathToFileURL } from 'node:url';
 import { tsImport } from 'tsx/esm/api';
 
 const { DEMOS } = await tsImport('../src/content/demos.ts', import.meta.url);
-const gyral = resolve(process.env.GYRAL_DIR ?? '../cyclejs-web-framework');
+// Gyral 0.3 lives on the gyral repository's `next` branch until it is released; this machine
+// keeps that branch checked out at ../gyral-next. Drop that default once 0.3 is on main.
+const gyral = resolve(
+  process.env.GYRAL_DIR ??
+    (existsSync('../gyral-next/examples') ? '../gyral-next' : '../cyclejs-web-framework'),
+);
 const check = process.argv.includes('--check');
 const record = process.argv.includes('--record');
 const JSON_PATH = 'content/demos.json';

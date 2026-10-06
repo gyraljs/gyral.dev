@@ -16,8 +16,10 @@ pnpm dev      # http://localhost:5400
 pnpm check    # the full gate, including a production build and a browser smoke test
 ```
 
-`@gyral/*` comes from npm. A checkout of `gyraljs/gyral` at `../cyclejs-web-framework` is
-only needed for `pnpm sync:examples` (the examples gallery excerpts).
+`@gyral/*` 0.3 comes from packed tarballs in `../gyral-tarballs` (`file:` dependencies and pnpm
+overrides) until 0.3.0 is on npm. A checkout of `gyraljs/gyral` is only needed for
+`pnpm sync:examples` (the examples gallery excerpts): `../gyral-next` (its `next` branch) if
+present, else `../cyclejs-web-framework`, or `GYRAL_DIR`.
 
 ## Contributing to the docs
 

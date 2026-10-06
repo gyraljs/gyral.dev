@@ -15,7 +15,8 @@ Build the site with Gyral and its own SSR package, with no site framework:
 - One renderer (`src/render/site.ts`) turns a path into a `Response`. The dev server calls it
   per request; the build calls `prerender()` from `@gyral/ssr/static` for every path and
   writes static HTML. Nothing runs on a server in production.
-- The page shell, header, footer and docs are server-only `serverHtml` templates. **Docs pages
+- The page shell, header, footer and docs are server-only `html` templates (from `@gyral/core`,
+  rendered by `@gyral/ssr`). **Docs pages
   ship no JavaScript.**
 - Interactive parts are **islands**: `define()` components server-rendered with Declarative
   Shadow DOM and hydrated by `src/entry-client.ts`. Pages opt in with `islands: true`.
@@ -31,3 +32,12 @@ Build the site with Gyral and its own SSR package, with no site framework:
   docs, an API reference. Each gets a bead when it's wanted.
 - `@gyral/*` comes from npm (`^0.1.0`, switched 2026-10-05; until then it was linked from
   `../cyclejs-web-framework`). The API reference is generated from the published `.d.ts`.
+
+## Addendum: Gyral 0.3 (2026-10-06, gyral-g1r.13)
+
+Gyral 0.3 replaces Lit with its own view layer (Gyral ADR 0018). The site moved on branch
+`gyral-0.3`, before 0.3.0 is published: `@gyral/*` come from tarballs packed from Gyral's `next`
+branch into `../gyral-tarballs` (`file:` dependencies plus pnpm `overrides`, because the
+tarballs depend on each other at the prerelease version). Switch back to npm ranges when 0.3.0
+is published. `lit`, `@lit-labs/ssr`, `@lit-labs/ssr-client` and the `lit-html` pin are gone;
+templates are compiled by the Vite preset and linted with `@gyral/core/eslint`.

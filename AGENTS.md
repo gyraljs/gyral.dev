@@ -13,22 +13,23 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 ## Commands
 
-| Command              | What it does                                                                                        |
-| -------------------- | --------------------------------------------------------------------------------------------------- |
-| `pnpm install`       | Install. `@gyral/*` comes from npm                                                                  |
-| `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual |
-| `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                          |
-| `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                   |
-| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                      |
-| `pnpm interop`       | Docs interop claims in Chromium: props, `gyral-output`, third-party events (test/interop/)          |
-| `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search       |
-| `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally) |
-| `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                                  |
-| `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                                 |
-| `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                       |
-| `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                                |
-| `pnpm sync:examples` | Copy example excerpts from a `../cyclejs-web-framework` checkout into `content/examples/`           |
-| `pnpm sync:demos`    | Encode demo recordings from the Gyral checkout into `public/demos/` (`--record` re-records first)   |
+| Command              | What it does                                                                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| `pnpm install`       | Install. `@gyral/*` 0.3 comes from the tarballs in `../gyral-tarballs` until it is on npm             |
+| `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual   |
+| `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                            |
+| `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                     |
+| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                        |
+| `pnpm interop`       | Docs interop claims in Chromium: props, `gyral-output`, third-party events (test/interop/)            |
+| `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search         |
+| `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally)   |
+| `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                                    |
+| `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                                   |
+| `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                         |
+| `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                                  |
+| `pnpm sync:examples` | Copy example excerpts from `../gyral-next` (else `../cyclejs-web-framework`) into `content/examples/` |
+| `pnpm sync:demos`    | Encode demo recordings from the Gyral checkout into `public/demos/` (`--record` re-records first)     |
+| `pnpm sync:code-css` | Regenerate `src/styles/code.css` (code-block colour classes) after a Shiki or theme change            |
 
 First run needs `pnpm exec playwright install chromium`.
 
@@ -50,6 +51,7 @@ First run needs `pnpm exec playwright install chromium`.
 | `src/demo-videos.ts`                           | Plays demo videos on screen; nothing under reduced motion             |
 | `src/styles/site.css`                          | The one site stylesheet (layers, brand tokens, light/dark)            |
 | `public/`                                      | Copied as-is: icons, logos, showcase images, `_headers`, robots       |
+| `src/render/csp.ts`                            | The CSP; the build adds it, with style hashes, to `dist/_headers`     |
 | `scripts/`                                     | Dev, build, preview, smoke, invariants                                |
 | [docs/design-docs/](docs/design-docs/index.md) | Decisions (ADRs)                                                      |
 
@@ -65,12 +67,15 @@ First run needs `pnpm exec playwright install chromium`.
 ## Skills to load
 
 - `modern-css` for `src/styles` and island styles; `semantic-html` for every template;
-  `lit-web-apps` for islands and rendering; `beads` for work tracking.
+  `gyral` (the gyral repo's `skills/gyral`) for islands and rendering; `beads` for work tracking.
 
 ## Hard rules (enforced by `pnpm check`)
 
-- Islands (`src/islands`) never import `src/render`, `src/content`, Node built-ins, Markdown
-  or Shiki; they use `define()` from `@gyral/core`, never raw Lit (eslint).
+- Islands (`src/islands`) never import `src/render`, `src/content`, Node built-ins, Markdown,
+  Shiki, `@gyral/ssr` or `@gyral/core/server` (eslint).
+- Templates follow Gyral's template rules and `each` rows are pure (`@gyral/core/eslint`;
+  `vite build` compiles them). Pages have no inline `style` attributes: the CSP has no
+  `'unsafe-inline'` (test/site.test.ts).
 - Docs code blocks that start with a file comment (`// src/x.ts`) must typecheck against the
   real Gyral packages (`scripts/check-snippets.mjs`).
 - Pages pass axe in light and dark, have no console errors under the production CSP, and don't

@@ -1,6 +1,6 @@
 ---
 title: Code-splitting and lazy loading
-description: Load each component's code only on the pages that use it, delay hydration until it's needed, and keep the client entry's import order safe.
+description: Load each component's code only on the pages that use it, delay hydration until it's needed, and see what each page downloads.
 section: Guides
 order: 13
 ---
@@ -70,8 +70,6 @@ export async function loadComponentsIn(root: ParentNode): Promise<void> {
 
 ```ts
 // src/entry-client.ts
-// ORDER MATTERS: hydrate support first, before anything that imports Lit.
-import '@gyral/ssr/hydrate';
 import { loadComponentsIn } from './lazy.js';
 
 await loadComponentsIn(document);
@@ -98,26 +96,22 @@ When a component's code is on the page but it isn't needed yet, set `hydrate` in
 
 A delayed component is plain server HTML until then: its links and forms still work.
 `interaction` hydrates on `pointerover`, `pointerdown`, `focusin` or `touchstart`, which arrive
-before the click, so the first click still lands. Set it on page-level components; a component
-nested inside another hydrates with its parent. More in
+before the click, so the first click still lands. An island may sit anywhere, also inside
+another component; components inside a waiting island still hydrate at load, so make them
+islands too if they should wait. More in
 [Server rendering](/docs/server-rendering/#lazy-hydration).
 
-## Keep the hydrate import first
+## Module order doesn't matter
 
-The client entry must import `@gyral/ssr/hydrate` before anything that imports Lit. With
-code-splitting there's one more thing to know: when an entry awaits a lazy import (as above),
-the bundler moves the modules both chunks share, such as Lit and `@gyral/core`, into a separate
-chunk and **evaluates it before the entry's own code**. Your first import is then no longer the
-first module to run.
+Hydration is built into every component, so no import has to run first. When an entry awaits a
+lazy import (as above), the bundler may move the modules both chunks share, such as
+`@gyral/core`, into a separate chunk that runs before the entry's own code. That's fine: each
+component hydrates from its own seed and its own template whenever its element is defined.
 
-Components made with `define()` handle this themselves: they hydrate their server-rendered DOM
-whether or not Lit's hydrate support was installed first. Gyral's
-[isomorphic example](https://github.com/gyraljs/gyral/tree/main/examples/isomorphic) is built
-this way on purpose, and its production smoke test fails if the order ever breaks hydration.
-
-Plain `LitElement` classes in the same app don't get that protection. If you have any, either
-load `@gyral/ssr/hydrate` from its own `<script type="module">` before the app entry, or set
-Rolldown's `output.strictExecutionOrder` in your Vite build.
+Gyral splits itself the same way. Features load with the API that uses them, so an app that
+never calls `each`, `raw`, `defineHook`, `command()` or `defineStore()` doesn't bundle their
+code, and the hydration code is a chunk of its own (about 2.8 KiB gzip) that only pages with
+server-rendered components fetch, one round trip after the entry.
 
 ## Measure
 
