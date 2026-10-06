@@ -51,8 +51,8 @@ Everything a view needs comes from `@gyral/core`:
 New in `@gyral/core`: `each`, `raw`, `defineHook`, `prop`, `intents`, `settled`,
 `HydrationMismatch`, the `renderOnFrame` spec field (messages from bursty sources render once
 per animation frame), and the entry points `@gyral/core/server` and `@gyral/core/eslint`. New in
-`@gyral/ssr`: `contentSecurityPolicy` and `page({ modulepreload })`; in `@gyral/ssr/static`:
-`clientAssets` and `clientAssetsFromManifest`.
+`@gyral/ssr`: `contentSecurityPolicy`, `renderPage({ csp })` and `page({ modulepreload })`; in
+`@gyral/ssr/static`: `clientAssets` and `clientAssetsFromManifest`.
 
 ## Build: the Vite preset compiles templates
 
@@ -107,6 +107,10 @@ Attributes: `null` and `undefined` remove an attribute, so `href=${s.url ?? noth
 
 One spelling per piece of state, the same on the server and in the browser. The model wins
 whenever it changes, and hydration never overwrites what the user typed before scripts ran.
+Unlike 0.2's `live()`, a control is written only when the model's value for it changes: a
+re-render for any other reason (another field's message, a refused edit) leaves what the user
+typed alone. To put a control back, change the model or re-create the form with a key (see
+[Views](/docs/views/#form-state)).
 
 ```text
 // 0.2
@@ -309,41 +313,45 @@ development console banner.
 
 ## Server rendering
 
-Rendering is Gyral's own (`@gyral/core/server`): synchronous, no DOM shim, any runtime with
-WebCrypto. `@gyral/ssr` keeps `renderPage`, `renderToString`, `renderToStream`, `page`,
+Rendering is Gyral's own (`@gyral/core/server`): synchronous, no DOM shim, any runtime.
+`@gyral/ssr` keeps `renderPage`, `renderToString`, `renderToStream`, `page`,
 `formAction` and `@gyral/ssr/static`, and every template is written with core's `html`:
 
 ```ts
 // server/home.ts
 import { html } from '@gyral/core';
-import { contentSecurityPolicy, renderPage } from '@gyral/ssr';
+import { renderPage } from '@gyral/ssr';
 
 const styles = ':root { color-scheme: light dark; }';
 
-export async function home(): Promise<Response> {
+export function home(): Response {
   return renderPage({
     title: 'Home',
     styles,
     head: html`<link rel="icon" href="/favicon.svg" />`, // was serverHtml`…`
     body: html`<my-home></my-home>`,
     scripts: ['/src/entry-client.ts'],
-    csp: await contentSecurityPolicy({ styles, directives: { 'default-src': "'self'" } }),
+    csp: { directives: { 'default-src': "'self'" } }, // built when the page renders
   });
 }
 ```
 
-- **The CSP helper** allows shadow components' `<style>` elements by hash, so `style-src`
-  needs no `'unsafe-inline'` any more. See
+- **The CSP** allows shadow components' `<style>` elements by hash, so `style-src` needs no
+  `'unsafe-inline'` any more. `renderPage({ csp: { directives } })` builds the header when the
+  page renders, with every component registered by then; `contentSecurityPolicy()` builds it
+  ahead of time (a static `_headers` file), for the components imported before the call. See
   [Server rendering](/docs/server-rendering/#content-security-policy).
 - **Preloading:** in production, read the entry and its preloads from the Vite manifest with
   `clientAssetsFromManifest()` and pass `modulepreload` to `renderPage`; `productionServer` now
-  hands `{ clientEntry, modulepreload }` to `createApp`. See
+  hands `{ clientEntry, modulepreload }` to `createApp`, and a `preload(modules)` for pages
+  whose route module is imported lazily. See
   [Static sites](/docs/static-sites/#a-static-build).
 - A `Promise` anywhere in a view is an error: load data in the handler first, as before.
 - Development output (Vite's dev server, Vitest) carries `<!--gyral:ID-->` markers; production
-  output is the template HTML plus values. Regenerate golden SSR fixtures. A server that imports
-  `@gyral/core` through Node without the `development` condition gets production output; pass
-  `{ dev: true }` to `renderPage` or `renderToStream` in development to get the markers.
+  output is the template HTML plus values. Regenerate golden SSR fixtures. The Vite preset keeps
+  `@gyral/*` out of SSR externalization in the dev server, so server code loaded with
+  `ssrLoadModule` gets development output without options. A server run by plain Node gets
+  production output; `{ dev: true }` on `renderPage` or `renderToStream` turns the markers on.
 
 ## Hydration
 
@@ -376,7 +384,7 @@ builders), so small apps shed the most. If you keep a size budget, budget the fi
 lazy hydration chunk (about 2.8 KiB) only loads on server-rendered pages.
 
 This site moved too. Its two islands, the home page counter and the search box, shipped as one
-17.2 KiB chunk on 0.2.0 (gzip at level 9). On 0.3 the entry is 13.9 KiB, and the hydration
+17.2 KiB chunk on 0.2.0 (gzip at level 9). On 0.3 the entry is 13.7 KiB, and the hydration
 chunk, 2.8 KiB, is preloaded alongside it on the two pages that have islands. Docs pages still
 ship no framework JavaScript at all.
 

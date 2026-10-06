@@ -138,7 +138,8 @@ switch to the enhanced one.
 The seed carries state as JSON, so keep state and props JSON-serializable. The server warns,
 with the exact path, when a value won't survive the trip (a `Date`, a `Map`, `NaN`). State that
 equals `init(props)` isn't written twice. Form controls keep what the user typed before scripts
-ran: hydration never overwrites it.
+ran: hydration never overwrites it, and a control is written again only when the model's value
+for it changes.
 
 ## Mismatches
 
@@ -179,38 +180,42 @@ CSS styles it. See [Styling](/docs/styling/#light-dom-components).
 ## Content-Security-Policy
 
 Seeds are attributes, not scripts, so `script-src 'self'` is enough. A shadow component's styles
-arrive as an inline `<style>` in its Declarative Shadow DOM, and `contentSecurityPolicy()` allows
-each of them by its SHA-256 hash, so `style-src` needs no `'unsafe-inline'`:
+arrive as an inline `<style>` in its Declarative Shadow DOM. Pass `csp: { directives }` to
+`renderPage` and it sends a `Content-Security-Policy` header that allows each of them by its
+SHA-256 hash, so `style-src` needs no `'unsafe-inline'`:
 
 ```ts
 // server/home.ts
 import { html } from '@gyral/core';
-import { contentSecurityPolicy, renderPage } from '@gyral/ssr';
+import { renderPage } from '@gyral/ssr';
 import '../src/counter.js';
 
 const styles = ':root { color-scheme: light dark; }';
 
-export async function home(): Promise<Response> {
-  // Hashes are cached, so computing the policy per request is cheap.
-  const csp = await contentSecurityPolicy({
-    styles,
-    directives: { 'default-src': "'self'", 'script-src': "'self'", 'object-src': "'none'" },
-  });
+export function home(): Response {
   return renderPage({
     title: 'Home',
     styles,
     body: html`<my-counter></my-counter>`,
     scripts: ['/src/entry-client.ts'],
-    csp,
+    // Built when the page renders; cached until another component registers.
+    csp: {
+      directives: { 'default-src': "'self'", 'script-src': "'self'", 'object-src': "'none'" },
+    },
   });
 }
 ```
 
-The policy lists every registered shadow component and each entry of `styles`. Inline `style="…"`
-attributes and `<style>` elements you write in `head` aren't covered: move that CSS into
-`styles` or a stylesheet. For a static site, write the same value into your host's headers file
-at build time (see [Static sites](/docs/static-sites/#headers-and-csp)). This site does exactly
-that.
+The header is built when the page renders, so it lists every shadow component registered by
+then, also those whose modules were imported lazily after startup, plus each entry of the
+page's `styles`. Inline `style="…"` attributes and `<style>` elements you write in `head` aren't
+covered: move that CSS into `styles` or a stylesheet.
+
+`contentSecurityPolicy({ directives, styles? })` builds the same value ahead of time, for the
+components imported before the call. Use it where no page renders per request: a static site
+writes it into the host's headers file at build time (see
+[Static sites](/docs/static-sites/#headers-and-csp)), as this site does. In development,
+`renderPage` warns when a header string it is given lacks a registered component's hash.
 
 ## Static generation
 
@@ -222,8 +227,10 @@ to ship either, see [Deploying](/docs/deploying/).
 ## Lower level: @gyral/core/server
 
 `@gyral/ssr` covers most apps. Underneath, `@gyral/core/server` exports `render(value)`, which
-yields the HTML in chunks synchronously, `renderToString(value)` and `styleHashes()`. Import it
-only from server code, never from a client entry, so client bundles carry no server renderer.
+yields the HTML in chunks synchronously, `renderToString(value)`, `styleHashes()` and
+`styleHashSync(css)` for a CSP, `componentStyles()` (each shadow component's `<style>` text) and
+`development` (whether it resolved with the `development` condition). Import it only from
+server code, never from a client entry, so client bundles carry no server renderer.
 
 ## Production checklist
 
@@ -232,7 +239,7 @@ only from server code, never from a client entry, so client bundles carry no ser
 - Bind form state with `value=${…}`, `?checked=${…}` and `<textarea>${…}</textarea>`, never
   `.value=` or `.checked=`, which the server can't write.
 - Load data before rendering; never put a `Promise` in a view.
-- Send a CSP from `contentSecurityPolicy()`; you don't need `'unsafe-inline'`.
+- Send a CSP with `renderPage({ csp: { directives } })`; you don't need `'unsafe-inline'`.
 - Preload the entry's chunks and the hydration chunk with `modulepreload`.
 - Test hydration against a production build, not only the dev server. `@gyral/testing`'s
   `mountSsr` and `hydrated` make that a unit test (see [Testing](/docs/testing/#ssr-and-hydration-tests)).

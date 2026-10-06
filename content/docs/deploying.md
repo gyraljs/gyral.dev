@@ -114,7 +114,9 @@ serve({ fetch: app.fetch, port: Number(process.env['PORT'] ?? 3000) });
 `productionServer({ distDir, createApp })` expects Vite's output in `dist/client/` (with
 `build.manifest: true`) and prerendered pages in `dist/static/`. It reads the manifest once and
 hands `createApp` the client entry and the chunks to preload with it, Gyral's hydration chunk
-included. It answers:
+included. A page whose route module is imported lazily passes
+`preload(['src/routes/product.ts'])` (also given to `createApp`) as `modulepreload` instead:
+the same list plus that module and its imports. It answers:
 
 | Request                        | Served from                | `cache-control`                       |
 | ------------------------------ | -------------------------- | ------------------------------------- |
@@ -147,7 +149,7 @@ How far each one is tested today:
 - **Bun**: `renderPage` with Declarative Shadow DOM output and `contentSecurityPolicy()` were
   checked by hand on Bun 1.3.14 with Gyral 0.3. It isn't part of Gyral's CI.
 - **Deno and Cloudflare Workers**: not tested yet. The renderer uses no Node-only APIs (it
-  hashes with WebCrypto and has no DOM shim), but check it there before you rely on it.
+  hashes in plain JavaScript and has no DOM shim), but check it there before you rely on it.
 - **`@gyral/ssr/static`** (`prerender`, `productionServer`) reads and writes files with
   `node:fs`. Use it in Node at build time; on an edge runtime, serve the static files from the
   platform's asset hosting instead.
@@ -196,10 +198,11 @@ Gyral works under a strict policy:
   elements, and your client entry is a module file.
 - **No `'unsafe-inline'` for styles.** Declarative Shadow DOM writes each component's styles as
   a `<style>` element inside its `<template>`, and `renderPage`'s `styles` option writes
-  `<style>` in the head. `contentSecurityPolicy()` from `@gyral/ssr` lists all of them by hash
-  (see [Server rendering](/docs/server-rendering/#content-security-policy)).
+  `<style>` in the head. `renderPage({ csp: { directives } })` lists all of them by hash in the
+  header it sends, and `contentSecurityPolicy()` from `@gyral/ssr` builds the same value for a
+  static headers file (see [Server rendering](/docs/server-rendering/#content-security-policy)).
 
-A good starting point, with the hashes appended by `contentSecurityPolicy()`:
+A good starting point, with the hashes appended by Gyral:
 
 ```text
 Content-Security-Policy: default-src 'self'; script-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; style-src 'self' 'sha256-…'
@@ -217,5 +220,6 @@ put the policy in a `<meta http-equiv="Content-Security-Policy">` element throug
   bundled builds. `@gyral/testing`'s `mountSsr` and `hydrated` make that a
   [unit test](/docs/testing/#ssr-and-hydration-tests).
 - Cache hashed assets for a year and pages not at all (or with revalidation).
-- Serve a CSP header built with `contentSecurityPolicy()`. Gyral needs no `'unsafe-inline'` and
-  no `'unsafe-eval'`.
+- Serve a CSP header: `renderPage({ csp: { directives } })` per request, or
+  `contentSecurityPolicy()` written into a static host's headers file. Gyral needs no
+  `'unsafe-inline'` and no `'unsafe-eval'`.

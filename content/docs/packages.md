@@ -135,4 +135,5 @@ feature-detected and used as enhancements.
   [Deploying](/docs/deploying/#bun-deno-and-cloudflare-workers)).
 - **Without a preload hint, the hydration chunk loads one round trip after the entry** on
   server-rendered pages. Pass `clientAssetsFromManifest()`'s `modulepreload` to `renderPage` (see
-  [Static sites](/docs/static-sites/#a-static-build)); `productionServer` hands it to your app.
+  [Static sites](/docs/static-sites/#a-static-build)); `productionServer` hands it to your app,
+  with a `preload(modules)` that adds a page's lazily imported route chunks.

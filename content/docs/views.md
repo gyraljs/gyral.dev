@@ -233,10 +233,18 @@ browser:
 | `<details>`, `<dialog>` | `?open=${s.open}`                            |
 | `<textarea>`            | `<textarea name="note">${s.note}</textarea>` |
 
-These bindings are live: the model wins whenever its value changes, even after the user has
-edited the control, and the view compares with what the control shows now, not with what it
-rendered last. On the server they write the attribute, so the page is right before JavaScript
-loads, and hydration never overwrites what the user typed before scripts ran.
+A binding writes the control only when the model's value for it changes. Then the model wins,
+even after the user has edited the control (the view compares with what the control shows now
+and writes only if they differ). A render for any other reason, such as another field's
+message or a reducer that refused the edit, leaves what the user typed or toggled alone. On the
+server the bindings write the attribute, so the page is right before JavaScript loads, and
+hydration keeps what the user typed before scripts ran until the model's value changes.
+
+To put a control back after a refused edit, change the model: clamp or normalize to a value
+that differs from the one rendered last, or re-create the form with a key. Keep a counter in
+the state, bump it on reset, and render the fields as a one-item list,
+`each([s], (x) => x.formKey, (x) => fields(x))`: the new key brings fresh elements with the
+model's values. `form.reset()` is no substitute; it restores the first values, not the model's.
 
 Never bind form state as a property (`.value=`, `.checked=`): the server can't write a
 property, so the page would arrive empty. The compiler rejects it. A checkbox's `value` and a

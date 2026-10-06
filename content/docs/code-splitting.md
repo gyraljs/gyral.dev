@@ -79,6 +79,13 @@ Each `import()` becomes its own chunk, so a page without a gallery never downloa
 its module loads, a server-rendered `<my-gallery>` is the server's HTML, already showing its
 first state; when the module defines the element, it hydrates in place, with no flash.
 
+A page that you know needs a lazy chunk can preload it with the entry instead of finding it
+only after the entry has run. `clientAssetsFromManifest(manifest, entry, also)` from
+`@gyral/ssr/static` takes the source paths of those modules (`['src/widgets.ts']`) and adds
+them, with their static imports, to `modulepreload`; on a server, `productionServer` hands your
+app a `preload(modules)` that does the same per page (see
+[Deploying](/docs/deploying/#node)).
+
 [gyral-shop](https://github.com/gyraljs/gyral-shop/blob/main/src/client/lazy.ts) uses this
 pattern for every page-specific component (listing, product gallery, checkout, admin), and adds
 a `MutationObserver` for components inserted after load.

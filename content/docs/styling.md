@@ -77,8 +77,8 @@ Styles in a shadow root don't leak out, and page styles don't leak in. Rendered 
 they travel inside the component's Declarative Shadow DOM as one `<style>` element, so they
 apply before any JavaScript runs. When the component hydrates, Gyral swaps that element for the
 shared sheet in the same step, so nothing flashes. A strict Content Security Policy doesn't need
-`'unsafe-inline'` for them: `contentSecurityPolicy()` from `@gyral/ssr` lists each component's
-`<style>` by its hash (see [Server rendering](/docs/server-rendering/#content-security-policy)).
+`'unsafe-inline'` for them: `renderPage({ csp })` and `contentSecurityPolicy()` from `@gyral/ssr`
+list each component's `<style>` by its hash (see [Server rendering](/docs/server-rendering/#content-security-policy)).
 
 ## Theming with custom properties
 

@@ -113,7 +113,9 @@ export default defineConfig({
   URL of your client entry (`entry`, for example `/assets/entry-client-Ab12.js`) and the chunks
   it needs (`modulepreload`): its static imports and Gyral's hydration chunk.
   `renderPage({ modulepreload })` writes a `<link rel="modulepreload">` for each, so the browser
-  fetches them alongside the entry instead of a round trip later.
+  fetches them alongside the entry instead of a round trip later. A third argument lists
+  modules a page imports lazily, by source path (`['src/routes/product.ts']`); they are
+  preloaded too, each with its static imports.
 - The client entry is the one from [Server rendering](/docs/server-rendering/#hydration-and-the-client-entry):
   it imports your components, and each one hydrates on its own.
 - `@gyral/ssr/static` reads and writes files, so it runs in Node at build time. Your pages
@@ -137,7 +139,8 @@ see [lazy hydration](/docs/server-rendering/#lazy-hydration) and
 ## Headers and CSP
 
 A static host can't compute headers per request, but most read a headers file from the output:
-Cloudflare Pages and Netlify read `_headers`. Build the `Content-Security-Policy` with
+Cloudflare Pages and Netlify read `_headers`. Where a server renders per request,
+`renderPage({ csp })` builds the policy as the page renders; here, build it ahead of time with
 `contentSecurityPolicy()` from `@gyral/ssr` in the same build step and write it there. Its
 `style-src` lists the hash of each component's Declarative Shadow DOM `<style>`, so it needs no
 `'unsafe-inline'`:
