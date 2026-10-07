@@ -9,8 +9,8 @@ order: 7
 
 Reducers can't fetch, wait or write to storage, because they're pure. Instead they return
 **commands**: plain objects that describe a side effect and say which message the outcome
-becomes. A **driver** runs the command and answers with that message. This is the idea Gyral
-keeps from [Cycle.js](https://cycle.js.org): effects are data, and they happen at the edges.
+becomes. A **driver** runs the command and answers with that message. Effects are data, and
+they happen at the edges.
 
 ## Commands as data
 

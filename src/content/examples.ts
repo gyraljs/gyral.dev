@@ -1,13 +1,11 @@
-// The examples gallery: every example in the Gyral repository (most are ports of the Cycle.js
-// examples) plus gyral-shop. The code excerpts are copied from the real files by
-// `pnpm sync:examples` into content/examples/, and `pnpm invariants` fails when they drift.
+// The examples gallery: every example in the Gyral repository plus gyral-shop. The code
+// excerpts are copied from the real files by `pnpm sync:examples` into content/examples/, and
+// `pnpm invariants` fails when they drift.
 
 export interface Example {
   /** The directory under `examples/` in the Gyral repository; also the anchor on /examples/. */
   readonly slug: string;
   readonly title: string;
-  /** The Cycle.js example it ports, if any. */
-  readonly cycle?: string;
   readonly summary: string;
   /** Docs pages that explain what it shows: [label, path]. */
   readonly shows: readonly (readonly [string, string])[];
@@ -29,7 +27,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'hello-world',
         title: 'Hello world',
-        cycle: 'basic/hello-world',
         summary: 'Type a name and see a greeting: one input intent, one reducer, one view.',
         shows: [['Intent', '/docs/intent/']],
         file: 'src/hello.ts',
@@ -37,7 +34,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'counter',
         title: 'Counter',
-        cycle: 'basic/counter',
         summary: 'Two buttons and a number. The smallest complete Model-View-Intent loop.',
         shows: [['Getting started', '/docs/getting-started/']],
         file: 'src/counter.ts',
@@ -45,7 +41,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'checkbox',
         title: 'Checkbox',
-        cycle: 'basic/checkbox',
         summary:
           'A checkbox whose state the model owns, bound with ?checked so it is right on the server and in the browser.',
         shows: [['Views', '/docs/views/#form-state']],
@@ -54,16 +49,14 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'hello-lastname',
         title: 'Hello, last name',
-        cycle: 'intermediate/hello-lastname',
         summary:
-          'Two fields and a greeting derived from state, where Cycle.js needed three streams to express valid and invalid input.',
+          'Two fields and a greeting derived from state: valid and invalid input are plain values in the model.',
         shows: [['Model and update', '/docs/update/']],
         file: 'src/hello-lastname.ts',
       },
       {
         slug: 'bmi',
         title: 'BMI calculator',
-        cycle: 'basic/bmi-naive, intermediate/bmi-typescript',
         summary:
           'Range inputs parsed and bounded by a schema with field(), so the model only sees valid numbers.',
         shows: [['Forms', '/docs/forms/']],
@@ -78,7 +71,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'seconds-elapsed',
         title: 'Seconds elapsed',
-        cycle: 'basic/jsx-seconds-elapsed, intermediate/tsx-seconds-elapsed',
         summary:
           'A periodic command started from init streams ticks until the component disconnects.',
         shows: [['Effects and drivers', '/docs/effects/#streaming-results-with-emit']],
@@ -87,7 +79,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'http-random-user',
         title: 'Random user',
-        cycle: 'basic/http-random-user',
         summary:
           'Randomness and HTTP as commands: pick a random id with randomInt, fetch the user, decode it with a schema.',
         shows: [['Effects and drivers', '/docs/effects/']],
@@ -96,7 +87,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'http-search-github',
         title: 'Search GitHub',
-        cycle: 'intermediate/http-search-github',
         summary:
           'Search as you type: debounce() and a switch lane cancel stale requests, and late answers for old queries are ignored.',
         shows: [['Concurrency lanes', '/docs/effects/#concurrency-lanes']],
@@ -105,7 +95,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'autocomplete-search',
         title: 'Autocomplete',
-        cycle: 'advanced/autocomplete-search',
         summary:
           'Wikipedia suggestions in a popover, with keyboard navigation through keydown intents and debounced requests.',
         shows: [['Intent', '/docs/intent/#trigger-events']],
@@ -114,7 +103,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'custom-driver',
         title: 'Custom driver',
-        cycle: 'advanced/custom-driver',
         summary:
           'A canvas chart as a driver: one command draws, another streams the bars the user clicks.',
         shows: [['Writing a driver', '/docs/effects/#writing-a-driver']],
@@ -129,7 +117,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'bmi-nested',
         title: 'Nested BMI',
-        cycle: 'advanced/bmi-nested',
         summary:
           'Two instances of one slider component. Props go down, outputs come up, and the parent owns the values.',
         shows: [['Child components', '/docs/components/#child-components-and-outputs']],
@@ -138,7 +125,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'nested-folders',
         title: 'Nested folders',
-        cycle: 'advanced/nested-folders',
         summary:
           'A folder that contains folders: a recursive component through child(() => Folder), each level owning its own children.',
         shows: [['Child components', '/docs/components/#child-components-and-outputs']],
@@ -161,7 +147,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'routing-view',
         title: 'Routing',
-        cycle: 'advanced/routing-view',
         summary:
           'A typed route table, listen() streaming every location, setTitle(), and a View Transition between pages.',
         shows: [['Routing', '/docs/routing/']],
@@ -170,7 +155,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'isomorphic',
         title: 'Isomorphic app',
-        cycle: 'advanced/isomorphic',
         summary:
           'Rendered on the server with Declarative Shadow DOM, hydrated in place, with one route prerendered and one rendered per request.',
         shows: [['Server rendering', '/docs/server-rendering/']],
@@ -195,7 +179,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'animation',
         title: 'Animation',
-        cycle: 'intermediate/animation',
         summary:
           'The model counts runs and CSS does the motion: no per-frame state, restarted by a one-item each().',
         shows: [['Views', '/docs/views/#lists']],
@@ -204,7 +187,6 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'animated-letters',
         title: 'Animated letters',
-        cycle: 'advanced/animated-letters',
         summary:
           'Letters you type grow in and shrink out. The model tracks which are present or leaving; CSS transitions animate.',
         shows: [['Model and update', '/docs/update/']],

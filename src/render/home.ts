@@ -126,9 +126,9 @@ export async function homeBody(): Promise<ChildValue> {
       <p class="eyebrow">New in 0.3: Gyral's own view layer</p>
       <h1 id="hero-title">Model-View-Intent web components on the modern web platform.</h1>
       <p class="lead">
-        Gyral keeps the best idea of Cycle.js: your app is a pure function, and side effects happen
-        at the edges, as data. It rebuilds that loop on custom elements, semantic HTML, modern CSS
-        and a small view layer of its own, with no runtime dependencies.
+        Your app is a pure function, and side effects happen at the edges, as data. Gyral builds
+        that loop on custom elements, semantic HTML, modern CSS and a small view layer of its own,
+        with no runtime dependencies.
       </p>
       <div class="actions">
         <a class="button primary" href="/docs/getting-started/">Get started</a>
@@ -246,12 +246,12 @@ export async function homeBody(): Promise<ChildValue> {
     </section>
 
     <section class="lineage" aria-labelledby="lineage-title">
-      <h2 id="lineage-title">Standing on Cycle.js</h2>
+      <h2 id="lineage-title">Inspired by Cycle.js</h2>
       <p>
         <a href=${LINKS.cyclejs} rel="external">Cycle.js</a> showed that a web app can be one
         visible loop with every effect at the edge. Gyral is a new framework that carries that idea
         forward. It replaces streams with plain functions and the virtual DOM with the platform's
-        own components, and credits the original in its licence notice.
+        own components, and credits the original in its license notice.
       </p>
     </section>
 

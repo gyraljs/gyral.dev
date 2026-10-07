@@ -94,14 +94,10 @@ server-rendered, works without JavaScript, and switches between four complete th
 alone. Many of Gyral's features, from light-DOM page components to `fakeHttp`, exist because
 the shop needed them.
 
-## Standing on Cycle.js
+## Inspired by Cycle.js
 
-Gyral is inspired by [Cycle.js](https://cycle.js.org). It keeps Cycle's central idea, an app as
-a pure function with effects at the edges, and rebuilds it on today's platform: plain messages
-instead of streams, Shadow DOM instead of `isolate()`, templates that update in place instead of
-a virtual DOM.
-Its examples are ports of the Cycle.js examples. There's more on that in
-[Why I rebuilt Cycle.js on web components](/blog/why-i-rebuilt-cyclejs/).
+Gyral is inspired by [Cycle.js](https://cycle.js.org): an app as a pure function, with effects at
+the edges.
 
 ## Try it
 

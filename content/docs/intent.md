@@ -184,5 +184,4 @@ everywhere. Built-in commands such as `show-modal` are left to the browser.
 
 Only `data-intent` elements in the component's own render root count. A click inside a child
 component belongs to the child, never to the parent, because the child's shadow root is a
-boundary. Light-DOM components keep the same rule by stopping at the next Gyral host. This is
-what Cycle.js needed `isolate()` for.
+boundary. Light-DOM components keep the same rule by stopping at the next Gyral host.

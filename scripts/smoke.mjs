@@ -6,6 +6,7 @@
 // - axe finds no violations, in light and dark;
 // - no horizontal overflow at phone width;
 // - every internal link and fragment resolves;
+// - every rule in the built `_redirects` answers with its status and lands on a 200 page;
 // - the home page's counter hydrates in place (it keeps the server's nodes) and counts;
 // - /search/ (not in the sitemap) finds the expected pages through the header form, and its
 //   keys work: arrows move through results, Escape clears.
@@ -16,6 +17,7 @@ import { chromium } from 'playwright';
 import { tsImport } from 'tsx/esm/api';
 
 const { createPreview } = await tsImport('./preview.ts', import.meta.url);
+const { parseRedirects } = await tsImport('./lib/redirects.ts', import.meta.url);
 const dist = new URL('../dist/', import.meta.url).pathname;
 const server = createPreview(dist.replace(/\/$/, ''));
 await new Promise((resolve) => server.listen(0, resolve));
@@ -50,6 +52,7 @@ try {
   // Pages are independent: check a few at once (each in its own context).
   await pool(tasks, CONCURRENCY, (task) => checkPage(task, links));
   await checkLinks(links);
+  await checkRedirects();
 } finally {
   await browser.close();
   server.close();
@@ -204,6 +207,19 @@ async function checkLinks(links) {
     ) {
       fail('links', `${key}${url.hash}: no element with that id`);
     }
+  }
+}
+
+async function checkRedirects() {
+  const rules = parseRedirects(readFileSync(`${dist}_redirects`, 'utf8'));
+  if (rules.length === 0) fail('redirects', 'dist/_redirects has no rules');
+  for (const { from, to, status } of rules) {
+    const res = await fetch(base + from, { redirect: 'manual' });
+    if (res.status !== status || res.headers.get('location') !== to)
+      fail('redirects', `${from} → ${String(res.status)} ${String(res.headers.get('location'))}`);
+    const target = await fetch(base + to);
+    if (target.status !== 200)
+      fail('redirects', `${from} lands on ${to}: ${String(target.status)}`);
   }
 }
 

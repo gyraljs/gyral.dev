@@ -31,7 +31,9 @@ Status: **accepted** (2026-10-05)
 - Lead with a working example, then explain it.
 - Use the semantic-html skill's vocabulary in examples (labels, `<output>`, `<form>`): the docs
   teach accessible markup by example.
-- Credit Cycle.js where an idea comes from it.
+- Mention Cycle.js only where it explains Gyral's origin: the home page's "Inspired by Cycle.js"
+  section, the Coming from Cycle.js page and dated blog posts. Elsewhere, describe Gyral's ideas
+  on their own terms. The license credit lives in the Gyral repository's `NOTICE` file.
 
 ## Addendum: generated reference, examples and blog (2026-10-05)
 

@@ -1,13 +1,15 @@
 /// <reference types="node" />
 // `pnpm preview`: serves dist/ the way Cloudflare Pages does: `/x/` → `x/index.html`,
-// `/x` → 308 to `/x/`, unknown paths → 404.html with status 404, headers from `_headers`.
+// `/x` → 308 to `/x/`, unknown paths → 404.html with status 404, headers from `_headers`,
+// redirects from `_redirects` (applied first, as on Cloudflare).
 // The smoke test runs against this server.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import http from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { headersFor, parseHeaders } from './lib/headers.js';
+import { parseRedirects, redirectFor } from './lib/redirects.js';
 
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -33,6 +35,10 @@ const isFile = async (path: string): Promise<boolean> =>
 
 export function createPreview(dist: string): http.Server {
   const rules = parseHeaders(readFileSync(join(dist, '_headers'), 'utf8'));
+  const redirectsFile = join(dist, '_redirects');
+  const redirects = existsSync(redirectsFile)
+    ? parseRedirects(readFileSync(redirectsFile, 'utf8'))
+    : [];
   return http.createServer((req, res) => {
     void (async () => {
       const url = new URL(req.url ?? '/', 'http://localhost');
@@ -50,7 +56,11 @@ export function createPreview(dist: string): http.Server {
         });
         res.end(await readFile(file));
       };
-      if (!local.startsWith(dist) || path.split('/').some((p) => p.startsWith('_'))) {
+      const redirect = redirectFor(redirects, path);
+      if (redirect !== undefined) {
+        res.writeHead(redirect.status, { location: `${redirect.to}${url.search}` });
+        res.end();
+      } else if (!local.startsWith(dist) || path.split('/').some((p) => p.startsWith('_'))) {
         await send(join(dist, '404.html'), 404);
       } else if (path.endsWith('/') && (await isFile(join(local, 'index.html')))) {
         await send(join(local, 'index.html'), 200);

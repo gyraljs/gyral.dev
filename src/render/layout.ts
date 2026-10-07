@@ -164,10 +164,7 @@ const siteFooter = () => html`
         </ul>
       </section>
     </nav>
-    <p class="credit">
-      Inspired by <a href=${LINKS.cyclejs} rel="external">Cycle.js</a>. This site is built with
-      Gyral.
-    </p>
+    <p class="credit">This site is built with Gyral.</p>
     <p class="legal">
       <small>
         Code under the MIT licence. © ${COPYRIGHT_YEAR} Mike Zupper. Gyral, gyraljs and the Gyral

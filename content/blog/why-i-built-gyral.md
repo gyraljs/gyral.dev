@@ -1,19 +1,19 @@
 ---
-title: Why I rebuilt Cycle.js on web components
-description: What Cycle.js got right, what made it hard, and the decisions behind Gyral, its successor in spirit built on custom elements and plain messages.
+title: Why I built Gyral
+description: The ideas behind Gyral, what made them hard to adopt before, and the decisions behind a web-native framework built on custom elements and plain messages.
 date: 2026-10-05
 author: Mike Zupper
 ---
 
-# Why I rebuilt Cycle.js on web components
+# Why I built Gyral
 
 [Cycle.js](https://cycle.js.org) had one of the clearest ideas in front-end development: your
 application is a pure function. It receives what happened in the world, returns what should
 happen next, and drivers at the edges do the actual work. Everything in between is testable
 without a browser.
 
-Gyral is my attempt to keep that idea and drop what made Cycle.js hard to adopt. This post is
-about the decisions behind it. Each one is written up in full in the
+Gyral takes that idea and builds a web-native approach to it, without what made it hard to
+adopt. This post is about the decisions behind it. Each one is written up in full in the
 [decision records](https://github.com/gyraljs/gyral/tree/main/docs/design-docs) in Gyral's
 repository.
 
@@ -53,7 +53,7 @@ parts that change, without a virtual DOM. CSS gained custom properties, cascade 
 container queries and `:user-invalid`. And [Standard Schema](https://standardschema.dev) gave
 validation libraries one interface.
 
-Rebuilding Cycle's idea on top of that meant much less framework.
+Building on that platform meant much less framework.
 
 ## The decisions
 

@@ -19,7 +19,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 | `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual |
 | `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                          |
 | `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                   |
-| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                      |
+| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers` and `_redirects`, on http://localhost:5401     |
 | `pnpm interop`       | Docs interop claims in Chromium: props, `gyral-output`, third-party events (test/interop/)          |
 | `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search       |
 | `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally) |
@@ -50,7 +50,7 @@ First run needs `pnpm exec playwright install chromium`.
 | `src/content/demos.ts`                         | /what-you-can-build/: titles, descriptions, crops (videos are synced) |
 | `src/demo-videos.ts`                           | Plays demo videos on screen; nothing under reduced motion             |
 | `src/styles/site.css`                          | The one site stylesheet (layers, brand tokens, light/dark)            |
-| `public/`                                      | Copied as-is: icons, logos, showcase images, `_headers`, robots       |
+| `public/`                                      | Copied as-is: icons, logos, showcase images, `_headers`, `_redirects` |
 | `src/render/csp.ts`                            | The CSP; the build adds it, with style hashes, to `dist/_headers`     |
 | `scripts/`                                     | Dev, build, preview, smoke, invariants                                |
 | [docs/design-docs/](docs/design-docs/index.md) | Decisions (ADRs)                                                      |

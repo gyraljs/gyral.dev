@@ -241,8 +241,7 @@ export const Total = define<State, Msg>('my-total', {
 - Any custom element can talk to a Gyral parent by dispatching `gyral-output` with a tagged
   `detail`, so children don't have to be Gyral components.
 
-This replaces Cycle.js's `isolate()` and collections: Shadow DOM does the isolating, and `each`
-does the list.
+Shadow DOM does the isolating, and `each` does the list.
 
 ## Escape hatches
 

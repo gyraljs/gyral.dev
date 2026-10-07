@@ -14,7 +14,7 @@ export const examplesMeta: PageMeta = {
   searchable: true,
   markdown: true,
   description:
-    'Gyral examples, from a counter to a server-rendered app: ports of the Cycle.js examples with their source, plus gyral-shop, a full store.',
+    'Gyral examples with their source, from a counter to a server-rendered app, plus gyral-shop, a full store.',
   jsonLd: [
     {
       '@context': 'https://schema.org',
@@ -31,14 +31,6 @@ const card = (example: Example, code: string | undefined) => html`
       <h3 id=${`${example.slug}-title`}>${example.title}</h3>
       <p>${example.summary}</p>
       <dl class="example-facts">
-        ${
-          example.cycle === undefined
-            ? nothing
-            : html`<div>
-                <dt>Ports</dt>
-                <dd>Cycle.js <code>${example.cycle}</code></dd>
-              </div>`
-        }
         <div>
           <dt>Read</dt>
           <dd>
@@ -69,9 +61,8 @@ export async function examplesBody(): Promise<ChildValue> {
     <section class="page-intro" aria-labelledby="examples-title">
       <h1 id="examples-title">Examples</h1>
       <p>
-        Most of these are ports of the <a href=${LINKS.cyclejs} rel="external">Cycle.js</a>
-        examples, kept in the Gyral repository as its acceptance suite: each one has tests, and the
-        excerpts below are copied from the real files. To run them all, clone
+        These examples live in the Gyral repository as its acceptance suite: each one has tests, and
+        the excerpts below are copied from the real files. To run them all, clone
         <a href=${LINKS.github} rel="external">the repository</a>, then
         <code>pnpm install</code> and <code>pnpm examples</code>.
       </p>

@@ -24,7 +24,7 @@ Transitions, Gyral uses it as an enhancement rather than building its own.
 ## Pure core, effects at the edges
 
 `update` and `view` are pure functions. Side effects are described as data, as commands, and
-carried out by drivers. This is the idea Gyral inherits from Cycle.js.
+carried out by drivers.
 
 It's what makes a component testable without a browser, renderable on a server, and observable
 in [devtools](/docs/devtools/): every change is a message, every effect a value.

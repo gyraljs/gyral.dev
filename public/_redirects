@@ -1,0 +1,8 @@
+# Cloudflare Pages redirects (docs/design-docs/0003-hosting.md): `from to status`, one per line.
+# scripts/preview.ts applies the built copy too, so `pnpm smoke` checks every rule resolves.
+# Renamed pages keep their old URLs working with a permanent redirect.
+
+# The post's slug changed on 2026-10-07.
+/blog/why-i-rebuilt-cyclejs/ /blog/why-i-built-gyral/ 301
+/blog/why-i-rebuilt-cyclejs /blog/why-i-built-gyral/ 301
+/blog/why-i-rebuilt-cyclejs/index.md /blog/why-i-built-gyral/index.md 301

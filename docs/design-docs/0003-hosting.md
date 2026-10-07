@@ -8,7 +8,8 @@ Status: **accepted** (2026-10-05)
   sitemap use `https://gyral.dev`. **gyraljs.com redirects** (301, path and query preserved) to
   gyral.dev. `www.` on both domains redirects too.
 - **Cloudflare Pages** serves `dist/`: static HTML, `404.html` for unknown paths, trailing-slash
-  URLs, and `_headers` (from `public/`) for security and cache headers.
+  URLs, `_headers` (from `public/`) for security and cache headers, and `_redirects` (from
+  `public/`) for renamed pages.
 - **Deploys are Cloudflare Git-connected builds** of `main` (decided 2026-10-05, when the
   owner connected the repo). `@gyral/*` comes from npm (0.1.0+), so Cloudflare's defaults
   work: build command `pnpm run build`, output `dist`, env `NODE_VERSION=24`. Cloudflare
@@ -21,6 +22,16 @@ Status: **accepted** (2026-10-05)
 
 - **No analytics** (owner decision 2026-10-05, site-54d.32). Cloudflare Web Analytics stays
   disabled on the Pages project: its injected beacon would need a third-party CSP exception.
+
+## Redirects (`public/_redirects`)
+
+- A renamed page keeps its old URL working with a **301** to the new one: both the trailing-slash
+  and bare forms, plus the Markdown twin (`index.md`). The first rename was the post
+  `/blog/why-i-rebuilt-cyclejs/` → `/blog/why-i-built-gyral/` (2026-10-07).
+- Rules are exact paths only (no splats or placeholders), read by `scripts/lib/redirects.ts`.
+  `scripts/preview.ts` applies them before anything else, as Cloudflare does; `pnpm smoke` checks
+  every built rule answers with its status and lands on a 200 page, and `test/site.test.ts`
+  checks each target is a real page.
 
 ## Headers (`public/_headers`)
 

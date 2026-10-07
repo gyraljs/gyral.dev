@@ -102,7 +102,7 @@ const blogIndexTwin = (posts: readonly Post[]): Twin => {
 /** The examples gallery as Markdown, with each example's code excerpt. */
 async function examplesTwin(root: URL): Promise<Twin> {
   const description =
-    'Gyral examples, from a counter to a server-rendered app: ports of the Cycle.js examples with their source, plus gyral-shop.';
+    'Gyral examples with their source, from a counter to a server-rendered app, plus gyral-shop.';
   const parts: string[] = [];
   for (const group of EXAMPLE_GROUPS) {
     parts.push(`## ${group.title}\n`);
@@ -114,7 +114,6 @@ async function examplesTwin(root: URL): Promise<Twin> {
         `${example.summary}\n`,
         [
           `- Source: ${EXAMPLES_SOURCE}/${example.slug}`,
-          ...(example.cycle === undefined ? [] : [`- Ports Cycle.js \`${example.cycle}\``]),
           ...(shows === '' ? [] : [`- Explained in: ${shows}`]),
         ].join('\n') + '\n',
         `\`${example.file}\`:\n`,

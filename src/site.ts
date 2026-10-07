@@ -9,7 +9,7 @@ export const SITE_NAME = 'Gyral';
 export const TAGLINE = 'Model-View-Intent web components on the modern web platform.';
 
 export const DESCRIPTION =
-  'Gyral is a small framework for web components: intents in, a pure update, a pure view out. Server rendering, forms, routing and testing built in. Inspired by Cycle.js.';
+  'Gyral is a small framework for web components: intents in, a pure update, a pure view out. Server rendering, forms, routing and testing built in.';
 
 export const LINKS = {
   github: 'https://github.com/gyraljs/gyral',

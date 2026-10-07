@@ -42,6 +42,6 @@ to `dist/pagefind/` (pages opt in with `PageMeta.searchable`).
 
 `dist/` is a static site: `index.html` per path (`/docs/getting-started/` →
 `docs/getting-started/index.html`), `404.html`, `sitemap.xml`, hashed `assets/`, and `public/`
-copied verbatim (including `_headers`, which Cloudflare Pages applies; the build adds the
+copied verbatim (including `_redirects` and `_headers`, which Cloudflare Pages applies; the build adds the
 Content-Security-Policy from `src/render/csp.ts`, with the islands' style hashes). See
 [0003-hosting.md](docs/design-docs/0003-hosting.md).

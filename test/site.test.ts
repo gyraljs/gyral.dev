@@ -1,8 +1,10 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
 import { headersFor, parseHeaders, withCsp } from '../scripts/lib/headers.js';
+import { parseRedirects, redirectFor } from '../scripts/lib/redirects.js';
 
 const assets = {
   stylesheet: '/assets/site.css',
@@ -205,5 +207,47 @@ describe('_headers', () => {
     const rules = parseHeaders('/*.md\n  C: 3\n');
     expect(headersFor(rules, '/docs/x/index.md')).toEqual([['C', '3']]);
     expect(headersFor(rules, '/docs/x/')).toEqual([]);
+  });
+});
+
+describe('_redirects', () => {
+  // public/ is copied into dist/ by Vite, so this is the file Cloudflare Pages gets; `pnpm smoke`
+  // checks the built copy answers through the preview server.
+  const rules = parseRedirects(
+    readFileSync(new URL('../public/_redirects', import.meta.url), 'utf8'),
+  );
+
+  it('sends the renamed post to its new URL with a permanent redirect', async () => {
+    for (const from of ['/blog/why-i-rebuilt-cyclejs/', '/blog/why-i-rebuilt-cyclejs']) {
+      expect(redirectFor(rules, from), from).toEqual({
+        from,
+        to: '/blog/why-i-built-gyral/',
+        status: 301,
+      });
+    }
+    expect(redirectFor(rules, '/blog/why-i-rebuilt-cyclejs/index.md')).toEqual({
+      from: '/blog/why-i-rebuilt-cyclejs/index.md',
+      to: '/blog/why-i-built-gyral/index.md',
+      status: 301,
+    });
+    expect((await get('/blog/why-i-built-gyral/')).status).toBe(200);
+    expect((await get('/blog/why-i-rebuilt-cyclejs/')).status).toBe(404);
+  });
+
+  it('only redirects to pages that exist', async () => {
+    const site = await createSite(assets);
+    for (const { to } of rules) {
+      const page = to.endsWith('/index.md') ? to.slice(0, -'index.md'.length) : to;
+      expect(site.paths, to).toContain(page);
+    }
+  });
+
+  it('parses comments, a default status, and rejects what it cannot serve', () => {
+    expect(parseRedirects('# c\n\n/a /b\n/c /d 308\n')).toEqual([
+      { from: '/a', to: '/b', status: 302 },
+      { from: '/c', to: '/d', status: 308 },
+    ]);
+    expect(() => parseRedirects('/a /b 200\n')).toThrow(/unexpected line/);
+    expect(() => parseRedirects('/a/* /b 301\n')).toThrow(/splats/);
   });
 });
