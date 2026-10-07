@@ -130,7 +130,8 @@ Gyral renders on a schedule: reducers run as soon as a message arrives, and the 
 microtask, once for every message that arrived together. **`await settled()`** from
 `@gyral/core` waits until every component on the page has rendered its latest state, including
 view transitions, focus commands and lazily loaded code. Await it before you look at the DOM;
-there's nothing to poll.
+there's nothing to poll. It covers rendering, not driver work: answer fake drivers and advance
+virtual time first.
 
 ```ts
 // src/lookup.browser.test.ts

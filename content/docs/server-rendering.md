@@ -135,11 +135,11 @@ Every client-side instance then gets the `Hydrated` message once. Use it for pro
 enhancement: render the no-JavaScript version on the server and in the first client render, then
 switch to the enhanced one.
 
-The seed carries state as JSON, so keep state and props JSON-serializable. The server warns,
-with the exact path, when a value won't survive the trip (a `Date`, a `Map`, `NaN`). State that
-equals `init(props)` isn't written twice. Form controls keep what the user typed before scripts
-ran: hydration never overwrites it, and a control is written again only when the model's value
-for it changes.
+The seed carries state as JSON, so keep state and props JSON-serializable. In development the
+server warns, with the exact path, when a value won't survive the trip (a `Date`, a `Map`,
+`NaN`). State that equals `init(props)` isn't written twice. Form controls keep what the user
+typed before scripts ran: hydration never overwrites it, and a control is written again only
+when the model's value for it changes.
 
 ## Mismatches
 

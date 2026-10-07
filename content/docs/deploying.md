@@ -43,8 +43,8 @@ Set the host's 404 page to your prerendered `404.html` if you render one.
 ## Node
 
 When some pages render per request, build into two folders and run Gyral's production server.
-`npm create gyral@latest my-app -- --template ssr` sets this up for you; this is what it
-generates.
+`npm create gyral@latest my-app -- --template ssr` sets this up for you; the files below are a
+trimmed-down version of what it generates.
 
 ```ts
 // src/counter.ts

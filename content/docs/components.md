@@ -110,13 +110,13 @@ export const Badge = define<Stateless, never, Props>('my-badge', {
 
 ### Builders and attributes
 
-| Builder                     | The attribute is parsed with                 | Attribute name         |
-| --------------------------- | -------------------------------------------- | ---------------------- |
-| `prop.string(opts?)`        | nothing: the string as is                    | kebab-case of the prop |
-| `prop.number(opts?)`        | `Number(v)`; empty or `NaN` is invalid       | kebab-case             |
-| `prop.boolean(opts?)`       | presence: there is `true`, absent is `false` | kebab-case             |
-| `prop.json(schema, opts?)`  | `JSON.parse`, then the schema                | kebab-case             |
-| `prop.value(schema, opts?)` | no attribute: set it as a property           | none                   |
+| Builder                     | The attribute is parsed with           | Attribute name         |
+| --------------------------- | -------------------------------------- | ---------------------- |
+| `prop.string(opts?)`        | nothing: the string as is              | kebab-case of the prop |
+| `prop.number(opts?)`        | `Number(v)`; empty or `NaN` is invalid | kebab-case             |
+| `prop.boolean(opts?)`       | present is `true`, absent is `false`   | kebab-case             |
+| `prop.json(schema, opts?)`  | `JSON.parse`, then the schema          | kebab-case             |
+| `prop.value(schema, opts?)` | no attribute: set it as a property     | none                   |
 
 A prop named `maxValue` reads the attribute `max-value`; pass `attribute: 'name'` to choose
 another, or `attribute: false` for a property only. The options are `required`, `default`,

@@ -67,8 +67,9 @@ hydration of real server output against production builds.
 ## Enforce invariants, not intentions
 
 Rules that matter become checks with error messages that explain the fix. In Gyral's own repo,
-`@gyral/core` is checked to have no runtime dependencies, views can't attach closures (the
-template compiler and the ESLint rules reject them), and every decision record is indexed. This site follows the same rule: every code sample on it compiles
+`@gyral/core` is checked to have no runtime dependencies, views can't bind event handlers (the
+template compiler and the ESLint rules reject `@event` bindings), and every decision record is
+indexed. This site follows the same rule: every code sample on it compiles
 against the real packages, and every page passes accessibility checks in light and dark mode.
 
 ## Measure, then budget

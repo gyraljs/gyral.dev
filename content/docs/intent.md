@@ -82,8 +82,9 @@ Override it with `data-intent-on`, such as `data-intent-on="keydown"`. Any event
 there: `keyup`, `focusin`, `focusout`, `toggle` (popovers and `<details>`), `command` (invoker
 commands, below), `pointerdown` or a third-party element's own event. A component listens only
 for the events its templates name, so a component without keyboard intents never runs intent
-lookup on a keystroke. If the value itself is bound, `data-intent-on=${…}`, list the event types
-it can produce in the spec: `events: ['pointerdown']`.
+lookup on a keystroke. If the value itself is bound, `data-intent-on=${…}`, the component listens
+for `keydown`, `keyup`, `focusin`, `focusout`, `toggle` and `command` as well; list any other
+event type it can produce in the spec: `events: ['pointerdown']`.
 
 An element carries one `data-intent`. To give a control a second intent, put it on an
 ancestor, as the example does: the `keydown` intent sits on `<search>` around the input whose

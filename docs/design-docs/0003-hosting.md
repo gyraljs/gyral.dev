@@ -24,11 +24,12 @@ Status: **accepted** (2026-10-05)
 
 ## Headers (`public/_headers`)
 
-- CSP: `default-src 'self'`; `script-src 'self' 'wasm-unsafe-eval'` (JSON-LD and hydration
-  seeds are data blocks, which CSP doesn't block; `'wasm-unsafe-eval'` lets the search index's
-  WebAssembly compile and allows neither `eval()` nor inline script); `style-src 'self'` plus
-  the SHA-256 hash of each island's Declarative Shadow DOM `<style>`, **no `'unsafe-inline'`**
-  (Gyral 0.3, 2026-10-06); no third-party origins at all. The policy is built by
+- CSP: `default-src 'self'`; `script-src 'self' 'wasm-unsafe-eval'` (JSON-LD is a data block,
+  which CSP doesn't block, and hydration seeds are `data-gyral-seed` attributes;
+  `'wasm-unsafe-eval'` lets the search index's WebAssembly compile and allows neither `eval()`
+  nor inline script); `style-src 'self'` plus the SHA-256 hash of each island's Declarative
+  Shadow DOM `<style>`, **no `'unsafe-inline'`** (Gyral 0.3, 2026-10-06); no third-party origins
+  at all. The policy is built by
   `src/render/csp.ts` with `@gyral/ssr`'s `contentSecurityPolicy()` and added to the `/*` rule
   of `dist/_headers` by `scripts/build.ts`, so the hashes always match the build; `public/_headers`
   must not set one. Pages carry no `style` attributes: Shiki's colours are classes

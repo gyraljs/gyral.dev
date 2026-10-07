@@ -41,8 +41,8 @@ npm install -D @gyral/testing @gyral/devtools
 
 ## Optional peer dependencies
 
-No Gyral package needs another library at runtime. The build tools Gyral plugs into are optional
-peer dependencies: install the ones you use.
+No Gyral package asks you to install another library at runtime. The build tools Gyral plugs
+into are optional peer dependencies: install the ones you use.
 
 | Package          | Optional peers                                                                            |
 | ---------------- | ----------------------------------------------------------------------------------------- |
@@ -71,13 +71,15 @@ export default defineConfig({
 });
 ```
 
-- **`plugins`**: the template compiler. In `vite build` it checks every `html` template,
-  dependencies included, fails the build with a code frame on a rule violation, and replaces each
-  template with a precompiled object, so the bundle doesn't carry the runtime template preparer.
-  The dev server and Vitest keep the runtime path, which checks the same rules on first render.
-  With `parse5` installed, the build also compares each template with a full HTML parser's
-  result. If your config has plugins of its own, list both:
-  `plugins: [...gyralVitePreset().plugins, mine()]`.
+- **`plugins`**: the template compiler and a dev-server plugin. In `vite build` the compiler
+  checks every `html` template, dependencies included, fails the build with a code frame on a
+  rule violation, and replaces each template with a precompiled object, so the bundle doesn't
+  carry the runtime template preparer. The dev server and Vitest keep the runtime path, which
+  checks the same rules on first render. With `parse5` installed, the build also compares each
+  template with a full HTML parser's result. The dev-server plugin makes Vite, not Node, load
+  `@gyral/*` (and your dependencies that use them) in server code under `vite dev`, so server
+  rendering there gets development output and shares one copy of `@gyral/core`. If your config
+  has plugins of its own, list both: `plugins: [...gyralVitePreset().plugins, mine()]`.
 - **`optimizeDeps.include`**: empty by default. If Vite discovers a dependency during the first
   browser test run and reloads the page, list it: `gyralVitePreset({ optimize: ['some-dep'] })`.
 
@@ -114,9 +116,9 @@ Measured on Gyral's examples (gzip, production builds with the preset):
 
 | App                      | 0.2.0    | 0.3: first load | 0.3: all chunks |
 | ------------------------ | -------- | --------------- | --------------- |
-| hello-world              | 12.2 KiB | 8.9 KiB         | 11.3 KiB        |
-| isomorphic (SSR)         | 17.3 KiB | 13.0 KiB        | 15.6 KiB        |
-| no-js-first (SSR, forms) | 18.7 KiB | 16.8 KiB        | 19.3 KiB        |
+| hello-world              | 12.2 KiB | 8.9 KiB         | 11.2 KiB        |
+| isomorphic (SSR)         | 17.3 KiB | 12.9 KiB        | 15.4 KiB        |
+| no-js-first (SSR, forms) | 18.7 KiB | 16.6 KiB        | 19.0 KiB        |
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any
 lazy `import()`. The [migration guide](/docs/migrating-0-2-to-0-3/#size) has this site's own

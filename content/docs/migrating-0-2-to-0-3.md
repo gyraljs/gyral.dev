@@ -375,9 +375,9 @@ what a page loads before any `import()`:
 
 | Bundle                   | 0.2.0    | 0.3: first load | 0.3: all chunks |
 | ------------------------ | -------- | --------------- | --------------- |
-| hello-world              | 12.2 KiB | 8.9 KiB         | 11.3 KiB        |
-| isomorphic (SSR)         | 17.3 KiB | 13.0 KiB        | 15.6 KiB        |
-| no-js-first (SSR, forms) | 18.7 KiB | 16.8 KiB        | 19.3 KiB        |
+| hello-world              | 12.2 KiB | 8.9 KiB         | 11.2 KiB        |
+| isomorphic (SSR)         | 17.3 KiB | 12.9 KiB        | 15.4 KiB        |
+| no-js-first (SSR, forms) | 18.7 KiB | 16.6 KiB        | 19.0 KiB        |
 
 Features load with the API that uses them (`each`, `raw`, hooks, `command()`, stores, prop
 builders), so small apps shed the most. If you keep a size budget, budget the first load: the

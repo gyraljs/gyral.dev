@@ -113,7 +113,7 @@ in place. Without a real application, that bug would have shipped.
 
 > **Update, 2026-10-06:** Bugs like that one led to Gyral 0.3, which replaces Lit with a view
 > layer of its own. Hydration is now part of each component, so module order can't break it at
-> all. The test that caught the bug still runs.
+> all. The production-build test added for that bug still runs.
 
 ## Thanks
 
