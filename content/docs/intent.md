@@ -122,6 +122,32 @@ Parsers may return a promise, because schema validation can be async. They must 
 effects. The one exception is `event.preventDefault()`, for example to stop arrow keys moving
 the caret.
 
+## Typing parsers
+
+Each key in `intent` produces its own variant: the `Search` parser above returns a
+`{ _tag: 'Search'; … }`. Inside the spec, leave the return type off, and the key types it.
+
+Don't annotate a parser with the whole union. `(): Msg => …` widens it, and TypeScript answers
+with a long error that ends in "`IntentParser<Msg>` is not assignable to …". A parser written
+outside the spec returns its variant:
+
+```ts
+// src/search-parser.ts
+import type { IntentInput } from '@gyral/core';
+import type { Msg } from './search-box.js';
+
+/** The variant, not the union; `undefined` ignores the event. */
+export const parseSearch = ({
+  formData,
+}: IntentInput): Extract<Msg, { _tag: 'Search' }> | undefined => {
+  const q = formData?.get('q');
+  return typeof q === 'string' && q.trim() !== '' ? { _tag: 'Search', query: q.trim() } : undefined;
+};
+```
+
+`_tag: 'Search' as const` in the returned object works too. The same holds for the mappers of
+`child()`, `form()` and `field()`.
+
 ## Buttons carry their own data
 
 A button's `value` is part of `IntentInput`, so a list of buttons needs one intent, not one

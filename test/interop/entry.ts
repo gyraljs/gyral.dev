@@ -2,13 +2,15 @@
 // "Using Gyral in other frameworks" and "Using third-party web components" docs pages, run in
 // Chromium against the published @gyral/core.
 import * as v from 'valibot';
-import { define, each, emit, html, intents, prop } from '@gyral/core';
+import { define, each, html, intents, OUTPUT_EVENT, outputs, prop } from '@gyral/core';
 
-/** The page awaits this instead of polling: every component has rendered. */
-export { settled } from '@gyral/core';
+/** The page awaits `settled` instead of polling: every component has rendered. */
+export { OUTPUT_EVENT, settled } from '@gyral/core';
 
 /** A Gyral component used from outside Gyral: props in, outputs out. */
 export type PickerOut = { readonly _tag: 'Picked'; readonly id: string };
+
+const emit = outputs<PickerOut>();
 
 type PickerMsg = { readonly _tag: 'Pick'; readonly id: string };
 
@@ -64,6 +66,36 @@ class FakeSelect extends HTMLElement {
 }
 customElements.define('fake-select', FakeSelect);
 
+/** A plain custom element that talks to a Gyral parent by dispatching OUTPUT_EVENT. */
+class PlainChild extends HTMLElement {
+  connectedCallback(): void {
+    this.addEventListener('click', () => {
+      this.dispatchEvent(
+        new CustomEvent(OUTPUT_EVENT, { detail: { _tag: 'Picked', id: 'plain' }, bubbles: true }),
+      );
+    });
+  }
+}
+customElements.define('plain-child', PlainChild);
+
+type ParentMsg = { readonly _tag: 'Heard'; readonly id: string };
+
+/** A Gyral parent of a non-Gyral child: the child's output arrives as `detail`. */
+export const Parent = define<{ readonly heard: string }, ParentMsg>('interop-parent', {
+  init: () => ({ heard: '' }),
+  intent: {
+    Heard: ({ detail }) =>
+      typeof detail === 'object' && detail !== null && 'id' in detail
+        ? { _tag: 'Heard', id: String(detail.id) }
+        : undefined,
+  },
+  update: { Heard: (_s, m) => ({ heard: m.id }) },
+  view: (s, i) => html`
+    <plain-child data-intent=${i.Heard}>tell</plain-child>
+    <output>${s.heard}</output>
+  `,
+});
+
 type HostMsg = { readonly _tag: 'Changed'; readonly value: string };
 
 /** A Gyral component hosting the third-party element. */
@@ -93,6 +125,8 @@ declare global {
   interface HTMLElementTagNameMap {
     'interop-picker': InstanceType<typeof Picker>;
     'interop-host': InstanceType<typeof Host>;
+    'interop-parent': InstanceType<typeof Parent>;
+    'plain-child': PlainChild;
     'fake-select': FakeSelect;
   }
 }

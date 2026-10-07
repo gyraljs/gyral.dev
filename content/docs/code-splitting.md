@@ -2,7 +2,7 @@
 title: Code-splitting and lazy loading
 description: Load each component's code only on the pages that use it, delay hydration until it's needed, and see what each page downloads.
 section: Guides
-order: 13
+order: 14
 ---
 
 # Code-splitting and lazy loading

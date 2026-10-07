@@ -2,7 +2,7 @@
 title: Rendering modes
 description: Choose how each page renders - in the browser only, once at build time, or on every request - and mix all three in one app.
 section: Guides
-order: 10
+order: 11
 ---
 
 # Rendering modes
@@ -54,10 +54,53 @@ request) and `csr` (client). Gyral's
 [isomorphic example](https://github.com/gyraljs/gyral/tree/main/examples/isomorphic) uses
 exactly this table.
 
+## Client-only builds
+
+An app that no server renders can tell the build so, and leave the hydration code out of its
+bundle:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { gyralVitePreset } from '@gyral/core/vite';
+
+export default defineConfig({
+  ...gyralVitePreset({ clientOnly: true }),
+});
+```
+
+With `clientOnly: true` the browser bundle carries no hydration code: no seed reading and no
+hydration chunk, and when your app has no other `import()`, Vite's preload helper goes too. The
+fallback for [invoker commands](/docs/intent/#invoker-commands) stays only when some module, your
+dependencies included, may make a component listen for `command` intents. Measured on Gyral's
+examples (gzip, 0.3.1):
+
+| App         | Default: first load | Default: all chunks | `clientOnly: true` |
+| ----------- | ------------------- | ------------------- | ------------------ |
+| hello-world | 8.42 KiB            | 10.81 KiB           | 7.35 KiB           |
+| counter     | 8.34 KiB            | 10.72 KiB           | 7.27 KiB           |
+
+"First load" is what a page downloads before any lazy `import()`; in these examples a
+client-only build has nothing lazy left, so its first load is all of it.
+
+Use it for apps that load their components with a `<script type="module">` into pages no Gyral
+server wrote: widgets in an existing site, admin tools, single-page apps. Leave it off as soon
+as any page is server-rendered or prerendered, including islands, and spread the same preset
+into your Vitest config so tests build the way the app does. `gyralClientOnly()` is the plugin
+alone, for configs that list plugins themselves.
+
+If server-rendered markup reaches a client-only build anyway, nothing breaks twice: each
+component drops the server's seed and DOM and renders fresh from its attributes, so a view is
+never doubled. Development warns once and names `clientOnly`; production renders fresh
+silently. The server's work is wasted, though, so treat that warning as a configuration bug.
+
+This site server-renders its pages and hydrates two islands, so it builds without the option.
+
 ## Where to go next
 
 - **Client only**: write components as in [Getting started](/docs/getting-started/) and load
-  them with a `<script type="module">`. No server code at all.
+  them with a `<script type="module">`. No server code at all, and a
+  [client-only build](#client-only-builds) to match.
 - **Static**: [Static sites and prerendering](/docs/static-sites/).
 - **Per request**: [Server rendering](/docs/server-rendering/).
 - **Shipping it**: [Deploying](/docs/deploying/) covers static hosts, Node, Bun and edge

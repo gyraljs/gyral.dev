@@ -2,7 +2,7 @@
 title: Static sites and prerendering
 description: Render pages to HTML files at build time with @gyral/ssr/static, ship zero JavaScript where nothing is interactive, and host them anywhere.
 section: Guides
-order: 12
+order: 13
 ---
 
 # Static sites and prerendering

@@ -92,6 +92,25 @@ try {
     return el.shadowRoot.querySelector('output').textContent;
   });
   check('third-party event reaches the parser with detail and target', host === 'b', host);
+
+  // 4. OUTPUT_EVENT names the event; a plain custom element talks to a Gyral parent with it.
+  const plain = await page.evaluate(async () => {
+    const el = document.createElement('interop-parent');
+    document.body.append(el);
+    await window.Interop.settled();
+    el.shadowRoot.querySelector('plain-child').click();
+    await window.Interop.settled();
+    return {
+      name: window.Interop.OUTPUT_EVENT,
+      heard: el.shadowRoot.querySelector('output').textContent,
+    };
+  });
+  check('OUTPUT_EVENT is gyral-output', plain.name === 'gyral-output', plain.name);
+  check(
+    'a non-Gyral child reaches a Gyral parent with OUTPUT_EVENT',
+    plain.heard === 'plain',
+    plain.heard,
+  );
   check('no page errors', errors.length === 0, errors.join(' | '));
 } finally {
   await browser.close();

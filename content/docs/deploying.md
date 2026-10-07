@@ -2,7 +2,7 @@
 title: Deploying
 description: Ship a Gyral app to a static host, a Node server or Bun, with the right cache headers and a strict Content Security Policy.
 section: Guides
-order: 14
+order: 15
 ---
 
 # Deploying
