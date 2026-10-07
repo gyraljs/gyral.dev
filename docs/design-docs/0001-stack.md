@@ -43,3 +43,12 @@ released on GitHub (tag `v0.3.0`) but not yet on npm, the release tarballs were 
 `vendor/` and the branch merged to `main`; switch to `^0.3.0` from npm when it is published
 (vendor/README.md). `lit`, `@lit-labs/ssr`, `@lit-labs/ssr-client` and the `lit-html` pin are
 gone; templates are compiled by the Vite preset and linted with `@gyral/core/eslint`.
+
+## Addendum: Gyral 0.3.1 prerelease (2026-10-07)
+
+The docs describe Gyral 0.3.1 (`svg` templates, `subscription()`, typed outputs, client-only
+builds, `@gyral/time/delay`, production error codes linking to `/errors/`), which is still on
+Gyral's `next` branch. `vendor/` now holds `0.3.1-next.0`, packed from `next` at `207e864`, in
+place of the 0.3.0 release tarballs, and `pnpm sync:examples` / `sync:demos` read the
+`../gyral-next` worktree by default. When 0.3.1 is published: `^0.3.1` from npm, no `vendor/`,
+and the sync default back to `../gyral` (vendor/README.md).

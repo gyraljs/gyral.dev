@@ -1,5 +1,5 @@
 // `pnpm sync:demos` copies the demo recordings and their text from a Gyral checkout
-// (../gyral, or GYRAL_DIR) into the site:
+// (../gyral-next, or GYRAL_DIR) into the site:
 // - the pitch and "usual way" lines from examples/<slug>/demo.mjs into content/demos.json;
 // - each scene's recording (.demos/<stem>.webm and .png, made by `pnpm demos:record` there)
 //   encoded for the web into public/demos/<stem>.<hash>.{webm,mp4,webp}: AV1 in WebM, H.264 in
@@ -28,9 +28,10 @@ import { pathToFileURL } from 'node:url';
 import { tsImport } from 'tsx/esm/api';
 
 const { DEMOS } = await tsImport('../src/content/demos.ts', import.meta.url);
-// The Gyral checkout (gyraljs/gyral on `main`): GYRAL_DIR, else the sibling folder
-// ../gyral, relative to the repo root.
-const gyral = resolve(process.env.GYRAL_DIR ?? '../gyral');
+// The Gyral checkout: GYRAL_DIR, else a sibling folder, relative to the repo root. The site
+// documents Gyral 0.3.1, which is still on Gyral's `next` branch, so the default is the `next`
+// worktree ../gyral-next; switch it back to ../gyral (`main`) once 0.3.1 merges there.
+const gyral = resolve(process.env.GYRAL_DIR ?? '../gyral-next');
 const check = process.argv.includes('--check');
 const record = process.argv.includes('--record');
 const JSON_PATH = 'content/demos.json';

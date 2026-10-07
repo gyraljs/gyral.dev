@@ -15,9 +15,10 @@ Status: **accepted** (2026-10-05)
   work: build command `pnpm run build`, output `dist`, env `NODE_VERSION=24`. Cloudflare
   installs with the committed lockfile. The gate still runs before pushing (`pnpm check`);
   `pnpm run deploy` (wrangler direct upload) remains for manual deploys.
-- **Until Gyral 0.3.0 is on npm** (2026-10-07), `@gyral/*` resolve to the release tarballs
-  committed in `vendor/`, so a Cloudflare Git build installs them from the repo like any other
-  dependency. Switch to `^0.3.0` from npm once it is published (vendor/README.md).
+- **Until Gyral 0.3.1 is on npm** (2026-10-07), `@gyral/*` resolve to tarballs committed in
+  `vendor/` (0.3.1-next.0, a prerelease packed from Gyral's `next` branch; 0.3.0's release
+  tarballs before that), so a Cloudflare Git build installs them from the repo like any other
+  dependency. Switch to `^0.3.1` from npm once it is published (vendor/README.md).
 - **CI** is `.github/workflows/ci.yml`, `workflow_dispatch` only, run with `pnpm ci:local`.
 
 - **No analytics** (owner decision 2026-10-05, site-54d.32). Cloudflare Web Analytics stays

@@ -1,7 +1,7 @@
 // `pnpm sync:examples` copies each example's excerpt from a Gyral checkout into
 // content/examples/, where the build reads it. `--check` (in `pnpm invariants`) fails when a
 // committed excerpt differs from the source, so the gallery can't drift from the examples.
-// The Gyral checkout is GYRAL_DIR, else ../gyral (see below).
+// The Gyral checkout is GYRAL_DIR, else ../gyral-next (see below).
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tsImport } from 'tsx/esm/api';
@@ -10,9 +10,10 @@ const { ALL_EXAMPLES, excerpt, excerptPath } = await tsImport(
   '../src/content/examples.ts',
   import.meta.url,
 );
-// The Gyral checkout (gyraljs/gyral on `main`): GYRAL_DIR, else the sibling folder
-// ../gyral, relative to the repo root.
-const gyral = resolve(process.env.GYRAL_DIR ?? '../gyral');
+// The Gyral checkout: GYRAL_DIR, else a sibling folder, relative to the repo root. The site
+// documents Gyral 0.3.1, which is still on Gyral's `next` branch, so the default is the `next`
+// worktree ../gyral-next; switch it back to ../gyral (`main`) once 0.3.1 merges there.
+const gyral = resolve(process.env.GYRAL_DIR ?? '../gyral-next');
 const check = process.argv.includes('--check');
 
 if (!existsSync(join(gyral, 'examples'))) {

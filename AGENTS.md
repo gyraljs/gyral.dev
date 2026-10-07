@@ -15,7 +15,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 | Command              | What it does                                                                                        |
 | -------------------- | --------------------------------------------------------------------------------------------------- |
-| `pnpm install`       | Install. `@gyral/*` 0.3.0 comes from `vendor/` until it is on npm (vendor/README.md)                |
+| `pnpm install`       | Install. `@gyral/*` 0.3.1-next.0 comes from `vendor/` until 0.3.1 is on npm (vendor/README.md)      |
 | `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual |
 | `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                          |
 | `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                   |
@@ -27,7 +27,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 | `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                                 |
 | `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                       |
 | `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                                |
-| `pnpm sync:examples` | Copy example excerpts from `GYRAL_DIR` (else `../gyral`) into `content/examples/`                   |
+| `pnpm sync:examples` | Copy example excerpts from `GYRAL_DIR` (else `../gyral-next`) into `content/examples/`              |
 | `pnpm sync:demos`    | Encode demo recordings from the Gyral checkout into `public/demos/` (`--record` re-records first)   |
 | `pnpm sync:code-css` | Regenerate `src/styles/code.css` (code-block colour classes) after a Shiki or theme change          |
 
@@ -85,4 +85,5 @@ First run needs `pnpm exec playwright install chromium`.
 - CSS is Baseline newly available; newer features go inside `@supports` (stylelint).
 - Workflows trigger on `workflow_dispatch` only (`scripts/check-workflows.mjs`).
 - Brand files in `public/` are copies; change them in gyraljs/brand and re-sync.
-- Example excerpts match the Gyral examples (`sync-examples.mjs --check`).
+- Example excerpts match the Gyral examples (`sync-examples.mjs --check`). Until Gyral 0.3.1
+  merges to Gyral's `main`, the site syncs from its `next` branch (`../gyral-next`).
