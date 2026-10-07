@@ -67,8 +67,9 @@ data-pagefind-body>` of docs, API reference, examples and blog posts (`PageMeta.
   focuses it on `/` or Ctrl/⌘+K.
 - **`/search/`** is a page with the `<gd-site-search>` island (`noindex`, not in the sitemap).
   Server-rendered it says search needs JavaScript and links the docs index; once hydrated it
-  reads `?q=`, searches as you type (debounced, newer queries cancel older ones), keeps `?q=` in
-  the address bar, and supports arrows/Escape. Excerpts reach the view as text runs, never HTML.
+  reads `?q=`, searches as you type (`debounce` from `@gyral/time/delay`; newer queries cancel
+  older ones), keeps `?q=` in the address bar, and supports arrows/Escape. Excerpts reach the
+  view as text runs, never HTML.
 - `pnpm smoke` searches for `intent`, `hydrate` and `formAction` through the header form and
   checks the expected pages are in the top five.
 

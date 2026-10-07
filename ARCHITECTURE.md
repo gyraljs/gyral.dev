@@ -16,13 +16,13 @@ public/ ────────────────────────
 
 ## Layers
 
-| Layer         | Runs                 | May import                                                         |
-| ------------- | -------------------- | ------------------------------------------------------------------ |
-| `src/site.ts` | server and browser   | nothing                                                            |
-| `src/content` | build (Node)         | `marked`, `shiki`, `typescript`, Node built-ins                    |
-| `src/render`  | build (Node)         | `src/content`, `src/islands` (to server-render them), `@gyral/ssr` |
-| `src/islands` | browser (and server) | `@gyral/core` (never `/server`), `src/site.ts` only                |
-| `scripts/`    | Node                 | anything                                                           |
+| Layer         | Runs                 | May import                                                          |
+| ------------- | -------------------- | ------------------------------------------------------------------- |
+| `src/site.ts` | server and browser   | nothing                                                             |
+| `src/content` | build (Node)         | `marked`, `shiki`, `typescript`, Node built-ins                     |
+| `src/render`  | build (Node)         | `src/content`, `src/islands` (to server-render them), `@gyral/ssr`  |
+| `src/islands` | browser (and server) | `@gyral/core` (never `/server`), `@gyral/time/delay`, `src/site.ts` |
+| `scripts/`    | Node                 | anything                                                            |
 
 `src/render` is server-only: the shell, header, footer and docs pages are written with
 `@gyral/core`'s `html`, rendered by `@gyral/ssr` and never hydrated, so docs pages ship **no

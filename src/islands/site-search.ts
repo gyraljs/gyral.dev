@@ -3,11 +3,17 @@
 // `Hydrated`: it reads `?q=` (the header form lands here), searches as you type, and keeps the
 // address bar in step. Keys: arrows move between the box and the results, Escape clears.
 import { css, define, each, focus, html, nothing, type Command } from '@gyral/core';
+import { debounce } from '@gyral/time/delay';
 import { readQuery, search, writeQuery, type Hit } from './pagefind.js';
+
+/** Typing pauses this long before a search runs; a newer keystroke cancels the pending one. */
+const DEBOUNCE_MS = 120;
 
 export type Msg =
   | { readonly _tag: 'Started'; readonly query: string }
   | { readonly _tag: 'Typed'; readonly query: string }
+  /** Typing paused on this (trimmed) query. */
+  | { readonly _tag: 'Paused'; readonly query: string }
   | { readonly _tag: 'Submitted' }
   /** Arrow keys move between the box and the results; Escape clears. */
   | {
@@ -29,23 +35,29 @@ type Result =
   | { readonly _tag: 'Found'; readonly query: string; readonly hits: readonly Hit[] }
   | { readonly _tag: 'Failed'; readonly reason: string };
 
-/** The commands for a new query: keep `?q=` in step and, unless it's blank, search. */
-const run = (query: string): readonly Command<Msg>[] =>
-  query.trim() === ''
-    ? [writeQuery<Msg>('')]
-    : [
-        writeQuery<Msg>(query),
-        search(
-          query.trim(),
-          (hits): Msg => ({ _tag: 'Found', query: query.trim(), hits }),
-          (reason): Msg => ({ _tag: 'Failed', reason }),
-        ),
-      ];
+/** Searches for `query` (trimmed, not blank); a newer search cancels the one in flight. */
+const find = (query: string): Command<Msg> =>
+  search(
+    query,
+    (hits): Msg => ({ _tag: 'Found', query, hits }),
+    (reason): Msg => ({ _tag: 'Failed', reason }),
+  );
 
-const live = (query: string): readonly [State, readonly Command<Msg>[]] => [
-  { _tag: 'Live', query, result: query.trim() === '' ? { _tag: 'Empty' } : { _tag: 'Searching' } },
-  run(query),
-];
+/**
+ * A new query: keep `?q=` in step and, unless it's blank, search. Typing searches once it
+ * pauses (`debounce`); a query from the address bar searches at once.
+ */
+const live = (query: string, typed: boolean): readonly [State, readonly Command<Msg>[]] => {
+  const q = query.trim();
+  if (q === '') return [{ _tag: 'Live', query, result: { _tag: 'Empty' } }, [writeQuery<Msg>('')]];
+  return [
+    { _tag: 'Live', query, result: { _tag: 'Searching' } },
+    [
+      writeQuery<Msg>(query),
+      typed ? debounce<Msg>(DEBOUNCE_MS, { _tag: 'Paused', query: q }) : find(q),
+    ],
+  ];
+};
 
 /** Index of the focused result (`hit-3` → 3), or -1 for the search box. */
 const indexOf = (target: EventTarget | null): number => {
@@ -73,12 +85,14 @@ export const SiteSearch = define<State, Msg>('gd-site-search', {
       { _tag: 'Live', query: '', result: { _tag: 'Empty' } },
       [readQuery((query): Msg => ({ _tag: 'Started', query }))],
     ],
-    Started: (_s, m) => live(m.query),
-    Typed: (_s, m) => live(m.query),
+    Started: (_s, m) => live(m.query, false),
+    Typed: (_s, m) => live(m.query, true),
+    // A pause that a later edit made stale (or Escape cleared) searches for nothing.
+    Paused: (s, m) => (s._tag === 'Live' && s.query.trim() === m.query ? [s, [find(m.query)]] : s),
     Submitted: (s) => (hitsOf(s).length > 0 ? [s, [focus('#hit-0')]] : s),
     Key: (s, m) => {
       if (m.key === 'Escape') {
-        const [state, commands] = live('');
+        const [state, commands] = live('', false);
         return [state, [...commands, focus('#q')]];
       }
       const last = hitsOf(s).length - 1;

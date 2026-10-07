@@ -37,9 +37,6 @@ interface Pagefind {
 /** The index lives next to the pages; a variable keeps Vite from bundling it. */
 const PAGEFIND_URL = '/pagefind/pagefind.js';
 const MAX_HITS = 12;
-/** Typing pauses this long before a search runs; `switch` cancels the pending one. */
-const DEBOUNCE_MS = 120;
-
 let loaded: Promise<Pagefind> | undefined;
 const loadPagefind = (): Promise<Pagefind> => {
   loaded ??= (import(/* @vite-ignore */ PAGEFIND_URL) as Promise<Pagefind>).then(async (pf) => {
@@ -99,24 +96,10 @@ export const toHit = (d: PagefindResult): Hit => {
   };
 };
 
-const wait = (ms: number, signal: AbortSignal): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const timer = setTimeout(resolve, ms);
-    signal.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer);
-        reject(new DOMException('Aborted', 'AbortError'));
-      },
-      { once: true },
-    );
-  });
-
 const pagefind = defineDriver<string, readonly Hit[], string>({
   name: 'pagefind',
   concurrency: 'switch',
-  run: async (query, { signal }) => {
-    await wait(DEBOUNCE_MS, signal);
+  run: async (query) => {
     const pf = await loadPagefind();
     const found = await pf.search(query);
     const data = await Promise.all(
