@@ -9,13 +9,17 @@ import ts from 'typescript';
 import type { DocPage } from './docs.js';
 import { renderMarkdown, slugify } from './markdown.js';
 
-/** Every published package and its public entry points, in reading order. */
+/**
+ * Every published package and its public entry points, in reading order. Left out:
+ * `@gyral/core/compiled` (what the template compiler emits, not API) and `@gyral/ssr/hydrate`
+ * (kept for 0.2 imports; it does nothing since hydration moved into core).
+ */
 export const API_PACKAGES = [
-  { name: 'core', entries: ['.', './vite'] },
+  { name: 'core', entries: ['.', './server', './vite', './eslint'] },
   { name: 'http', entries: ['.', './testing'] },
   { name: 'router', entries: ['.'] },
   { name: 'time', entries: ['.'] },
-  { name: 'ssr', entries: ['.', './hydrate', './static'] },
+  { name: 'ssr', entries: ['.', './static'] },
   { name: 'testing', entries: ['.', './arbitraries'] },
   { name: 'devtools', entries: ['.'] },
 ] as const;
@@ -28,6 +32,7 @@ interface PackageJson {
   readonly description: string;
   readonly exports: Readonly<Record<string, string | { readonly types: string }>>;
   readonly peerDependencies?: Readonly<Record<string, string>>;
+  readonly peerDependenciesMeta?: Readonly<Record<string, { readonly optional?: boolean }>>;
 }
 
 interface Entry {
@@ -60,7 +65,7 @@ function loadPackage(name: string, entries: readonly string[]): Package {
   };
 }
 
-type Kind = 'function' | 'class' | 'constant' | 'type' | 'lit';
+type Kind = 'function' | 'class' | 'constant' | 'type';
 
 interface ApiSymbol {
   readonly name: string;
@@ -74,7 +79,6 @@ const GROUPS: readonly { readonly kind: Kind; readonly title: string }[] = [
   { kind: 'class', title: 'Classes' },
   { kind: 'constant', title: 'Constants' },
   { kind: 'type', title: 'Types and interfaces' },
-  { kind: 'lit', title: 'Re-exported from Lit' },
 ];
 
 const tidy = (text: string): string =>
@@ -114,12 +118,10 @@ function declarationText(node: ts.Declaration, name: string, checker: ts.TypeChe
 }
 
 function kindOf(node: ts.Declaration, checker: ts.TypeChecker): Kind {
-  const file = node.getSourceFile().fileName;
-  if (/\/node_modules\/(lit|lit-html|lit-element|@lit)\//.test(file)) return 'lit';
   if (ts.isFunctionDeclaration(node)) return 'function';
   if (ts.isClassDeclaration(node)) return 'class';
   if (ts.isVariableDeclaration(node)) {
-    // Arrow functions and directives (`directive(X)` returns a function) are called.
+    // Arrow functions and builders that return functions (`defineHook(…)`) are called.
     return checker.getTypeAtLocation(node).getCallSignatures().length > 0 ? 'function' : 'constant';
   }
   return 'type';
@@ -139,7 +141,7 @@ function describeExports(program: ts.Program, file: string): ApiSymbol[] {
     return {
       name: exported.name,
       kind,
-      declaration: kind === 'lit' ? '' : declarationText(node, exported.name, checker),
+      declaration: declarationText(node, exported.name, checker),
       doc: ts.displayPartsToString(symbol.getDocumentationComment(checker)),
     };
   });
@@ -207,12 +209,6 @@ function entryMarkdown(entry: Entry, symbols: readonly ApiSymbol[]): string {
       .sort((a, b) => a.name.localeCompare(b.name));
     if (members.length === 0) continue;
     parts.push(`### ${group.title}\n`);
-    if (group.kind === 'lit') {
-      parts.push(
-        `${members.map((s) => `\`${s.name}\``).join(', ')}. Re-exported so components need one import; see the [Lit documentation](https://lit.dev/docs/api/).\n`,
-      );
-      continue;
-    }
     parts.push('| Name | Summary |\n| --- | --- |');
     for (const s of members) {
       parts.push(`| [\`${s.name}\`](#${anchor(entry.specifier, s.name)}) | ${summary(s.doc)} |`);
@@ -232,8 +228,11 @@ function entryMarkdown(entry: Entry, symbols: readonly ApiSymbol[]): string {
 }
 
 function packageMarkdown(pkg: Package, symbols: ReadonlyMap<string, readonly ApiSymbol[]>): string {
-  const peers = Object.keys(pkg.json.peerDependencies ?? {});
-  const install = [pkg.json.name, ...peers.filter((p) => p !== 'fast-check')].join(' ');
+  // Optional peers (Vite, ESLint and parse5 for core's tooling, fast-check) aren't needed to start.
+  const peers = Object.keys(pkg.json.peerDependencies ?? {}).filter(
+    (p) => pkg.json.peerDependenciesMeta?.[p]?.optional !== true,
+  );
+  const install = [pkg.json.name, ...peers].join(' ');
   return [
     `# ${pkg.json.name}\n`,
     `${pkg.json.description}\n`,

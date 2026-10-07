@@ -1,10 +1,13 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
+import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
-import { headersFor, parseHeaders } from '../scripts/lib/headers.js';
+import { headersFor, parseHeaders, withCsp } from '../scripts/lib/headers.js';
 
 const assets = {
   stylesheet: '/assets/site.css',
   clientEntry: '/assets/entry.js',
+  clientPreload: ['/assets/hydration-client.js'],
   shortcuts: '/assets/shortcuts.js',
   demoVideos: '/assets/demo-videos.js',
 };
@@ -26,6 +29,7 @@ describe('pages', () => {
     expect(html).toContain('<gd-loop-counter');
     expect(html).toContain('<template shadowroot'); // Declarative Shadow DOM
     expect(html).toContain('<script type="module" src="/assets/entry.js">');
+    expect(html).toContain('<link rel="modulepreload" href="/assets/hydration-client.js">');
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
   });
 
@@ -37,6 +41,7 @@ describe('pages', () => {
     expect(html).toContain('aria-current="page"');
     expect(html).toContain('<script type="module" src="/assets/shortcuts.js">');
     expect(html).not.toMatch(NO_ISLANDS);
+    expect(html).not.toContain('modulepreload');
     expect(html).toContain('<main id="main" data-pagefind-body');
     expect(html).toContain('<form action="/search/" method="get">');
     expect(html).toContain('<details class="docs-menu" data-pagefind-ignore>');
@@ -102,7 +107,7 @@ describe('what you can build', () => {
     expect(status).toBe(200);
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
     const videos = html.match(/<video[^>]*>/g) ?? [];
-    expect(videos).toHaveLength(6); // five demos, one of them with two scenes
+    expect(videos).toHaveLength(4); // three demos, one of them with two scenes
     for (const v of videos) {
       expect(v).toMatch(/poster="\/demos\/[\w-]+\.[0-9a-f]{8}\.webp"/);
       expect(v).toContain('preload="none"');
@@ -112,9 +117,7 @@ describe('what you can build', () => {
       const described = /aria-describedby="([^"]+)"/.exec(v)?.[1];
       expect(html).toContain(`id="${described ?? 'missing'}"`);
     }
-    expect(html.match(/<source src="\/demos\/[^"]+\.(?:webm|mp4)" type="video\//g)).toHaveLength(
-      12,
-    );
+    expect(html.match(/<source src="\/demos\/[^"]+\.(?:webm|mp4)" type="video\//g)).toHaveLength(8);
     expect(html).toContain('The usual way:');
     expect(html).toContain('https://github.com/gyraljs/gyral/tree/main/examples/typeahead-race');
     expect(html).toContain('<script type="module" src="/assets/demo-videos.js">');
@@ -155,7 +158,40 @@ describe('search', () => {
   });
 });
 
+describe('Content-Security-Policy', () => {
+  it('allows every inline <style> by hash, without unsafe-inline', async () => {
+    const csp = await siteCsp();
+    expect(csp).not.toContain('unsafe-inline');
+    expect(csp).toMatch(/^default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; /);
+    const styleSrc = csp.split('; ').find((d) => d.startsWith('style-src '));
+    for (const path of ['/', '/search/']) {
+      const { html } = await get(path);
+      const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1] ?? '');
+      expect(styles.length, path).toBeGreaterThan(0);
+      for (const text of styles) {
+        const hash = createHash('sha256').update(text).digest('base64');
+        expect(styleSrc, `${path}: <style> not in style-src`).toContain(`'sha256-${hash}'`);
+      }
+    }
+  });
+
+  it('has no inline style attributes on any kind of page', async () => {
+    for (const path of ['/', '/docs/views/', '/docs/api/core/', '/examples/', '/brand/']) {
+      expect((await get(path)).html, path).not.toMatch(/<[a-z][^<>]*\sstyle=/i);
+    }
+  });
+});
+
 describe('_headers', () => {
+  it('gets the Content-Security-Policy on the /* rule', () => {
+    const text = withCsp('# c /*\n/*\n  A: 1\n/assets/*\n  B: 2\n', "default-src 'self'");
+    expect(headersFor(parseHeaders(text), '/')).toEqual([
+      ['Content-Security-Policy', "default-src 'self'"],
+      ['A', '1'],
+    ]);
+    expect(() => withCsp('/assets/*\n  B: 2\n', 'x')).toThrow(/no "\/\*" rule/);
+  });
+
   it('applies every matching rule in order', () => {
     const rules = parseHeaders('# c\n/*\n  A: 1\n/assets/*\n  B: 2\n');
     expect(headersFor(rules, '/assets/x.js')).toEqual([

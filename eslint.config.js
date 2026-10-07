@@ -4,9 +4,10 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import compat from 'eslint-plugin-compat';
 import globals from 'globals';
+import gyral from '@gyral/core/eslint';
 
-const RAW_LIT =
-  "Build islands with @gyral/core define() and import html/css through it. Raw LitElement components don't hydrate in production builds (gyral consumer setup).";
+const SERVER_ONLY =
+  'Islands run in the browser: server rendering (@gyral/core/server, @gyral/ssr) stays in src/render. Hydration is built into @gyral/core.';
 
 export default tseslint.config(
   {
@@ -30,6 +31,8 @@ export default tseslint.config(
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
     },
   },
+  // Gyral's template rules (the same messages as `vite build`) and pure `each` rows.
+  { files: ['src/**/*.ts', 'test/**/*.ts'], ...gyral.configs.recommended },
   {
     files: ['**/*.{js,mjs}'],
     ...tseslint.configs.disableTypeChecked,
@@ -59,7 +62,8 @@ export default tseslint.config(
         'error',
         {
           paths: [
-            { name: 'lit', message: RAW_LIT },
+            { name: '@gyral/core/server', message: SERVER_ONLY },
+            { name: '@gyral/ssr', message: SERVER_ONLY },
             {
               name: 'marked',
               message: 'Markdown renders at build time (src/content), never in the browser.',
@@ -71,27 +75,11 @@ export default tseslint.config(
           ],
           patterns: [
             { group: ['node:*'], message: 'Islands run in the browser: no Node built-ins.' },
+            { group: ['@gyral/ssr/*'], message: SERVER_ONLY },
             {
               group: ['../render/*', '../content/*'],
               message:
                 'Islands must not import server-only modules (src/render, src/content). See ARCHITECTURE.md.',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    // Server-only modules may use lit's nothing/directives but never define raw elements.
-    files: ['src/render/**/*.ts', 'src/content/**/*.ts'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['lit/decorators*', 'lit-element', '@lit/reactive-element'],
-              message: RAW_LIT,
             },
           ],
         },

@@ -1,6 +1,7 @@
 // The route table and the request handler: one function renders every page, and it serves
 // both the dev server (per request) and the build (prerendered to files).
-import { renderToStream, renderToString, serverHtml } from '@gyral/ssr';
+import { html, type ChildValue } from '@gyral/core';
+import { renderToStream, renderToString } from '@gyral/ssr';
 import { loadApiPages } from '../content/api.js';
 import { byReadingOrder, loadDocs, type DocPage } from '../content/docs.js';
 import { absolute } from '../site.js';
@@ -16,7 +17,7 @@ import { searchBody, searchMeta } from './search.js';
 
 interface Route {
   readonly meta: PageMeta;
-  readonly body: () => unknown;
+  readonly body: () => ChildValue | Promise<ChildValue>;
 }
 
 export interface Site {
@@ -37,7 +38,7 @@ const notFoundMeta: PageMeta = {
   noindex: true,
 };
 
-const notFoundBody = () => serverHtml`
+const notFoundBody = () => html`
   <section class="not-found prose" aria-labelledby="nf-title">
     <h1 id="nf-title">Page not found</h1>
     <p>There's no page at this address. It may have moved while the docs grow.</p>

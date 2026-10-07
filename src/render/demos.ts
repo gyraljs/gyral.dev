@@ -3,8 +3,7 @@
 // and the docs. Server-rendered; without JavaScript every video has its poster and controls.
 // src/demo-videos.ts plays a video while it is on screen, unless the visitor prefers reduced
 // motion.
-import { nothing } from 'lit';
-import { serverHtml } from '@gyral/ssr';
+import { html, nothing, type ChildValue } from '@gyral/core';
 import { loadDemos, usualWay, type LoadedDemo, type LoadedScene } from '../content/demos.js';
 import { absolute, LINKS } from '../site.js';
 import type { PageMeta } from './layout.js';
@@ -19,7 +18,7 @@ export const demosMeta: PageMeta = {
   path: DEMOS_PATH,
   title: 'What you can build',
   description:
-    'See what Gyral makes easy: undo and replay, type-ahead without stale results, pages that work before JavaScript, live themes and animated transitions. Short recordings, with source.',
+    'See what Gyral makes easy: undo and replay, type-ahead without stale results, and pages that work before JavaScript. Short recordings, with source.',
   searchable: true,
   markdown: true,
   demoVideos: true,
@@ -42,11 +41,11 @@ const sources = (scene: LoadedScene) =>
     ] as const
   )
     .toSorted((a, b) => a[2] - b[2])
-    .map(([kind, type]) => serverHtml`<source src=${scene.files[kind]} type=${type}>`);
+    .map(([kind, type]) => html`<source src=${scene.files[kind]} type=${type} />`);
 
 const video = (demo: LoadedDemo, scene: LoadedScene) => {
   const id = `${demo.slug}-${scene.id}`;
-  return serverHtml`
+  return html`
     <figure class="demo-clip">
       <video
         class="demo-video"
@@ -63,14 +62,14 @@ const video = (demo: LoadedDemo, scene: LoadedScene) => {
         ${sources(scene)}
       </video>
       <figcaption>
-        ${scene.label === undefined ? nothing : serverHtml`<strong>${scene.label}.</strong> `}
+        ${scene.label === undefined ? nothing : html`<strong>${scene.label}.</strong> `}
         <span id=${`${id}-desc`}>${scene.description}</span>
       </figcaption>
     </figure>
   `;
 };
 
-const section = (demo: LoadedDemo) => serverHtml`
+const section = (demo: LoadedDemo) => html`
   <section class="demo-item" id=${demo.slug} aria-labelledby=${`${demo.slug}-title`}>
     <div class="demo-text">
       <h2 id=${`${demo.slug}-title`}>${demo.title}</h2>
@@ -87,15 +86,15 @@ const section = (demo: LoadedDemo) => serverHtml`
   </section>
 `;
 
-export async function demosBody(): Promise<unknown> {
+export async function demosBody(): Promise<ChildValue> {
   const demos = await loadDemos();
-  return serverHtml`
+  return html`
     <section class="page-intro" aria-labelledby="demos-title">
       <h1 id="demos-title">What you can build</h1>
       <p>${DEMOS_INTRO}</p>
       <nav aria-label="Demos" data-pagefind-ignore>
         <ul role="list" class="chips">
-          ${demos.map((d) => serverHtml`<li><a href=${`#${d.slug}`}>${d.title}</a></li>`)}
+          ${demos.map((d) => html`<li><a href=${`#${d.slug}`}>${d.title}</a></li>`)}
         </ul>
       </nav>
     </section>
@@ -103,8 +102,8 @@ export async function demosBody(): Promise<unknown> {
     <section class="cta" aria-labelledby="demos-cta-title">
       <h2 id="demos-cta-title">Run them yourself</h2>
       <p>
-        Every demo is an example with tests. Clone the repository, then <code>pnpm install</code>
-        and <code>pnpm examples</code>.
+        Every demo is an example with tests. Clone the repository, then
+        <code>pnpm install</code> and <code>pnpm examples</code>.
       </p>
       <a class="button primary" href="/docs/getting-started/">Build your first component</a>
     </section>

@@ -28,6 +28,8 @@ import { pathToFileURL } from 'node:url';
 import { tsImport } from 'tsx/esm/api';
 
 const { DEMOS } = await tsImport('../src/content/demos.ts', import.meta.url);
+// The Gyral checkout (gyraljs/gyral on `main`): GYRAL_DIR, else the sibling folder
+// ../cyclejs-web-framework (the checkout's historical name), relative to the repo root.
 const gyral = resolve(process.env.GYRAL_DIR ?? '../cyclejs-web-framework');
 const check = process.argv.includes('--check');
 const record = process.argv.includes('--record');

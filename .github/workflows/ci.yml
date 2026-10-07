@@ -1,7 +1,8 @@
 # Runs LOCALLY only: `pnpm ci:local` (gh act + Docker). See docs/design-docs/0003-hosting.md.
 # Do not add push / pull_request / schedule triggers: scripts/check-workflows.mjs rejects them.
-# @gyral/* comes from npm, so only this repo is checked out. Without a Gyral checkout the
-# examples drift check (sync:examples --check) skips; run it locally next to the Gyral repo.
+# @gyral/* comes from the tarballs in vendor/ (until 0.3.0 is on npm), so only this repo is
+# checked out. Without a Gyral checkout the examples drift check (sync:examples --check) skips;
+# run it locally next to the Gyral repo.
 name: ci
 
 on:

@@ -14,6 +14,7 @@ const vite = await createViteServer({
 const DEV_ASSETS = {
   stylesheet: '/src/styles/site.css',
   clientEntry: '/src/entry-client.ts',
+  clientPreload: [],
   shortcuts: '/src/shortcuts.ts',
   demoVideos: '/src/demo-videos.ts',
 };

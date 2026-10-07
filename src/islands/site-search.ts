@@ -2,7 +2,7 @@
 // Server-rendered as the no-JavaScript message (search needs the browser), then enhanced on
 // `Hydrated`: it reads `?q=` (the header form lands here), searches as you type, and keeps the
 // address bar in step. Keys: arrows move between the box and the results, Escape clears.
-import { css, define, focus, html, nothing, type Command } from '@gyral/core';
+import { css, define, each, focus, html, nothing, type Command } from '@gyral/core';
 import { readQuery, search, writeQuery, type Hit } from './pagefind.js';
 
 export type Msg =
@@ -109,7 +109,7 @@ export const SiteSearch = define<State, Msg>('gd-site-search', {
                 autocomplete="off"
                 spellcheck="false"
                 aria-describedby="search-status"
-                .value=${s.query}
+                value=${s.query}
                 data-intent=${i.Typed}
               />
             </form>
@@ -213,20 +213,31 @@ const statusText = (s: Extract<State, { _tag: 'Live' }>): string => {
   }
 };
 
+/**
+ * One result. A pure row (it reads only its arguments), so `each` skips rows whose hit and
+ * position are unchanged. The position comes through `pick`: it names the link (`hit-3`) the
+ * arrow keys move to.
+ */
+const Result = (hit: Hit, n: number) =>
+  html`<li>
+    <a id=${`hit-${String(n)}`} href=${hit.url}>
+      <span class="area">${hit.area}</span>
+      <span class="title">${hit.title}</span>
+      <span class="excerpt"
+        >${hit.excerpt.map((run) => (run.mark ? html`<mark>${run.text}</mark>` : run.text))}</span
+      >
+    </a>
+  </li>`;
+
+/** Results are keyed by URL: Pagefind lists a page once, and a deep link is within its page. */
 const results = (hits: readonly Hit[]) =>
   hits.length === 0
     ? nothing
     : html`<ol aria-label="Search results">
-        ${hits.map(
-          (hit, n) =>
-            html`<li>
-              <a id=${`hit-${String(n)}`} href=${hit.url}>
-                <span class="area">${hit.area}</span>
-                <span class="title">${hit.title}</span>
-                <span class="excerpt"
-                  >${hit.excerpt.map((run) => (run.mark ? html`<mark>${run.text}</mark>` : run.text))}</span
-                >
-              </a>
-            </li>`,
+        ${each(
+          hits,
+          (hit) => hit.url,
+          Result,
+          (hit) => hits.indexOf(hit),
         )}
       </ol>`;

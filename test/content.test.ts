@@ -1,10 +1,10 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseFrontmatter } from '../src/content/frontmatter.js';
-import { renderMarkdown, slugify } from '../src/content/markdown.js';
+import { codeCss, renderMarkdown, slugify, styleClasses } from '../src/content/markdown.js';
 import { loadAllDocs, loadDoc, loadDocs } from '../src/content/docs.js';
 import { API_PACKAGES, docMarkdown, loadApiPages } from '../src/content/api.js';
 import { longDate, loadPost, loadPosts } from '../src/content/blog.js';
@@ -43,8 +43,20 @@ describe('markdown', () => {
   it('highlights known languages with both themes and escapes unknown ones', async () => {
     const { html } = await renderMarkdown('```ts\nconst a = 1;\n```\n\n```text\n<b>\n```\n');
     expect(html).toContain('data-lang="ts"');
-    expect(html).toContain('--shiki-dark');
+    expect(html).toMatch(/class="sl-[0-9a-f]{6} sd-[0-9a-f]{6}"/);
     expect(html).toContain('&lt;b&gt;');
+  });
+
+  it('colours code with classes, never inline styles (the CSP has no unsafe-inline)', async () => {
+    const { html } = await renderMarkdown('```ts\nconst a = "x"; // note\n```\n');
+    expect(html).not.toContain('style=');
+    const css = await readFile(new URL('../src/styles/code.css', import.meta.url), 'utf8');
+    expect(css, 'src/styles/code.css is out of date: run `pnpm sync:code-css`').toBe(
+      await codeCss(),
+    );
+    for (const [, name] of html.matchAll(/\b(s[ld]b?-[0-9a-f]{6})\b/g))
+      expect(css, `no rule for .${String(name)}`).toContain(`.${String(name)} {`);
+    expect(() => styleClasses('color:red')).toThrow(/no class/);
   });
 
   it('marks external links', async () => {
@@ -152,12 +164,21 @@ describe('API reference', () => {
     expect(md).toContain('- item\n  continues the item');
   });
 
+  it('keeps double-backtick code spans (html and css summaries)', async () => {
+    const core = (await loadApiPages())[0];
+    expect(core?.html).toContain('<code>html`&lt;p&gt;${s.text}&lt;/p&gt;`</code>');
+    expect(core?.html).toContain('<code>css`p { margin-block: ${GAP}px; }`</code>');
+  });
+
   it('generates a page per package, with every entry point', async () => {
     const pages = await loadApiPages();
     expect(pages.map((p) => p.path)).toEqual(API_PACKAGES.map((p) => `/docs/api/${p.name}/`));
     const core = pages[0];
     expect(core?.html).toContain('<code>define</code>');
     expect(core?.html).toContain('@gyral/core/vite');
+    expect(core?.html).toContain('@gyral/core/server');
+    expect(core?.html).toContain('@gyral/core/eslint');
+    expect(core?.html).not.toMatch(/\blit\b/i);
     expect(core?.headings.map((h) => h.text)).toContain('Functions');
   });
 });
