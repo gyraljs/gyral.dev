@@ -118,22 +118,22 @@ cancellation, concurrency lanes and retries.
 Apps ship only the features they use. `each`, `raw`, hooks, commands, stores and the prop builders
 register themselves when your code first calls them, so an app that never calls one doesn't
 bundle it, and the hydration code is a separate chunk that only server-rendered pages fetch.
-Measured on Gyral's examples (gzip, production builds with the preset):
+Measured on Gyral's examples (KiB gzip, production builds with the preset):
 
-| App                      | 0.2.0    | 0.3.0: first load | 0.3.1: first load | 0.3.1: all chunks |
-| ------------------------ | -------- | ----------------- | ----------------- | ----------------- |
-| hello-world              | 12.2 KiB | 8.9 KiB           | 8.4 KiB           | 10.8 KiB          |
-| hello-world, client-only | —        | —                 | 7.4 KiB           | 7.4 KiB           |
-| isomorphic (SSR)         | 17.3 KiB | 12.9 KiB          | 12.4 KiB          | 14.9 KiB          |
-| no-js-first (SSR, forms) | 18.7 KiB | 16.6 KiB          | 15.8 KiB          | 18.3 KiB          |
+| App                      | 0.2.0 | 0.3.1: first load | 0.3.1: all chunks |
+| ------------------------ | ----- | ----------------- | ----------------- |
+| hello-world              | 12.2  | 8.4               | 10.8              |
+| hello-world, client-only | —     | 7.4               | 7.4               |
+| isomorphic (SSR)         | 17.3  | 12.4              | 14.9              |
+| no-js-first (SSR, forms) | 18.7  | 15.8              | 18.3              |
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any
-lazy `import()`. 0.3.1 also leaves out view transitions, the frame lane and custom states unless
-a module names their spec field, and production builds print short error codes instead of
-messages (see [Error codes](/errors/)). The client-only row is the same app built with
-[`clientOnly: true`](/docs/rendering-modes/#client-only-builds). The [migration guide](/docs/migrating-0-2-to-0-3/#size) has this site's own
-numbers before and after 0.3.0, and the [0.3.1 one](/docs/migrating-0-3-0-to-0-3-1/#new-in-031)
-after 0.3.1.
+lazy `import()`. On 0.3.0 the same first loads were 8.9, 12.9 and 16.6 KiB. 0.3.1 leaves out
+view transitions, the frame lane and custom states unless a module names their spec field, and
+its production builds print short [error codes](/errors/) instead of messages. The client-only
+row is the same app built with [`clientOnly: true`](/docs/rendering-modes/#client-only-builds).
+The migration guides have this site's own numbers: [before and after
+0.3.0](/docs/migrating-0-2-to-0-3/#size), and [after 0.3.1](/docs/migrating-0-3-0-to-0-3-1/#new-in-031).
 
 Browser code targets [Baseline](https://web.dev/baseline) "widely available" features. Newer
 APIs, such as the Navigation API, URLPattern, invoker commands and View Transitions, are

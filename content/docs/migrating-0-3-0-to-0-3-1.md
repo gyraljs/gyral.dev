@@ -118,7 +118,7 @@ from 0.3.0 have nothing to change.
   whenever a component registers.
 - Smaller bundles: view transitions, the frame lane and custom states ship only when a module
   names their spec field, and production messages are codes. Hello-world's first load went
-  from 8.9 to 8.4 KiB gzip (7.4 KiB built client-only); see [Packages](/docs/packages/#whats-inside).
+  from 8.9 to 8.4 KiB gzip (7.4 KiB built client-only); see [Packages](/docs/packages/).
 
 This site's islands moved too. Their entry chunk was 13.7 KiB gzip (level 9) on 0.3.0 and is
 13.5 KiB on 0.3.1, although the search box now debounces with `@gyral/time/delay`, which added
