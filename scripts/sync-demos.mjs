@@ -1,5 +1,5 @@
 // `pnpm sync:demos` copies the demo recordings and their text from a Gyral checkout
-// (../cyclejs-web-framework, or GYRAL_DIR) into the site:
+// (../gyral, or GYRAL_DIR) into the site:
 // - the pitch and "usual way" lines from examples/<slug>/demo.mjs into content/demos.json;
 // - each scene's recording (.demos/<stem>.webm and .png, made by `pnpm demos:record` there)
 //   encoded for the web into public/demos/<stem>.<hash>.{webm,mp4,webp}: AV1 in WebM, H.264 in
@@ -29,8 +29,8 @@ import { tsImport } from 'tsx/esm/api';
 
 const { DEMOS } = await tsImport('../src/content/demos.ts', import.meta.url);
 // The Gyral checkout (gyraljs/gyral on `main`): GYRAL_DIR, else the sibling folder
-// ../cyclejs-web-framework (the checkout's historical name), relative to the repo root.
-const gyral = resolve(process.env.GYRAL_DIR ?? '../cyclejs-web-framework');
+// ../gyral, relative to the repo root.
+const gyral = resolve(process.env.GYRAL_DIR ?? '../gyral');
 const check = process.argv.includes('--check');
 const record = process.argv.includes('--record');
 const JSON_PATH = 'content/demos.json';
