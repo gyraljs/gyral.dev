@@ -86,12 +86,22 @@ its own, so apps whose hooks need no teardown don't bundle the tracking: rename 
 with a `dispose` is a type error and an error in development. 0.3.0 had neither, so apps coming
 from 0.3.0 have nothing to change.
 
+The first prerelease (0.3.1-next.0) also scanned the text of every dependency for spec fields
+and `raw(`, so a word in an unrelated package's comments could keep custom states or the
+invoker fallback. Later builds [read less](/docs/rendering-modes/#what-the-build-reads): if a
+package of yours writes spec fields but doesn't depend on Gyral, give it `@gyral/core` as a peer
+dependency.
+
 ## Small cleanups
 
 - `gyralVitePreset()` no longer returns an empty `resolve: { dedupe: [] }`, a leftover from Lit.
   Spreading the preset is unchanged; a config that read `gyralVitePreset().resolve` drops it.
 - `useDefineForClassFields: false` in `tsconfig.json` is a leftover from Lit too. New apps no
   longer set it, and existing apps can remove the line.
+- A package that writes `viewTransition`, `renderOnFrame` or `states` for your components but
+  doesn't depend on any `@gyral/*` package: declare `@gyral/core` as a peer dependency. The build
+  bundles those features only when it [sees the field](/docs/rendering-modes/#what-the-build-reads),
+  and it reads only your code and packages that depend on Gyral.
 - New development warnings may show up: a function in a property binding (`.onclick=${fn}`, or
   a function prop on a Gyral component), and, from ESLint's recommended config,
   `gyral/unused-intent` for intent parsers no template names.
@@ -106,11 +116,13 @@ from 0.3.0 have nothing to change.
   [`OUTPUT_EVENT`](/docs/components/#outputs-and-other-code) with `OutputEvent` and `OutputsOf`
   for parents that aren't Gyral components.
 - [Type guards in `prop.value()` and `prop.json()`](/docs/components/#objects-type-guards-and-identity),
-  and production builds that drop a `prop.value` check passed by name.
+  and production builds that drop a `prop.value` check passed by name (its schema leaves the
+  bundle where the bundler allows: single-chunk builds, or a schema library not shared across
+  chunks).
 - [`defineDisposableHook`](/docs/views/#widgets-with-a-lifecycle), and the advice to give
   widgets with a lifecycle their own custom element.
 - [Client-only builds](/docs/rendering-modes/#client-only-builds) with
-  `gyralVitePreset({ clientOnly: true })`.
+  `gyralVitePreset({ clientOnly: true })`, the default in `create-gyral`'s `basic` template.
 - [`@gyral/time/delay`](/docs/effects/#built-in-drivers): `delay` and `debounce` alone.
 - [Development errors that name the template's file, line and column](/docs/views/#checked-before-it-runs),
   under Vite exactly, elsewhere from the stack trace.

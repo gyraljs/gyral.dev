@@ -71,9 +71,9 @@ export default defineConfig({
 
 With `clientOnly: true` the browser bundle carries no hydration code: no seed reading and no
 hydration chunk, and when your app has no other `import()`, Vite's preload helper goes too. The
-fallback for [invoker commands](/docs/intent/#invoker-commands) stays only when some module, your
-dependencies included, may make a component listen for `command` intents. Measured on Gyral's
-examples (gzip, 0.3.1):
+fallback for [invoker commands](/docs/intent/#invoker-commands) stays only when a module may make
+a component listen for `command` intents ([what the build reads](#what-the-build-reads)).
+Measured on Gyral's examples (gzip, 0.3.1):
 
 | App         | Default: first load | Default: all chunks | `clientOnly: true` |
 | ----------- | ------------------- | ------------------- | ------------------ |
@@ -93,6 +93,40 @@ If server-rendered markup reaches a client-only build anyway, nothing breaks twi
 component drops the server's seed and DOM and renders fresh from its attributes, so a view is
 never doubled. Development warns once and names `clientOnly`; production renders fresh
 silently. The server's work is wasted, though, so treat that warning as a configuration bug.
+
+### Starting from create-gyral
+
+`create-gyral`'s `basic` template is client-only from the start: its `vite.config.ts` sets
+`gyralVitePreset({ clientOnly: true })`, and its `vitest.config.ts` reuses that config, so tests
+build the way the app does. A new app is about 7.5 KiB gzip, in one file. Keep the option while
+every page renders in the browser. Delete `clientOnly: true` as soon as any page is rendered on
+a server or prerendered, for example when you add `@gyral/ssr`: with it on, those components
+can't hydrate and render again from scratch. The `ssr` template builds without it.
+
+### What the build reads
+
+To decide what a bundle needs, the build reads the code that can affect your components, not
+your whole dependency tree:
+
+- **Which modules**: your own source (everything outside `node_modules`, workspace and linked
+  packages included), and installed packages that are Gyral packages or list a `@gyral/*`
+  package in `dependencies`, `peerDependencies` or `optionalDependencies`, directly or through
+  their own dependencies, such as a design system built on Gyral. Any other package can't
+  define a component or write its spec, so it isn't read.
+- **What counts**: the parsed source, not its text, so comments and type-only code never count.
+  The invoker fallback stays when a module's markup has `data-intent-on="command"` or a bound
+  `data-intent-on`, when it has the string `'command'` on its own (`events: ['command']`, a
+  `setAttribute`), or when it uses `raw` imported from `@gyral/core` (under any alias, or
+  through a module that re-exports it), whose markup is only known at run time. A function of
+  another package that happens to be called `raw` doesn't count.
+
+Every build with the preset, client-only or not, uses the same scan for three opt-in features:
+view transitions, the frame lane and custom states are bundled only when a module names
+`viewTransition`, `renderOnFrame` or `states` in code. Write these field names literally: a name
+built at run time isn't seen, and the feature then degrades as on a browser without it
+(development builds warn). A package that writes these fields for your components must depend
+on Gyral to be read: if it doesn't, declare `@gyral/core` as a peer dependency in its
+`package.json`.
 
 This site server-renders its pages and hydrates two islands, so it builds without the option.
 

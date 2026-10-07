@@ -129,8 +129,10 @@ Measured on Gyral's examples (KiB gzip, production builds with the preset):
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any
 lazy `import()`. On 0.3.0 the same first loads were 8.9, 12.9 and 16.6 KiB. 0.3.1 leaves out
-view transitions, the frame lane and custom states unless a module names their spec field, and
-its production builds print short [error codes](/errors/) instead of messages. The client-only
+view transitions, the frame lane and custom states unless a module names their spec field (the
+build reads your code and the packages that depend on Gyral; see [what the build
+reads](/docs/rendering-modes/#what-the-build-reads)), and its production builds print short
+[error codes](/errors/) instead of messages. The client-only
 row is the same app built with [`clientOnly: true`](/docs/rendering-modes/#client-only-builds).
 The migration guides have this site's own numbers: [before and after
 0.3.0](/docs/migrating-0-2-to-0-3/#size), and [after 0.3.1](/docs/migrating-0-3-0-to-0-3-1/#new-in-031).

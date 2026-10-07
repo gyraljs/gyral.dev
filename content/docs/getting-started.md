@@ -26,7 +26,9 @@ npm run dev
 There are two templates:
 
 - **`basic`**: a client-rendered app. The page loads and your components render in the
-  browser.
+  browser. It builds [client-only](/docs/rendering-modes/#client-only-builds), without
+  hydration code; remove `clientOnly: true` from `vite.config.ts` before you render any page
+  on a server.
 - **`ssr`**: the same component rendered on the server first, so the page works before any
   JavaScript loads, then [hydrated](/docs/server-rendering/) in place.
 

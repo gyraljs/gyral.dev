@@ -191,6 +191,10 @@ export const SeatPicker = define<Stateless, never, PropsOf<typeof props>>('my-se
   `schemas.seat`) or an inline function, so the schema's code can leave the bundle. A call
   written in place, such as `prop.value(v.array(Seat))`, stays, because evaluating it could have
   effects. `prop.json` keeps its check: attributes are always parsed.
+- **Whether the schema really leaves is up to the bundler.** Vite 8.3 (Rolldown) keeps schema
+  code in a lazily loaded chunk once the schema library sits in a chunk shared with the entry,
+  even when its builders are marked free of side effects. So the saving shows in single-chunk
+  builds, and for schemas whose library isn't shared across chunks.
 - **`null` for an explicit "nobody".** A `default` replaces only `undefined`: setting a prop to
   `undefined`, or removing its attribute, brings the default back. Make the schema nullable and
   pass `.holder=${null}` (or the attribute `holder="null"` with `prop.json`).
