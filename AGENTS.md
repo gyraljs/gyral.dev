@@ -13,23 +13,23 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 ## Commands
 
-| Command              | What it does                                                                                          |
-| -------------------- | ----------------------------------------------------------------------------------------------------- |
-| `pnpm install`       | Install. `@gyral/*` 0.3 comes from the tarballs in `../gyral-tarballs` until it is on npm             |
-| `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual   |
-| `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                            |
-| `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                     |
-| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                        |
-| `pnpm interop`       | Docs interop claims in Chromium: props, `gyral-output`, third-party events (test/interop/)            |
-| `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search         |
-| `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally)   |
-| `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                                    |
-| `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                                   |
-| `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                         |
-| `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                                  |
-| `pnpm sync:examples` | Copy example excerpts from `../gyral-next` (else `../cyclejs-web-framework`) into `content/examples/` |
-| `pnpm sync:demos`    | Encode demo recordings from the Gyral checkout into `public/demos/` (`--record` re-records first)     |
-| `pnpm sync:code-css` | Regenerate `src/styles/code.css` (code-block colour classes) after a Shiki or theme change            |
+| Command              | What it does                                                                                        |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| `pnpm install`       | Install. `@gyral/*` 0.3.0 comes from `vendor/` until it is on npm (vendor/README.md)                |
+| `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual |
+| `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                          |
+| `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                   |
+| `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers`, on http://localhost:5401                      |
+| `pnpm interop`       | Docs interop claims in Chromium: props, `gyral-output`, third-party events (test/interop/)          |
+| `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search       |
+| `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally) |
+| `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                                  |
+| `pnpm ci:local`      | Run `.github/workflows/ci.yml` locally via `gh act`                                                 |
+| `pnpm run deploy`    | Gate, then upload `dist/` to Cloudflare Pages (owner; needs `wrangler login`)                       |
+| `pnpm sync:brand`    | Copy logos and icons from a `../gyral-brand` checkout into `public/`                                |
+| `pnpm sync:examples` | Copy example excerpts from `GYRAL_DIR` (else `../cyclejs-web-framework`) into `content/examples/`   |
+| `pnpm sync:demos`    | Encode demo recordings from the Gyral checkout into `public/demos/` (`--record` re-records first)   |
+| `pnpm sync:code-css` | Regenerate `src/styles/code.css` (code-block colour classes) after a Shiki or theme change          |
 
 First run needs `pnpm exec playwright install chromium`.
 

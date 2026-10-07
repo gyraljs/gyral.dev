@@ -38,6 +38,8 @@ Build the site with Gyral and its own SSR package, with no site framework:
 Gyral 0.3 replaces Lit with its own view layer (Gyral ADR 0018). The site moved on branch
 `gyral-0.3`, before 0.3.0 is published: `@gyral/*` come from tarballs packed from Gyral's `next`
 branch into `../gyral-tarballs` (`file:` dependencies plus pnpm `overrides`, because the
-tarballs depend on each other at the prerelease version). Switch back to npm ranges when 0.3.0
-is published. `lit`, `@lit-labs/ssr`, `@lit-labs/ssr-client` and the `lit-html` pin are gone;
-templates are compiled by the Vite preset and linted with `@gyral/core/eslint`.
+tarballs depend on each other at the prerelease version). On 2026-10-07, with Gyral 0.3.0
+released on GitHub (tag `v0.3.0`) but not yet on npm, the release tarballs were vendored into
+`vendor/` and the branch merged to `main`; switch to `^0.3.0` from npm when it is published
+(vendor/README.md). `lit`, `@lit-labs/ssr`, `@lit-labs/ssr-client` and the `lit-html` pin are
+gone; templates are compiled by the Vite preset and linted with `@gyral/core/eslint`.
