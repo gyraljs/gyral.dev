@@ -16,7 +16,7 @@ pnpm dev      # http://localhost:5400
 pnpm check    # the full gate, including a production build and a browser smoke test
 ```
 
-`@gyral/*` 0.3.1-next.0, a prerelease of Gyral 0.3.1 (the version the docs describe), comes
+`@gyral/*` 0.3.1-next.1, a prerelease of Gyral 0.3.1 (the version the docs describe), comes
 from the tarballs in `vendor/` (`file:` dependencies and pnpm overrides) until 0.3.1 is on npm;
 [vendor/README.md](vendor/README.md) says how to update or remove them. A checkout of
 `gyraljs/gyral` is only needed for `pnpm sync:examples` and `pnpm sync:demos`: `GYRAL_DIR` if set,
