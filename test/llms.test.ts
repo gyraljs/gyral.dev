@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadApiPages } from '../src/content/api.js';
+import { loadErrorsPage } from '../src/content/errors.js';
 import { loadPosts } from '../src/content/blog.js';
 import { byReadingOrder, loadDocs } from '../src/content/docs.js';
 import { absoluteLinks, buildLlmsFiles, twinPath, type LlmsFiles } from '../src/content/llms.js';
@@ -46,7 +47,11 @@ describe('Markdown for agents', () => {
   });
 
   it('covers every real docs and API page, with clean Markdown', async () => {
-    const docs = [...(await loadDocs()), ...(await loadApiPages())].sort(byReadingOrder);
+    const docs = [
+      ...(await loadDocs()),
+      ...(await loadApiPages()),
+      ...(await loadErrorsPage()),
+    ].sort(byReadingOrder);
     const files = await buildLlmsFiles('0.1.0', docs, await loadPosts());
     const written = new Set([
       ...files.twins.map((t) => t.path),

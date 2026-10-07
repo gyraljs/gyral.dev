@@ -103,3 +103,20 @@ about runtime behaviour that the snippet typecheck can't prove (attribute conver
 `pnpm interop` (`scripts/check-interop.mjs`, in `pnpm check`) bundles `test/interop/entry.ts`
 with the published `@gyral/core` and checks each claim in Chromium. React, Vue and Svelte
 recipes on those pages are marked "not yet tested by Gyral" until a test covers them.
+
+## Addendum: the error codes page (2026-10-07)
+
+Since Gyral 0.3.1, production builds of `@gyral/core` print `Gyral G0010 <arguments…>
+https://gyral.dev/errors/#G0010` instead of a message, so `/errors/` and an anchor per code must
+exist exactly as the package prints them.
+
+- **`/errors/`** is a generated docs page in the Reference section (`src/content/errors.ts`),
+  like the API reference: the codes, their groups and their texts are read at build time from the
+  installed package's own table (`@gyral/core/dist/view/messages.js`, which Gyral's
+  `docs/references/errors.json` is generated from), so they can't drift. Each code is an `h3`
+  with the id `G0010` and a self-link, its message as written, its arguments in the order production
+  prints them, and the site's explanation and fix (`ERROR_NOTES`). The Markdown twin uses
+  `### G0010`. The footer links the page.
+- `test/errors.test.ts` fails when the package has a code without an explanation (or the site
+  explains a code that no longer exists), when a code has no anchor on the rendered page, and
+  when the package's `ERRORS_URL` stops pointing at this page.

@@ -3,6 +3,7 @@
 import { html, type ChildValue } from '@gyral/core';
 import { renderToStream, renderToString } from '@gyral/ssr';
 import { loadApiPages } from '../content/api.js';
+import { loadErrorsPage } from '../content/errors.js';
 import { byReadingOrder, loadDocs, type DocPage } from '../content/docs.js';
 import { absolute } from '../site.js';
 import { docBody, docMeta } from './docs.js';
@@ -57,7 +58,11 @@ export async function createSite(
   docs?: readonly DocPage[],
   blog?: readonly Post[],
 ): Promise<Site> {
-  const pages = docs ?? [...(await loadDocs()), ...(await loadApiPages())].sort(byReadingOrder);
+  const pages =
+    docs ??
+    [...(await loadDocs()), ...(await loadApiPages()), ...(await loadErrorsPage())].sort(
+      byReadingOrder,
+    );
   const posts = blog ?? (await loadPosts());
   const table = new Map<string, Route>([
     ['/', { meta: homeMeta, body: homeBody }],

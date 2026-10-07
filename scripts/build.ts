@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { clientAssetsFromManifest, clientEntryFromManifest, prerender } from '@gyral/ssr/static';
 import * as pagefind from 'pagefind';
 import { loadApiPages } from '../src/content/api.js';
+import { loadErrorsPage } from '../src/content/errors.js';
 import { loadPosts, type Post } from '../src/content/blog.js';
 import { byReadingOrder, loadDocs, type DocPage } from '../src/content/docs.js';
 import { buildLlmsFiles } from '../src/content/llms.js';
@@ -29,7 +30,9 @@ export async function buildSite(dist: string): Promise<readonly string[]> {
     shortcuts: await clientEntryFromManifest(manifest, 'src/shortcuts.ts'),
     demoVideos: await clientEntryFromManifest(manifest, 'src/demo-videos.ts'),
   };
-  const docs = [...(await loadDocs()), ...(await loadApiPages())].sort(byReadingOrder);
+  const docs = [...(await loadDocs()), ...(await loadApiPages()), ...(await loadErrorsPage())].sort(
+    byReadingOrder,
+  );
   const posts = await loadPosts();
   const site = await createSite(assets, docs, posts);
   const pages = await prerender({

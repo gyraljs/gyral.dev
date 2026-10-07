@@ -149,6 +149,7 @@ const siteFooter = () => html`
           <li><a href="/docs/">Documentation</a></li>
           <li><a href="/docs/getting-started/">Getting started</a></li>
           <li><a href="/docs/api/">API reference</a></li>
+          <li><a href="/errors/">Error codes</a></li>
           <li><a href="/what-you-can-build/">What you can build</a></li>
           <li><a href="/examples/">Examples</a></li>
           <li><a href="/blog/">Blog</a></li>
