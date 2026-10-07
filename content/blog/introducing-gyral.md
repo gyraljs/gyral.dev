@@ -8,7 +8,7 @@ author: Mike Zupper
 # Introducing Gyral
 
 Gyral is a small framework for building web components with Model-View-Intent. Version 0.1 is on
-npm today, under the MIT licence.
+npm today, under the MIT license.
 
 A Gyral component is three pure functions and a little data:
 

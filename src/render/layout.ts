@@ -167,7 +167,7 @@ const siteFooter = () => html`
     <p class="credit">This site is built with Gyral.</p>
     <p class="legal">
       <small>
-        Code under the MIT licence. © ${COPYRIGHT_YEAR} Mike Zupper. Gyral, gyraljs and the Gyral
+        Code under the MIT license. © ${COPYRIGHT_YEAR} Mike Zupper. Gyral, gyraljs and the Gyral
         logo are trademarks of Mike Zupper.
       </small>
     </p>

@@ -203,7 +203,7 @@ export function brandBody(): ChildValue {
       <h2 id="trademark-title">Trademarks</h2>
       <p>
         Gyral, gyraljs and the Gyral logo are trademarks of Mike Zupper. The code is open source
-        under the MIT licence; the artwork is not, so that the logo only ever means "this is Gyral".
+        under the MIT license; the artwork is not, so that the logo only ever means "this is Gyral".
       </p>
       <p>You may use the logos, without asking, to:</p>
       <ul>

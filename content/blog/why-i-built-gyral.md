@@ -119,7 +119,7 @@ in place. Without a real application, that bug would have shipped.
 
 Gyral exists because Cycle.js showed the way. Thank you to André Staltz and the Cycle.js
 contributors for an idea that was worth carrying forward. Gyral is a new implementation, and
-its `NOTICE` file credits Cycle.js under its MIT licence.
+its `NOTICE` file credits Cycle.js under its MIT license.
 
 If you used Cycle.js, I'd like to hear how Gyral compares for you.
 [Coming from Cycle.js](/docs/coming-from-cyclejs/) maps the concepts one to one, and the
