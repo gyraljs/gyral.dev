@@ -16,10 +16,22 @@
 /demos/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Files that aren't HTML don't get the site's Content-Security-Policy (`!` detaches a header a
+# more general rule set): it protects nothing in them, and browsers show them with built-in
+# viewers whose inline styles it would block (Chrome's XML viewer on the sitemap, the text
+# viewer's line wrapping). The other /* headers stay.
+/sitemap.xml
+  ! Content-Security-Policy
+/robots.txt
+  ! Content-Security-Policy
+
 # Files for agents (src/content/llms.ts). Cached like the HTML pages (Cloudflare's default).
 /llms.txt
   Content-Type: text/plain; charset=utf-8
+  ! Content-Security-Policy
 /llms-full.txt
   Content-Type: text/plain; charset=utf-8
+  ! Content-Security-Policy
 /*.md
   Content-Type: text/markdown; charset=utf-8
+  ! Content-Security-Policy

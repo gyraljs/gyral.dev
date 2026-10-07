@@ -18,6 +18,7 @@ import { llmsProblems } from '../src/content/llms-check.js';
 import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
 import { withCsp } from './lib/headers.js';
+import { sitemapDates } from './lib/lastmod.js';
 import type { Assets } from '../src/render/layout.js';
 
 export async function buildSite(dist: string): Promise<readonly string[]> {
@@ -42,7 +43,7 @@ export async function buildSite(dist: string): Promise<readonly string[]> {
     origin: 'https://gyral.dev',
   });
   await writeFile(join(dist, '404.html'), await site.notFound());
-  await writeFile(join(dist, 'sitemap.xml'), sitemap(site.sitemapPaths));
+  await writeFile(join(dist, 'sitemap.xml'), sitemap(site.sitemapPaths, sitemapDates(docs, posts)));
   // public/_headers (copied by Vite) plus the Content-Security-Policy with this build's hashes.
   const headers = join(dist, '_headers');
   await writeFile(headers, withCsp(await readFile(headers, 'utf8'), await siteCsp()));

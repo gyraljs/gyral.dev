@@ -7,6 +7,9 @@
 // - no horizontal overflow at phone width;
 // - every internal link and fragment resolves;
 // - every rule in the built `_redirects` answers with its status and lands on a 200 page;
+// - sitemap.xml, robots.txt and the llms files come without the CSP (Chrome's XML and text
+//   viewers use inline styles) and open in Chromium without console errors; the sitemap has
+//   `<lastmod>` for blog posts;
 // - the home page's counter hydrates in place (it keeps the server's nodes) and counts;
 // - /search/ (not in the sitemap) finds the expected pages through the header form, and its
 //   keys work: arrows move through results, Escape clears.
@@ -53,6 +56,7 @@ try {
   await pool(tasks, CONCURRENCY, (task) => checkPage(task, links));
   await checkLinks(links);
   await checkRedirects();
+  await checkNonHtml();
 } finally {
   await browser.close();
   server.close();
@@ -208,6 +212,29 @@ async function checkLinks(links) {
       fail('links', `${key}${url.hash}: no element with that id`);
     }
   }
+}
+
+async function checkNonHtml() {
+  for (const path of ['/sitemap.xml', '/robots.txt', '/llms.txt', '/llms-full.txt']) {
+    const res = await fetch(base + path);
+    if (res.status !== 200) fail('non-HTML', `${path} → ${String(res.status)}`);
+    if (res.headers.has('content-security-policy')) fail('non-HTML', `${path} has a CSP`);
+    if (!res.headers.has('x-content-type-options')) fail('non-HTML', `${path} lost the /* headers`);
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const errors = [];
+    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+    await page.goto(base + path);
+    if (errors.length > 0) fail('non-HTML', `${path}: ${errors.join(' | ')}`);
+    await context.close();
+  }
+  const html = await fetch(`${base}/docs/`);
+  if (!html.headers.has('content-security-policy')) fail('non-HTML', 'pages lost their CSP');
+  const xml = readFileSync(`${dist}sitemap.xml`, 'utf8');
+  if (
+    !/<loc>https:\/\/gyral\.dev\/blog\/[^<]+<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(xml)
+  )
+    fail('non-HTML', 'sitemap.xml has no <lastmod> for blog posts');
 }
 
 async function checkRedirects() {

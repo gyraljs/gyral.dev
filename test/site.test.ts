@@ -4,6 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
 import { headersFor, parseHeaders, withCsp } from '../scripts/lib/headers.js';
+import { lastCommitDates, sitemapDates, type Git } from '../scripts/lib/lastmod.js';
+import type { Post } from '../src/content/blog.js';
+import type { DocPage } from '../src/content/docs.js';
 import { parseRedirects, redirectFor } from '../scripts/lib/redirects.js';
 
 const assets = {
@@ -207,6 +210,86 @@ describe('_headers', () => {
     const rules = parseHeaders('/*.md\n  C: 3\n');
     expect(headersFor(rules, '/docs/x/index.md')).toEqual([['C', '3']]);
     expect(headersFor(rules, '/docs/x/')).toEqual([]);
+  });
+
+  it('detaches a header a more general rule set (`! Name`, any case)', () => {
+    const rules = parseHeaders('/*\n  A: 1\n  B: 2\n/x.xml\n  ! a\n');
+    expect(headersFor(rules, '/x.xml')).toEqual([['B', '2']]);
+    expect(headersFor(rules, '/')).toEqual([
+      ['A', '1'],
+      ['B', '2'],
+    ]);
+  });
+
+  it('keeps the CSP off files that browsers show in built-in viewers, and on pages', () => {
+    // The built file: public/_headers plus the CSP scripts/build.ts adds to /*.
+    const rules = parseHeaders(
+      withCsp(readFileSync('public/_headers', 'utf8'), "default-src 'self'"),
+    );
+    const names = (path: string) => headersFor(rules, path).map(([k]) => k.toLowerCase());
+    for (const path of [
+      '/sitemap.xml',
+      '/robots.txt',
+      '/llms.txt',
+      '/llms-full.txt',
+      '/docs/intent/index.md',
+    ]) {
+      expect(names(path), path).not.toContain('content-security-policy');
+      expect(names(path), path).toContain('x-content-type-options');
+      expect(names(path), path).toContain('strict-transport-security');
+    }
+    for (const path of ['/', '/docs/intent/', '/errors/', '/404.html']) {
+      expect(names(path), path).toContain('content-security-policy');
+    }
+  });
+});
+
+describe('sitemap <lastmod>', () => {
+  const doc = (slug: string, source?: string) =>
+    ({ slug, path: `/docs/${slug}/`, source }) as unknown as DocPage;
+  const post = { path: '/blog/hello/', date: '2026-10-05' } as Post;
+  /** A fake git: a full clone where every file was last committed on 2026-10-01. */
+  const git =
+    (shallow: boolean): Git =>
+    (args) =>
+      args[0] === 'rev-parse' ? String(shallow) : args[0] === 'log' ? '2026-10-01' : undefined;
+
+  it('writes <lastmod> only for the pages it is given a date for', () => {
+    const xml = sitemap(['/', '/blog/hello/'], new Map([['/blog/hello/', '2026-10-05']]));
+    expect(xml).toContain('<url><loc>https://gyral.dev/</loc></url>');
+    expect(xml).toContain(
+      '<url><loc>https://gyral.dev/blog/hello/</loc><lastmod>2026-10-05</lastmod></url>',
+    );
+  });
+
+  it('dates posts by front matter and Markdown docs by their last commit', () => {
+    const dates = sitemapDates(
+      [doc('intent'), doc('api/core', 'https://…')],
+      [post],
+      git(false),
+      '2026-10-07',
+    );
+    expect([...dates]).toEqual([
+      ['/docs/intent/', '2026-10-01'],
+      ['/blog/hello/', '2026-10-05'],
+    ]);
+  });
+
+  it('gives a post dated in the future no date', () => {
+    expect([...sitemapDates([], [post], git(false), '2026-10-04')]).toEqual([]);
+  });
+
+  it('gives docs no date in a shallow clone, where every file has the clone’s date', () => {
+    expect([...sitemapDates([doc('intent')], [post], git(true), '2026-10-07')]).toEqual([
+      ['/blog/hello/', '2026-10-05'],
+    ]);
+  });
+
+  it('reads real commit dates, and none for a file git doesn’t know', () => {
+    const dates = lastCommitDates(['content/docs/intent.md', 'content/docs/no-such-page.md']);
+    if (dates.size === 0) return; // no git history here (a shallow or exported checkout)
+    expect(dates.get('content/docs/intent.md')).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(dates.has('content/docs/no-such-page.md')).toBe(false);
   });
 });
 

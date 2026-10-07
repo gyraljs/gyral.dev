@@ -97,10 +97,18 @@ export async function createSite(
   };
 }
 
-/** sitemap.xml for every indexable path. */
-export const sitemap = (paths: readonly string[]): string =>
+/** sitemap.xml for every indexable path, with `<lastmod>` where the date is known. */
+export const sitemap = (
+  paths: readonly string[],
+  lastmod: ReadonlyMap<string, string> = new Map(),
+): string =>
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${paths.map((p) => `  <url><loc>${absolute(p)}</loc></url>`).join('\n')}
+${paths
+  .map((p) => {
+    const day = lastmod.get(p);
+    return `  <url><loc>${absolute(p)}</loc>${day === undefined ? '' : `<lastmod>${day}</lastmod>`}</url>`;
+  })
+  .join('\n')}
 </urlset>
 `;

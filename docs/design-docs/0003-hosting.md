@@ -55,6 +55,22 @@ Status: **accepted** (2026-10-05)
   default caching, like the HTML pages.
 - `/demos/*` (demo recordings and posters) has content-hashed names: cached for a year, immutable
   (gyral-7se.7).
+- **No CSP on files that aren't HTML** (site-4a1, 2026-10-07): `/sitemap.xml`, `/robots.txt`,
+  `/llms.txt`, `/llms-full.txt` and the Markdown twins detach it with Cloudflare's documented
+  `! Content-Security-Policy` under their own rule (a detach removes a header a more general rule
+  such as `/*` set). The policy protects nothing in them, and browsers show them with built-in
+  viewers whose inline styles it blocked: Chrome's XML viewer showed the sitemap broken. The other
+  `/*` headers stay. `scripts/lib/headers.ts` (the preview server) applies detaches the same way;
+  `test/site.test.ts` checks the built rules and `pnpm smoke` opens each file in Chromium.
+
+## Sitemap
+
+`dist/sitemap.xml` lists every indexable page. `<lastmod>` is written only where the date is
+known (`scripts/lib/lastmod.ts`): a blog post's front-matter `date` (none while that date is
+still in the future), and a Markdown docs page's
+last commit (`git log -1 --format=%cs`). Generated pages (API reference, errors) and the other
+pages get none, and neither do docs pages in a shallow clone, where every file would carry the
+clone's date.
 
 ## Search (site-54d.23, 2026-10-05)
 
