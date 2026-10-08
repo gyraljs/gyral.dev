@@ -1,6 +1,6 @@
 ---
 title: Migrating from 0.3.0 to 0.3.1
-description: Move a Gyral 0.3.0 app to 0.3.1 - stricter svg checks, a settled() that waits for message chains, short production errors - and what's new.
+description: Move a Gyral 0.3.0 app to 0.3.1 - stricter svg checks, a settled() that waits for message chains, declining parsers, prop equality - and what's new.
 section: Reference
 order: 3
 ---
@@ -83,18 +83,44 @@ it against the old page.
 - In browsers without the Navigation API, the History API code now loads on first use, so the
   first navigation there resolves a moment later.
 
+## Behavior changes
+
+These keep compiling but behave differently. Check each against your app and its tests.
+
+- **A parser's `undefined` declines the event.** In 0.3.0 the nearest element with an intent
+  for an event took it, and a parser that returned `undefined` ended the lookup. Now a
+  synchronous `undefined` passes the event to the next intent outward for the same event, within
+  the component ([Declining](/docs/intent/#declining-passing-an-event-outward)). An outer intent
+  can therefore receive events that an inner parser ignored: a wrapper's `keydown` intent now
+  sees the keys an input's own `keydown` intent declined. If the outer intent must not see them,
+  have the inner parser return a message that changes nothing, or check `event.target` in the
+  outer parser. Async parsers keep the event, as before.
+- **A prop that receives an equal value changes nothing.** No render and no `PropsChanged`:
+  `prop.string`, `prop.number` and `prop.boolean` compare with `Object.is`, `prop.json` compares
+  the `JSON.stringify` text, and `prop.value` compares with `Object.is` or its new `equals`
+  option ([When a prop counts as changed](/docs/components/#when-a-prop-counts-as-changed)). A
+  parent that binds a fresh but equal object to a `prop.json` prop on every render no longer
+  re-renders the child. A child that relied on that render, or a test that sets an equal value
+  and waits for `PropsChanged`, must change the value instead.
+- **A `style` attribute written in the browser reads back as the browser serializes it**
+  (`color: red;`), because Gyral now writes it through the CSSOM (see
+  [inline styles](/docs/styling/#inline-styles-under-a-strict-csp)). Declarations the browser
+  doesn't understand are dropped. Compare computed styles, or the value with its trailing
+  semicolon.
+- **`match()` returns `path` too**, the route's canonical path: `{ name, params, path }`. A test
+  that compares a whole match with `toEqual` needs the new field. Servers can redirect to it
+  ([One URL per page](/docs/routing/#one-url-per-page)).
+
 ## Smaller changes tests may notice
 
-- **`match()` returns `path` too**, the route's canonical path:
-  `{ name, params, path }`. A test that compares a whole match with `toEqual` needs the new
-  field. Servers can redirect to it ([One URL per page](/docs/routing/#one-url-per-page)).
 - **Empty segments never match**: `/users//7` no longer matches `/users/:id` in browsers
   without URLPattern, as it already didn't with it. Patterns the two matchers would read
   differently (`/v:id`, `:post-id`, a param named twice) throw.
-- **A `style` attribute written in the browser reads back as the browser serializes it**
-  (`color: red;`), because Gyral now writes it through the CSSOM (see
-  [inline styles](/docs/styling/#inline-styles-under-a-strict-csp)). Compare computed styles,
-  or the value with its trailing semicolon.
+- **A parser takes a second argument**, the read-only context `{ props, read }`
+  ([Props and stores in a parser](/docs/intent/#props-and-stores-in-a-parser)). Parsers with
+  one parameter still fit, and so do direct calls of `form()`, `field()` and `child()`. A test
+  that calls a parser from a spec, `SearchBox.spec.intent.Search?.(input)`, must now pass a
+  context: `{ props: {}, read: readerOf([]) }`, with `readerOf` from `@gyral/testing`.
 
 ## Short error messages in production
 
@@ -138,6 +164,16 @@ dependency.
 
 ## New in 0.3.1
 
+- Intents: [`data-intent-on` lists](/docs/intent/#trigger-events) such as
+  `"pointerdown pointerup"`, [per-event attributes](/docs/intent/#one-element-an-intent-per-event)
+  `data-intent-<event>`, [declining parsers](/docs/intent/#declining-passing-an-event-outward),
+  [props and stores in a parser](/docs/intent/#props-and-stores-in-a-parser),
+  [`IntentName<…>`](/docs/intent/#intent-names-that-arent-messages) and `Messages<M>` for
+  intent names that aren't message tags, `detail` for every `CustomEvent`, and the
+  [`capturePointer()`](/docs/intent/#press-and-hold) hook for press-and-hold and drag.
+- Components: [`shadow: { delegatesFocus: true }`](/docs/views/#focusing-into-a-child-component),
+  also written by the server, and [prop equality](/docs/components/#when-a-prop-counts-as-changed)
+  with an `equals` option for `prop.json` and `prop.value`.
 - [`svg` templates](/docs/views/#svg-fragments) for SVG fragments that are templates of their
   own.
 - [`subscription()`](/docs/outside-state/) for state Gyral doesn't own: signals, Redux-style
@@ -161,7 +197,8 @@ dependency.
 - Server: [hashed stylesheets](/docs/static-sites/#a-static-build) (`css` from
   `clientAssetsFromManifest`, `renderPage({ stylesheets })`, `assets(modules)` in
   `productionServer`), safer asset serving with `assetHandler`, and `toNodeListener` from
-  `@gyral/ssr/node` for Node's `http` module ([Deploying](/docs/deploying/#node)).
+  `@gyral/ssr/node` for Node's `http` module ([Deploying](/docs/deploying/#node)), which
+  passes the handler [the client's address](/docs/deploying/#the-clients-address).
 - Testing: [`renderOnServer`](/docs/testing/#server-markup-on-demand) for hydration tests with
   real server markup, `outputsIn` and `focusTargetsIn`, `fakeDriver(name, run)`, and drivers
   that go into `el.drivers` with no cast.
