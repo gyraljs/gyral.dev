@@ -86,35 +86,168 @@ lookup on a keystroke. If the value itself is bound, `data-intent-on=${…}`, th
 for `keydown`, `keyup`, `focusin`, `focusout`, `toggle` and `command` as well; list any other
 event type it can produce in the spec: `events: ['pointerdown']`.
 
-An element carries one `data-intent`. To give a control a second intent, put it on an
-ancestor, as the example does: the `keydown` intent sits on `<search>` around the input whose
-`input` intent is on the input itself.
+`data-intent-on` also takes a list, separated by spaces: `data-intent-on="keydown keyup"` fires
+the intent for both events. The parser tells them apart with `event.type`. Use a list when the
+events mean the same thing to the model, such as the press and the release of a
+[hold-to-record button](#press-and-hold).
+
+## One element, an intent per event
+
+When each event on an element means something different, name an intent per event type with
+`data-intent-<event>`. A task in a sortable list grabs on `pointerdown`, drops on `pointerup`,
+moves with the keyboard and tracks focus, all on the `<li>` itself:
+
+```ts
+// src/task-list.ts
+import { define, each, html, intents } from '@gyral/core';
+
+export interface Task {
+  readonly id: string;
+  readonly title: string;
+}
+
+export interface State {
+  readonly tasks: readonly Task[];
+  readonly dragging: string | undefined;
+  readonly focused: string | undefined;
+}
+
+export type Msg =
+  | { readonly _tag: 'Grab'; readonly id: string }
+  | { readonly _tag: 'Drop'; readonly id: string }
+  | { readonly _tag: 'Move'; readonly id: string; readonly by: -1 | 1 }
+  | { readonly _tag: 'Focus'; readonly id: string };
+
+const i = intents<Msg>();
+
+const TaskRow = (t: Task) =>
+  html`<li
+    tabindex="0"
+    data-id=${t.id}
+    data-intent-pointerdown=${i.Grab}
+    data-intent-pointerup=${i.Drop}
+    data-intent-keydown=${i.Move}
+    data-intent-focusin=${i.Focus}
+  >
+    ${t.title}
+  </li>`;
+
+const idOf = (el: Element): string => el.getAttribute('data-id') ?? '';
+
+/** Moves the task `id` to the place `to(from)` gives, clamped to the list. */
+const moved = (tasks: readonly Task[], id: string, to: (from: number) => number) => {
+  const from = tasks.findIndex((t) => t.id === id);
+  const task = tasks[from];
+  if (task === undefined) return tasks;
+  const rest = tasks.filter((t) => t !== task);
+  const at = Math.max(0, Math.min(rest.length, to(from)));
+  return [...rest.slice(0, at), task, ...rest.slice(at)];
+};
+
+export const TaskList = define<State, Msg>('my-task-list', {
+  init: () => ({
+    tasks: [
+      { id: 'a', title: 'Write the brief' },
+      { id: 'b', title: 'Review the designs' },
+    ],
+    dragging: undefined,
+    focused: undefined,
+  }),
+  intent: {
+    Grab: ({ target }) => ({ _tag: 'Grab', id: idOf(target) }),
+    // Released over another task: the dragged one moves there.
+    Drop: ({ target }) => ({ _tag: 'Drop', id: idOf(target) }),
+    // Alt+ArrowUp and Alt+ArrowDown move the focused task; other keys keep their default.
+    Move: ({ target, key, event }) => {
+      const by = key === 'ArrowUp' ? -1 : key === 'ArrowDown' ? 1 : 0;
+      if (by === 0 || !(event instanceof KeyboardEvent) || !event.altKey) return undefined;
+      event.preventDefault();
+      return { _tag: 'Move', id: idOf(target), by };
+    },
+    Focus: ({ target }) => ({ _tag: 'Focus', id: idOf(target) }),
+  },
+  update: {
+    Grab: (s, m) => ({ ...s, dragging: m.id }),
+    Drop: (s, m) => {
+      const onto = s.tasks.findIndex((t) => t.id === m.id);
+      return s.dragging === undefined
+        ? s
+        : { ...s, dragging: undefined, tasks: moved(s.tasks, s.dragging, () => onto) };
+    },
+    Move: (s, m) => ({ ...s, tasks: moved(s.tasks, m.id, (from) => from + m.by) }),
+    Focus: (s, m) => ({ ...s, focused: m.id }),
+  },
+  view: (s) => html`
+    <ul aria-label="Tasks">
+      ${each(s.tasks, (t) => t.id, TaskRow)}
+    </ul>
+  `,
+});
+```
+
+- **Per-event attributes come first.** For an event of type T, an element's `data-intent-T`
+  answers before its plain `data-intent`, which keeps handling its own trigger. Lookup still
+  starts at the element that was hit and goes outward, and the nearest element with an intent
+  for that event wins.
+- **Write the event name in lower case**, as event types are: `data-intent-pointerdown`. The HTML
+  parser lower-cases attribute names, so an event whose name has capitals, such as a library's
+  `valueChange`, can't be named this way: `data-intent-valueChange` becomes
+  `data-intent-valuechange`. Put such a name in `data-intent-on` instead.
+- **`data-intent-on` is reserved** for the trigger list. It is never read as an event called
+  `on`.
+- **The component listens for every event these names mention**, bound or static, in list rows
+  and in `raw()` markup too. No `events` entry is needed.
+- `data-intent-keydown=${s.editing ? i.Key : nothing}` gives the element that intent only while
+  editing.
+
+When the events share one message, keep one `data-intent` with a `data-intent-on` list instead.
+And an intent can still sit on an ancestor, as `Clear` does in the first example: keys typed in
+the input bubble to the `<search>` around it. `data-intent-keydown=${i.Clear}` on the input
+itself would work as well.
 
 ## What a parser receives
 
-A parser gets one `IntentInput` object:
+A parser gets an `IntentInput` object, and the component's read-only context as a second
+argument (see [props and stores in a parser](#props-and-stores-in-a-parser)):
 
-| Field                     | Holds                                                                    |
-| ------------------------- | ------------------------------------------------------------------------ |
-| `value`                   | The `value` of the input, select, textarea or button that has the intent |
-| `checked`                 | `checked`, for checkboxes and radios                                     |
-| `formData`                | The submitted `FormData` (with the submitter button), for a `<form>`     |
-| `key`                     | `KeyboardEvent.key`, for `keydown` and `keyup`                           |
-| `newState`                | `'open'` or `'closed'`, for `toggle`                                     |
-| `detail`                  | A child component's output                                               |
-| `command`                 | The invoker command and its source, for `command`                        |
-| `event`, `target`, `name` | The raw event, the element and the intent name                           |
+| Field      | Holds                                                                          |
+| ---------- | ------------------------------------------------------------------------------ |
+| `value`    | The `value` of the input, select, textarea or button that has the intent       |
+| `checked`  | `checked`, for checkboxes and radios                                           |
+| `formData` | The submitted `FormData` (with the submitter button), for a `<form>`           |
+| `key`      | `KeyboardEvent.key`, for `keydown` and `keyup`                                 |
+| `newState` | `'open'` or `'closed'`, for `toggle`                                           |
+| `detail`   | The `detail` of any `CustomEvent`: a child's output, a library element's event |
+| `command`  | The invoker command and its source, for `command`                              |
+| `name`     | The intent's name: the `data-intent-<event>` or `data-intent` value            |
+| `event`    | The raw event                                                                  |
+| `target`   | The element that carries the intent                                            |
 
 Prefer the parsed fields to `event`: they read the same way for every element, and they're
 what [tests](/docs/testing/) can construct.
+
+### The intent element and the element that was hit
+
+Read the element with the intent from `target`, not from the event. Gyral listens on the
+component's root, so `event.currentTarget` is that root (the shadow root, or the host of a
+light-DOM component), and `event.target` is whatever was hit inside the element: the `<span>`
+in a button's label, an icon. `target` is always the element whose intent attribute answered.
+Compare the two when it matters where an event started, as in
+[declining](#declining-passing-an-event-outward).
+
+`detail` is `unknown` until the parser checks it, with a type guard or a schema, because any
+element can dispatch a `CustomEvent`. [Using third-party web
+components](/docs/third-party-components/#what-the-parser-gets) shows a map's custom event
+parsed this way.
 
 ## Parse, don't validate
 
 A parser returns one of three things:
 
 - **A message** of its own tag's variant.
-- **`undefined`** to ignore the event. Above, `Clear` ignores every key but Escape, and
-  `Search` ignores an empty query. Ignoring is not an error.
+- **`undefined`** to decline the event. Above, `Clear` declines every key but Escape, and
+  `Search` declines an empty query. Declining is not an error, and an intent further out may
+  still take the event ([below](#declining-passing-an-event-outward)).
 - **`IntentRejected`**, a framework message with field issues, when input fails a schema. The
   [Forms](/docs/forms/) helpers `form()` and `field()` produce it for you.
 
@@ -122,13 +255,159 @@ Parsers may return a promise, because schema validation can be async. They must 
 effects. The one exception is `event.preventDefault()`, for example to stop arrow keys moving
 the caret.
 
+## Declining: passing an event outward
+
+Lookup starts at the element that was hit and goes outward, and the nearest element with an
+intent for the event runs its parser. When that parser returns `undefined` synchronously, it
+declines: the next element outward with an intent for the same event gets it, up to the
+component's root. So a container's keyboard shortcuts and its fields' own keys live together:
+
+```ts
+// src/note-editor.ts
+import { define, html } from '@gyral/core';
+
+export interface State {
+  readonly body: string;
+  readonly draft: string;
+  readonly tags: readonly string[];
+  readonly saving: boolean;
+}
+
+export type Msg =
+  | { readonly _tag: 'Body'; readonly text: string }
+  | { readonly _tag: 'Draft'; readonly text: string }
+  | { readonly _tag: 'AddTag'; readonly tag: string }
+  | { readonly _tag: 'Save' };
+
+/** Ctrl+S, or Command+S on a Mac. */
+const isSave = (event: Event, key: string | undefined): boolean =>
+  key === 's' && event instanceof KeyboardEvent && (event.ctrlKey || event.metaKey);
+
+export const NoteEditor = define<State, Msg>('my-note-editor', {
+  init: () => ({ body: '', draft: '', tags: [], saving: false }),
+  intent: {
+    Body: ({ value }) => ({ _tag: 'Body', text: value ?? '' }),
+    Draft: ({ value }) => ({ _tag: 'Draft', text: value ?? '' }),
+    // The tag field keeps Enter. Every other key declines, so Ctrl+S goes on to Save.
+    AddTag: ({ key, value }) => {
+      const tag = value?.trim() ?? '';
+      return key === 'Enter' && tag !== '' ? { _tag: 'AddTag', tag } : undefined;
+    },
+    // The editor's shortcut, wherever focus is inside it.
+    Save: ({ key, event }) => {
+      if (!isSave(event, key)) return undefined;
+      event.preventDefault(); // not the browser's "Save page as"
+      return { _tag: 'Save' };
+    },
+  },
+  update: {
+    Body: (s, m) => ({ ...s, body: m.text }),
+    Draft: (s, m) => ({ ...s, draft: m.text }),
+    AddTag: (s, m) => ({ ...s, draft: '', tags: [...s.tags, m.tag] }),
+    // In an app, this also returns the command that sends the note.
+    Save: (s) => ({ ...s, saving: true }),
+  },
+  view: (s, i) => html`
+    <section aria-label="Note" data-intent-keydown=${i.Save}>
+      <label for="body">Note</label>
+      <textarea id="body" data-intent=${i.Body}>${s.body}</textarea>
+      <label for="tag">Add a tag</label>
+      <input id="tag" value=${s.draft} data-intent=${i.Draft} data-intent-keydown=${i.AddTag} />
+      <p>Tags: ${s.tags.join(', ')}</p>
+      <p role="status">${s.saving ? 'Saving…' : ''}</p>
+    </section>
+  `,
+});
+```
+
+A keystroke in the textarea has no `keydown` intent of its own, so it goes straight to `Save`.
+In the tag field, `AddTag` answers first: it takes Enter and declines everything else, and the
+section's `Save` sees Ctrl+S from there too.
+
+- **Only a synchronous `undefined` declines.** A parser that returns a promise has taken the
+  event, whatever the promise resolves to: lookup can't wait for it.
+- **Declining stays inside the component.** A nested component's lookup ends at its own root.
+  The outer component sees the same event through its own listener, once, as before.
+- **To skip events by where they started** rather than by key, compare `event.target` (the
+  element that was hit) with `target` (the element with the intent).
+
+Before Gyral 0.3.1, `undefined` ended the lookup, so an outer intent never saw an event that an
+inner parser ignored. See the [migration guide](/docs/migrating-0-3-0-to-0-3-1/#behavior-changes).
+
+## Props and stores in a parser
+
+A parser's second argument is the read-only context reducers get: `props`, as they are when the
+event fires, and `read(store)` for the stores in the spec's `stores`. Parsers that don't need it
+take one parameter. Use it when the decision must be made during the event, such as whether to
+call `preventDefault()`: by the time a reducer runs, the browser has already acted.
+
+A listbox owns the arrow keys of its orientation and leaves the others to the page:
+
+```ts
+// src/folders.ts
+import { define, html, prop } from '@gyral/core';
+
+export interface Props {
+  /** `vertical` lists take ArrowUp and ArrowDown; `horizontal` ones ArrowLeft and ArrowRight. */
+  readonly orientation: string;
+}
+
+export type Msg = { readonly _tag: 'Step'; readonly by: -1 | 1 };
+
+const FOLDERS = ['Inbox', 'Drafts', 'Sent'] as const;
+
+const KEYS: Readonly<Record<string, readonly [string, string]>> = {
+  vertical: ['ArrowUp', 'ArrowDown'],
+  horizontal: ['ArrowLeft', 'ArrowRight'],
+};
+
+export const Folders = define<{ readonly active: number }, Msg, Props>('my-folders', {
+  props: { orientation: prop.string({ default: 'vertical' }) },
+  init: () => ({ active: 0 }),
+  intent: {
+    // Only the arrow keys this orientation owns are taken; the others still scroll the page.
+    Step: ({ key, event }, { props }) => {
+      const [back, next] = KEYS[props.orientation] ?? KEYS.vertical ?? ['', ''];
+      const by = key === back ? -1 : key === next ? 1 : 0;
+      if (by === 0) return undefined;
+      event.preventDefault();
+      return { _tag: 'Step', by };
+    },
+  },
+  update: {
+    Step: (s, m) => ({ active: (s.active + m.by + FOLDERS.length) % FOLDERS.length }),
+  },
+  view: (s, i, { props }) => html`
+    <ul
+      role="listbox"
+      tabindex="0"
+      aria-label="Folders"
+      aria-orientation=${props.orientation}
+      aria-activedescendant=${`folder-${String(s.active)}`}
+      data-intent-keydown=${i.Step}
+    >
+      ${FOLDERS.map(
+        (name, n) =>
+          html`<li id=${`folder-${String(n)}`} role="option" aria-selected=${n === s.active}>
+            ${name}
+          </li>`,
+      )}
+    </ul>
+  `,
+});
+```
+
+Keep parsers pure apart from `preventDefault()`: they read the context, they never write.
+`form()`, `field()` and `child()` return one-parameter parsers, so code that calls one directly,
+`field(schema, toMsg)(input)`, still works.
+
 ## Typing parsers
 
 Each key in `intent` produces its own variant: the `Search` parser above returns a
 `{ _tag: 'Search'; … }`. Inside the spec, leave the return type off, and the key types it.
 
 Don't annotate a parser with the whole union. `(): Msg => …` widens it, and TypeScript answers
-with a long error that ends in "`IntentParser<Msg>` is not assignable to …". A parser written
+with a long error that ends in "`IntentParser<Msg, …>` is not assignable to …". A parser written
 outside the spec returns its variant:
 
 ```ts
@@ -136,7 +415,7 @@ outside the spec returns its variant:
 import type { IntentInput } from '@gyral/core';
 import type { Msg } from './search-box.js';
 
-/** The variant, not the union; `undefined` ignores the event. */
+/** The variant, not the union; `undefined` declines the event. */
 export const parseSearch = ({
   formData,
 }: IntentInput): Extract<Msg, { _tag: 'Search' }> | undefined => {
@@ -146,7 +425,8 @@ export const parseSearch = ({
 ```
 
 `_tag: 'Search' as const` in the returned object works too. The same holds for the mappers of
-`child()`, `form()` and `field()`.
+`child()`, `form()` and `field()`. To type a parser that reads the context, use
+`IntentParser<Variant, Props>`.
 
 ## Buttons carry their own data
 
@@ -159,6 +439,208 @@ closure per row:
 
 The parser reads `value` and the reducer finds the product. This is also what keeps the markup
 meaningful without JavaScript.
+
+## Several controls, one intent
+
+Controls that all change one thing don't need a message each. Give them the same intent and
+tell them apart by their `name`, as in a search filters panel:
+
+```ts
+// src/search-filters.ts
+import { define, html } from '@gyral/core';
+
+export interface Filters {
+  readonly category: string;
+  readonly sort: string;
+}
+
+export type Msg = {
+  readonly _tag: 'Filter';
+  readonly field: keyof Filters;
+  readonly value: string;
+};
+
+const FIELDS: readonly (keyof Filters)[] = ['category', 'sort'];
+const isField = (name: string): name is keyof Filters => FIELDS.some((f) => f === name);
+
+export const SearchFilters = define<Filters, Msg>('my-search-filters', {
+  init: () => ({ category: 'all', sort: 'relevance' }),
+  intent: {
+    // One parser for every <select>: the name says which filter changed.
+    Filter: ({ target, value }) => {
+      const name = target.getAttribute('name') ?? '';
+      return isField(name) && value !== undefined
+        ? { _tag: 'Filter', field: name, value }
+        : undefined;
+    },
+  },
+  update: {
+    Filter: (s, m) => ({ ...s, [m.field]: m.value }),
+  },
+  view: (s, i) => html`
+    <label>
+      Category
+      <select name="category" data-intent=${i.Filter}>
+        <option value="all" ?selected=${s.category === 'all'}>All</option>
+        <option value="books" ?selected=${s.category === 'books'}>Books</option>
+      </select>
+    </label>
+    <label>
+      Sort by
+      <select name="sort" data-intent=${i.Filter}>
+        <option value="relevance" ?selected=${s.sort === 'relevance'}>Relevance</option>
+        <option value="price" ?selected=${s.sort === 'price'}>Price</option>
+      </select>
+    </label>
+  `,
+});
+```
+
+Give each control its own message only when the reducers really differ. An intent name that is
+neither a message tag nor declared (next section) fails to compile: in `intent`, TypeScript
+reports that `'Category' does not exist in type 'Intents<Msg, object>'`, and in the view that
+`Property 'Category' does not exist on type 'IntentNames<Msg>'`.
+
+## Intent names that aren't messages
+
+Sometimes each control does something different, but all of them end in the same message. A
+table toolbar's Archive, Restore and Duplicate buttons all become one request to the server.
+Declare their names in the message union with `IntentName<…>`:
+
+```ts
+// src/doc-table.ts
+import { define, each, html, intents, type IntentName, type Messages } from '@gyral/core';
+
+export interface Doc {
+  readonly id: number;
+  readonly title: string;
+  readonly archived: boolean;
+}
+
+export type Action =
+  { readonly kind: 'archive' | 'restore'; readonly id: number } | { readonly kind: 'duplicate' };
+
+export type Msg =
+  | { readonly _tag: 'Request'; readonly action: Action }
+  | IntentName<'Archive' | 'Restore' | 'Duplicate'>;
+
+export interface State {
+  readonly docs: readonly Doc[];
+  readonly pending: readonly Action[];
+}
+
+const i = intents<Msg>(); // the declared names are in it, so rows can use them
+
+const idOf = (target: Element): number =>
+  Number(target.closest('[data-id]')?.getAttribute('data-id'));
+
+// Helpers that build messages return Messages<Msg>: the union without its intent names.
+const request = (action: Action): Messages<Msg> => ({ _tag: 'Request', action });
+
+const Row = (doc: Doc) =>
+  html`<li data-id=${doc.id}>
+    ${doc.title}
+    <button type="button" data-intent=${doc.archived ? i.Restore : i.Archive}>
+      ${doc.archived ? 'Restore' : 'Archive'}
+    </button>
+  </li>`;
+
+export const DocTable = define<State, Msg>('my-doc-table', {
+  init: () => ({ docs: [], pending: [] }),
+  intent: {
+    Archive: ({ target }) => request({ kind: 'archive', id: idOf(target) }),
+    Restore: ({ target }) => request({ kind: 'restore', id: idOf(target) }),
+    Duplicate: () => request({ kind: 'duplicate' }),
+  },
+  // One reducer for all three. In an app, it also returns the command that sends the request.
+  update: { Request: (s, m) => ({ ...s, pending: [...s.pending, m.action] }) },
+  view: (s) => html`
+    <ul>
+      ${each(s.docs, (doc) => doc.id, Row)}
+    </ul>
+    <button type="button" data-intent=${i.Duplicate}>Duplicate</button>
+  `,
+});
+```
+
+- **Each declared name needs a parser**, which may return any message of the union. A
+  message tag's parser stays optional and still returns its own variant.
+- **Declared names get no reducer.** They are never dispatched, so `update` has no key for them.
+- **`i` and `intents<Msg>()` include them**, so markup names them exactly like tags, and a typo
+  still fails to compile.
+- **Nothing can build one.** An intent name is never sent with `el.send()` or produced by a
+  command. Helpers that build messages for such a component return `Messages<Msg>`, the union
+  without its intent names; typed with the whole union, they fail with
+  `Type 'IntentName<…>' is not assignable to type 'ParseResult<…>'`.
+
+It is a type-level feature only: nothing changes at runtime, and it costs no bytes. Prefer one
+shared intent ([previous section](#several-controls-one-intent)) when one parser that reads
+`name` is clearer; declare names when each control's parser differs.
+
+## Press and hold
+
+A hold-to-record button, like a voice message in a chat, needs the press and the release. List
+both in `data-intent-on` and read `event.type`: one intent, one message with a `down` flag.
+
+```ts
+// src/record-button.ts
+import { capturePointer, define, html } from '@gyral/core';
+
+export interface State {
+  readonly recording: boolean;
+}
+
+export type Msg = { readonly _tag: 'Record'; readonly down: boolean };
+
+const PRESS = new Set(['pointerdown', 'keydown']);
+
+export const RecordButton = define<State, Msg>('my-record-button', {
+  init: () => ({ recording: false }),
+  intent: {
+    Record: ({ event, key }) => {
+      if (event instanceof KeyboardEvent) {
+        if (key !== ' ' || event.repeat) return undefined;
+        event.preventDefault(); // no page scroll, and no click when Space comes up
+      }
+      return { _tag: 'Record', down: PRESS.has(event.type) };
+    },
+  },
+  update: {
+    // In an app, these also start and stop the microphone with commands.
+    Record: (_s, m) => ({ recording: m.down }),
+  },
+  view: (s, i) => html`
+    <button
+      type="button"
+      aria-pressed=${s.recording}
+      ${capturePointer()}
+      data-intent=${i.Record}
+      data-intent-on="pointerdown pointerup pointercancel keydown keyup"
+    >
+      ${s.recording ? 'Recording…' : 'Hold to record'}
+    </button>
+  `,
+});
+```
+
+The release must arrive even when the pointer leaves the button before it lets go. That is
+**pointer capture**, and the `capturePointer()` [element hook](/docs/views/#element-hooks)
+provides it: it calls `setPointerCapture` on `pointerdown`, so the pointer's events stay with the
+button until release. `pointercancel`, when the browser takes the touch over for scrolling, is a
+release too. For the keyboard, the same button holds while Space is down, and the parser ignores
+auto-repeat.
+
+- Give the button `touch-action: none` in CSS, so a held finger doesn't scroll or zoom, and
+  `user-select: none`, so a long press doesn't select the label.
+- A button that may disappear mid-press, in a render that drops it, never gets its `pointerup`.
+  Also list `lostpointercapture` and treat it as a release, ignoring ones from other elements
+  (`event.target !== target`): the event bubbles.
+- While an element holds capture, the browser sends that pointer's events to it. Intents on the
+  capturing element keep firing, but intents on elements _inside_ it stop until release. Put
+  `capturePointer()` on the element whose intent needs the release, not on a container of other
+  controls.
+- Keys reach the button only while it has focus. For a shortcut anywhere on the page, read keys
+  in a driver: a [subscription](/docs/outside-state/) to `keydown` and `keyup` on `window`.
 
 ## Invoker commands
 
@@ -210,4 +692,5 @@ everywhere. Built-in commands such as `show-modal` are left to the browser.
 
 Only `data-intent` elements in the component's own render root count. A click inside a child
 component belongs to the child, never to the parent, because the child's shadow root is a
-boundary. Light-DOM components keep the same rule by stopping at the next Gyral host.
+boundary. Light-DOM components keep the same rule by stopping at the next Gyral host. A parser
+that declines passes the event outward only within its own component.

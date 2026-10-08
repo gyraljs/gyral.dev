@@ -106,7 +106,7 @@ Read it from the bottom up:
 - **Intent** says how a platform event becomes a message. A click on a button carrying
   `data-intent=${i.Increment}` runs the `Increment` parser, which returns
   `{ _tag: 'Increment' }`. A parser can also read the event's value, form data or key, and
-  return `undefined` to ignore it.
+  return `undefined` to decline it.
 - **Update** has one reducer per message, and TypeScript checks you have one for every message.
   A reducer returns the next state and never changes the old one.
 - **Init** gives the state the component starts with.

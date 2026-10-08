@@ -114,8 +114,9 @@ your whole dependency tree:
   their own dependencies, such as a design system built on Gyral. Any other package can't
   define a component or write its spec, so it isn't read.
 - **What counts**: the parsed source, not its text, so comments and type-only code never count.
-  The invoker fallback stays when a module's markup has `data-intent-on="command"` or a bound
-  `data-intent-on`, when it has the string `'command'` on its own (`events: ['command']`, a
+  The invoker fallback stays when a module's markup has `command` in a `data-intent-on` list
+  (`data-intent-on="command"`), a `data-intent-command` attribute or a bound `data-intent-on`,
+  when it has the string `'command'` on its own (`events: ['command']`, a
   `setAttribute`), or when it uses `raw` imported from `@gyral/core` (under any alias, or
   through a module that re-exports it), whose markup is only known at run time. A function of
   another package that happens to be called `raw` doesn't count.
