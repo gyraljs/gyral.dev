@@ -28,19 +28,22 @@ export const app = routes({
 });
 ```
 
-- `app.match('/users/7')` returns `{ name: 'user', params: { id: '7' } }`, or `undefined`. The
-  result is a union discriminated by `name`, and `params` is typed from the pattern.
+- `app.match('/users/7/')` returns `{ name: 'user', params: { id: '7' }, path: '/users/7' }`, or
+  `undefined`. The result is a union discriminated by `name`, and `params` is typed from the
+  pattern. `path` is the route's canonical path, `href(name, params)`: see
+  [One URL per page](#one-url-per-page).
 - `app.href('user', { id: 'a b' })` builds `/users/a%20b`.
 - Patterns are literal segments and `:params`, nothing more, so matching behaves the same with
-  the browser's URLPattern and with Gyral's own matcher. Trailing slashes are ignored, params are
-  decoded, and the first match in table order wins.
+  the browser's URLPattern and with Gyral's own matcher. One trailing slash is ignored, an empty
+  segment (`/users//7`) never matches, params are decoded, and the first match in table order
+  wins.
 - Matching never touches `window`, so it's safe on a server.
 
 ## Listening to navigation
 
 ```ts
 // src/shell.ts
-import { define, html } from '@gyral/core';
+import { define, focus, html } from '@gyral/core';
 import { listen, makeRouter, setTitle, type RouteLocation, type RouteMatch } from '@gyral/router';
 import { app } from './routes.js';
 
@@ -61,14 +64,17 @@ export const pageTitle = (route: Route): string =>
       : route.name;
 
 export const Shell = define<State, Msg>('my-shell', {
-  // This component owns the page, so it captures same-origin link clicks.
+  // The page itself, so its content is light DOM and it captures same-origin link clicks.
+  shadow: false,
   drivers: { router: makeRouter({ captureLinks: true }) },
   init: () => [{ route: undefined }, [listen((location): Msg => ({ _tag: 'Routed', location }))]],
   intent: {},
   update: {
     Routed: (_s, m) => {
       const route = app.match(m.location.href);
-      return [{ route }, [setTitle(pageTitle(route))]];
+      const title = setTitle(pageTitle(route));
+      // After a navigation (not on the page load), move focus to the new page's heading.
+      return [{ route }, m.location.seq === 0 ? [title] : [title, focus('main h1')]];
     },
   },
   view: (s) => html`
@@ -77,24 +83,25 @@ export const Shell = define<State, Msg>('my-shell', {
       <a href=${app.href('user', { id: '7' })}>User 7</a>
       <a href=${app.href('settings', {})}>Settings</a>
     </nav>
-    <main><h1>${pageTitle(s.route)}</h1></main>
+    <main><h1 tabindex="-1">${pageTitle(s.route)}</h1></main>
   `,
 });
 ```
 
 `listen(toMsg)` is one long-running command. It delivers the current location at once, then
 every change (link clicks, `navigate()`, back and forward), until the component disconnects.
-The view is a pure function of the route in state.
+Each location carries a `seq`, which counts the URL changes the router has seen: `0` is the URL
+the page loaded with. The view is a pure function of the route in state.
 
 ## Navigating
 
 Navigation is a command, returned from a reducer like any other:
 
-| Command                        | Does                                                |
-| ------------------------------ | --------------------------------------------------- |
-| `navigate(url)`                | Push a history entry (`{ replace: true }` replaces) |
-| `back()`, `forward()`, `go(n)` | Move through history                                |
-| `setTitle(title)`              | Set `document.title`                                |
+| Command                        | Does                                                                                                       |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `navigate(url, options?)`      | Push a history entry (`replace: true` replaces it; `scroll`, `focusReset`: [see below](#scroll-and-focus)) |
+| `back()`, `forward()`, `go(n)` | Move through history                                                                                       |
+| `setTitle(title)`              | Set `document.title`                                                                                       |
 
 ```ts
 // src/save.ts
@@ -108,7 +115,83 @@ export const afterSave = (id: string): Command<never> =>
 ```
 
 The router uses the Navigation API where the browser has it and the History API elsewhere, so
-both behave the same.
+both behave the same. Browsers with the Navigation API never download the History API code.
+
+## Scroll and focus
+
+After a navigation, the router does what the browser does for a page load, once the new page
+has rendered:
+
+- **Scroll**: to the `#fragment` target, or to the top, after a push or a replace. Back and
+  forward restore the position the page was left at.
+- **Focus**: to the first `[autofocus]` element, or back to the start of the page, so the next
+  Tab starts at the top of the new page instead of on a link that's gone.
+
+Both happen with or without the Navigation API. The browser looks for a fragment's target in
+the document only, so render targets in light DOM: page-level components with `shadow: false`,
+like the shell above.
+
+Focus at the start of the page tells a screen reader user little about where they landed. Move it to
+the new page's heading instead, as the shell does: `focus('main h1')` from the `Routed` reducer,
+with `tabindex="-1"` on the heading so it can take focus. Skip it for the first location
+(`location.seq === 0`), which is the page load, not a navigation. Focus that your app moves during a
+navigation wins: the router doesn't reset it. If the heading appears only after data loads, focus it
+from the message that brings the data.
+
+To manage scroll or focus yourself, turn either off for one navigation, with
+`navigate(url, { scroll: false, focusReset: false })`, or for every navigation the router
+starts, link clicks and back and forward included, with
+`makeRouter({ scroll: false, focusReset: false })`. Memory history ignores both.
+
+## Updating the query
+
+A search box or a set of filters often keeps its state in the query string, so the URL can be
+shared and survives a reload. Update the query with `navigate` too, not with
+`history.replaceState`, which the router never sees: its location, and every `listen()`, would
+be one step behind. Replace the entry, so each keystroke doesn't add one, and leave scroll and
+focus where they are:
+
+```ts
+// src/product-filters.ts
+import { define, html } from '@gyral/core';
+import { listen, navigate, type RouteLocation } from '@gyral/router';
+
+export interface State {
+  readonly query: string;
+}
+
+export type Msg =
+  | { readonly _tag: 'Routed'; readonly location: RouteLocation }
+  | { readonly _tag: 'Typed'; readonly query: string };
+
+export const ProductFilters = define<State, Msg>('my-product-filters', {
+  init: () => [{ query: '' }, [listen((location): Msg => ({ _tag: 'Routed', location }))]],
+  intent: { Typed: ({ value }) => ({ _tag: 'Typed', query: value ?? '' }) },
+  update: {
+    // The URL is the source of truth: a shared link or back and forward set the box.
+    Routed: (_s, m) => ({ query: new URLSearchParams(m.location.search).get('q') ?? '' }),
+    Typed: (_s, m) => [
+      { query: m.query },
+      [
+        navigate(`?q=${encodeURIComponent(m.query)}`, {
+          replace: true,
+          scroll: false,
+          focusReset: false,
+        }),
+      ],
+    ],
+  },
+  view: (s, i) => html`
+    <search>
+      <label for="q">Filter products</label>
+      <input id="q" type="search" value=${s.query} data-intent=${i.Typed} />
+    </search>
+  `,
+});
+```
+
+The page stays where it is and focus stays in the box while the user types. A relative URL such
+as `?q=…` keeps the current path.
 
 ## Links
 
@@ -145,7 +228,12 @@ import { pageTitle } from '../src/shell.js';
 export const server = new Hono();
 
 server.get('*', (c) => {
-  const route = routes.match(c.req.url);
+  const url = new URL(c.req.url);
+  const route = routes.match(url);
+  // One URL per page: /users/7/ redirects to /users/7.
+  if (route && route.path !== url.pathname) {
+    return Response.redirect(new URL(route.path + url.search, url), 301);
+  }
   return renderPage(
     {
       title: pageTitle(route),
@@ -156,6 +244,16 @@ server.get('*', (c) => {
   );
 });
 ```
+
+### One URL per page
+
+The router ignores a trailing slash, so `/users/7` and `/users/7/` match the same route. A page
+that answers at two URLs splits its links and its search ranking, and caches store it twice.
+`match()` returns the route's canonical `path` (also the canonical spelling of
+percent-escapes), so the server redirects every other spelling to it, as above, and keeps the
+query string. `path` is a fixed point: matching it gives the same route and the same `path`.
+
+### The first render
 
 The server doesn't run `listen()` (commands never run on the server), so the shell above is
 server-rendered with no route and gets one only after hydration, when `listen()` delivers the
