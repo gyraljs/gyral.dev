@@ -250,6 +250,11 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
       'A page shell, a template with `<!doctype>`, `<html>`, `<head>` or `<body>`, was rendered in the browser. Only the server renders document-level tags. Development reports it as template rule 11, with the full explanation.',
     fix: 'Render the page shell on the server (`@gyral/ssr`’s `page()`, or `@gyral/core/server`), and render only components in the browser.',
   },
+  72: {
+    explanation:
+      "Gyral parses template HTML and `raw()` markup through a Trusted Types policy named `gyral`. The page’s Content-Security-Policy has a `trusted-types` directive that lists allowed policy names without `gyral`, so the browser refused to create it. Gyral falls back to plain strings, which works only while the page doesn’t enforce Trusted Types (`require-trusted-types-for 'script'`). Development warns once.",
+    fix: 'Add `gyral` to the policy list: `trusted-types gyral` (with your own policies, if any). If you don’t use Trusted Types, remove the `trusted-types` directive.',
+  },
 };
 
 /** The page's Markdown. `html` builds headings with exact ids (`G0010`); the twin uses `###`. */

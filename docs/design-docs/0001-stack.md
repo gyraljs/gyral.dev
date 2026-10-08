@@ -48,7 +48,7 @@ gone; templates are compiled by the Vite preset and linted with `@gyral/core/esl
 
 The docs describe Gyral 0.3.1 (`svg` templates, `subscription()`, typed outputs, client-only
 builds, `@gyral/time/delay`, production error codes linking to `/errors/`), which is still on
-Gyral's `next` branch. `vendor/` now holds `0.3.1-next.2`, packed from `next` at `751f76a`
-(`0.3.1-next.1` at `bd2acc9` and `0.3.1-next.0` at `207e864` before it), in place of the 0.3.0 release tarballs, and
+Gyral's `next` branch. `vendor/` now holds `0.3.1-next.3`, packed from `next` at `3239f6b`
+(`0.3.1-next.2` at `751f76a`, `0.3.1-next.1` at `bd2acc9` and `0.3.1-next.0` at `207e864` before it), in place of the 0.3.0 release tarballs, and
 `pnpm sync:examples` / `sync:demos` read the `../gyral-next` worktree by default. When 0.3.1 is published: `^0.3.1` from npm, no `vendor/`,
 and the sync default back to `../gyral` (vendor/README.md).
