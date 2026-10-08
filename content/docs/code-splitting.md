@@ -82,8 +82,9 @@ first state; when the module defines the element, it hydrates in place, with no 
 A page that you know needs a lazy chunk can preload it with the entry instead of finding it
 only after the entry has run. `clientAssetsFromManifest(manifestPath, entry, also)` from
 `@gyral/ssr/static` reads Vite's build manifest; `also` takes the source paths of those modules
-(`['src/widgets.ts']`) and adds them, with their static imports, to `modulepreload`. On a
-server, `productionServer` hands your app a `preload(modules)` that does the same per page (see
+(`['src/widgets.ts']`) and adds them, with their static imports, to `modulepreload`, and their
+CSS to `css`. On a server, `productionServer` hands your app an `assets(modules)` that does the
+same per page and returns `{ modulepreload, stylesheets }` to spread into `renderPage` (see
 [Deploying](/docs/deploying/#node)).
 
 [gyral-shop](https://github.com/gyraljs/gyral-shop/blob/main/src/client/lazy.ts) uses this

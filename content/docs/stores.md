@@ -136,7 +136,7 @@ export const cartPage = (saved: Cart): Response =>
 ```
 
 - Components read the request's instance synchronously while they render. Gyral keeps one
-  registry per render, even across streamed chunks, without `AsyncLocalStorage`, so it works on
+  registry per render, even across the chunks of a response, without `AsyncLocalStorage`, so it works on
   any runtime.
 - `page()` writes every store's state once into the document as
   `<script type="application/json" data-gyral-stores>`, escaped for scripts. The browser
