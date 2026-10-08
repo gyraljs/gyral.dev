@@ -121,10 +121,27 @@ export const Host = define<{ readonly value: string }, HostMsg>('interop-host', 
   `,
 });
 
+/** The same element and event through a per-event attribute: no data-intent, no data-intent-on. */
+export const HostPerEvent = define<{ readonly value: string }, HostMsg>('interop-host-per-event', {
+  init: () => ({ value: '' }),
+  intent: {
+    Changed: ({ detail }) =>
+      typeof detail === 'object' && detail !== null && 'value' in detail
+        ? { _tag: 'Changed', value: String(detail.value) }
+        : undefined,
+  },
+  update: { Changed: (_s, m) => ({ value: m.value }) },
+  view: (s, i) => html`
+    <fake-select data-intent-fake-change=${i.Changed}>pick</fake-select>
+    <output>${s.value}</output>
+  `,
+});
+
 declare global {
   interface HTMLElementTagNameMap {
     'interop-picker': InstanceType<typeof Picker>;
     'interop-host': InstanceType<typeof Host>;
+    'interop-host-per-event': InstanceType<typeof HostPerEvent>;
     'interop-parent': InstanceType<typeof Parent>;
     'plain-child': PlainChild;
     'fake-select': FakeSelect;

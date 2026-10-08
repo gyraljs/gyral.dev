@@ -93,6 +93,17 @@ try {
   });
   check('third-party event reaches the parser with detail and target', host === 'b', host);
 
+  // 3b. The same event through a per-event attribute, data-intent-fake-change, alone.
+  const perEvent = await page.evaluate(async () => {
+    const el = document.createElement('interop-host-per-event');
+    document.body.append(el);
+    await window.Interop.settled();
+    el.shadowRoot.querySelector('fake-select').click();
+    await window.Interop.settled();
+    return el.shadowRoot.querySelector('output').textContent;
+  });
+  check('third-party event reaches a data-intent-<event> intent', perEvent === 'b', perEvent);
+
   // 4. OUTPUT_EVENT names the event; a plain custom element talks to a Gyral parent with it.
   const plain = await page.evaluate(async () => {
     const el = document.createElement('interop-parent');
