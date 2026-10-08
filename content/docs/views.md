@@ -71,10 +71,12 @@ differ.
 
 In a text position, `false`, `null`, `undefined` and `nothing` render nothing, so
 ``${s.open && html`…`}`` works. Classes and inline styles are plain strings:
-`class=${s.done ? 'done' : ''}`. Inline `<svg>` works inside `html`, so icons and charts need
-nothing special; an SVG fragment that is a template of its own uses [`svg`](#svg-fragments).
-Property bindings carry data, never functions: events are [intents](#no-event-handlers), and
-behaviour on an element is a [hook](#element-hooks).
+`class=${s.done ? 'done' : ''}`, `style="--w: ${s.width}px"` (under a strict Content Security
+Policy, see [inline styles](/docs/styling/#inline-styles-under-a-strict-csp)). Inline `<svg>`
+works inside `html`, so icons and charts need nothing special; an SVG fragment that is a
+template of its own uses [`svg`](#svg-fragments). Property bindings carry data, never
+functions: events are [intents](#no-event-handlers), and behaviour on an element is a
+[hook](#element-hooks).
 
 Whitespace is normalized once per template, the same way on the server and in the browser:
 indentation between block-level tags disappears, and a run of whitespace between inline

@@ -100,6 +100,69 @@ Document the custom properties a component reads, and treat renaming one as a br
 For pieces a theme may want to restyle completely, expose them as parts (`part="label"`) so the
 page can write `my-tag::part(label) { … }`.
 
+## Inline styles under a strict CSP
+
+Some values don't come from a fixed set: a width the user dragged, a colour they picked. Bind
+those as custom properties in a `style` attribute, a plain binding like any other, and let the
+stylesheet use them:
+
+```ts
+// src/split-view.ts
+import { css, define, html, prop, type Stateless } from '@gyral/core';
+
+export interface Props {
+  /** The sidebar width the user chose, in pixels. */
+  readonly sidebar: number;
+  readonly compact: boolean;
+}
+
+export const SplitView = define<Stateless, never, Props>('my-split-view', {
+  props: { sidebar: prop.number({ required: true }), compact: prop.boolean() },
+  intent: {},
+  update: {},
+  view: (_s, _i, { props }) => html`
+    <div
+      class="split"
+      data-density=${props.compact ? 'compact' : 'comfortable'}
+      style="--sidebar: ${props.sidebar}px"
+    >
+      <aside><slot name="aside"></slot></aside>
+      <div><slot></slot></div>
+    </div>
+  `,
+  styles: css`
+    .split {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .split[data-density='compact'] {
+      gap: 0.5rem;
+    }
+    aside {
+      flex: none;
+      inline-size: var(--sidebar, 16rem);
+    }
+  `,
+});
+```
+
+A Content Security Policy without `'unsafe-inline'` blocks `style` attributes in HTML and
+`setAttribute('style', …)`, but not styles set from script through the CSSOM. Here is what
+that means for Gyral:
+
+- **Client renders and updates always apply.** Gyral writes `style` bindings, and static
+  `style="…"` attributes in templates, through the CSSOM (`el.style.cssText`), so a component
+  rendered or updated in the browser needs no `'unsafe-inline'`.
+- **Server HTML waits for hydration.** The server writes `style` as an attribute, so under a
+  strict policy the first paint goes without it. When the component hydrates, Gyral applies the
+  same value through the CSSOM. On a page that never hydrates, it stays blocked.
+
+So plan the first paint around it. Values from a known set belong in the stylesheet, selected
+by a class or a data attribute such as `data-density` above: they apply from the first paint,
+with no inline style at all. Continuous values go in custom properties with a fallback in the
+stylesheet, such as `inline-size: var(--sidebar, 16rem)`: the first paint uses the fallback,
+and the user's width arrives with hydration.
+
 ## Custom states
 
 To style by what the model says, mirror boolean facts onto the element's custom states with
