@@ -112,6 +112,9 @@ it('ignores answers to an older query', () => {
 
 - `inputsFor(commands, driver)` lists the inputs of the commands for one driver, matched by
   name, so the test reads the request that would be sent.
+- `outputsIn(commands, Component)` lists what a reducer sent to the parent with `emit`, typed
+  by the component's output union, and `focusTargetsIn(commands)` lists where it asked focus to
+  go (below).
 - `resolve(command, output)` and `reject(command, error)` run a command's own mappers, so the
   test checks the exact message the component would receive.
 - Framework messages step like any other: `{ _tag: 'PropsChanged', props, prev }`,
@@ -119,6 +122,59 @@ it('ignores answers to an older query', () => {
 - `step(…, props, stores)` and `run(…, { props, stores, state })` give reducers their context.
 
 These tests run in Node, in milliseconds, and cover most of the behaviour.
+
+Outputs and focus requests are commands too, so a model test checks them the same way. Take a
+tag editor that tells its parent about each new tag and puts focus back in its input:
+
+```ts
+// src/tag-editor.ts
+import { define, focus, html, outputs } from '@gyral/core';
+
+export type TagEditorOutput = { readonly _tag: 'TagAdded'; readonly tag: string };
+
+const emit = outputs<TagEditorOutput>();
+
+export interface State {
+  readonly tags: readonly string[];
+}
+
+export type Msg = { readonly _tag: 'Add'; readonly tag: string };
+
+export const TagEditor = define<State, Msg, object, TagEditorOutput>('my-tag-editor', {
+  init: () => ({ tags: [] }),
+  intent: { Add: ({ value }) => ({ _tag: 'Add', tag: value ?? '' }) },
+  update: {
+    Add: (s, m) => [
+      { tags: [...s.tags, m.tag] },
+      [emit({ _tag: 'TagAdded', tag: m.tag }), focus('input', { select: true })],
+    ],
+  },
+  view: (s, i) => html`
+    <label for="tag">New tag</label>
+    <input id="tag" />
+    <button type="button" value="urgent" data-intent=${i.Add}>Add “urgent”</button>
+    <output for="tag">${s.tags.join(', ')}</output>
+  `,
+});
+```
+
+```ts
+// src/tag-editor.test.ts
+import { expect, it } from 'vitest';
+import { focusTargetsIn, outputsIn, step } from '@gyral/testing';
+import { TagEditor } from './tag-editor.js';
+
+it('tells the parent about the new tag and keeps focus in the input', () => {
+  const { commands } = step(TagEditor.spec, { tags: [] }, { _tag: 'Add', tag: 'urgent' });
+  expect(outputsIn(commands, TagEditor)).toEqual([{ _tag: 'TagAdded', tag: 'urgent' }]);
+  expect(focusTargetsIn(commands)).toEqual([{ selector: 'input', select: true }]);
+});
+```
+
+Passing the class types the result by its outputs, so a test that expects an output the
+component can't send doesn't compile. Without a class, `outputsIn<TagEditorOutput>(commands)`
+names the union itself. Read outputs and focus requests through these helpers, not by
+filtering on driver names: those are Gyral's internals and may change.
 
 ## Browser tests
 
@@ -193,10 +249,31 @@ Substitute drivers by name, as the app would ([Effects](/docs/effects/#substitut
   components in shadow roots. It returns a function that removes the overrides.
 - **`fakeDriver(driverOrName, { impl? })`** records every call and waits for the test:
   `resolveNext(output)`, `rejectNext(error)`, `emitNext(value)` for streaming drivers, or
-  `calls[i].resolve(…)`. With `impl`, it answers at once.
+  `calls[i].resolve(…)`. With `impl`, it answers at once. **`fakeDriver(name, run)`** is the
+  short form: it answers every call with `run` and records the inputs.
 - **`fakeHttp()`** from `@gyral/http/testing` is the real HTTP driver over a controllable
   `fetch`, so response schemas, status errors and JSON parsing behave as in production.
   `respondNext({ status, body })`, `reply(422, problem)` and `failNext()` answer requests.
+
+Drivers go in as they are: any driver, a fake included, fits `el.drivers`, `withDrivers` and
+`provideDrivers` with no cast. When you keep a map of drivers yourself, type it as
+`DriverOverrides` from `@gyral/core`. `Record<string, Driver<unknown, unknown>>` looks right but
+rejects every driver with a typed input.
+
+```ts
+// src/test-drivers.ts
+import type { DriverOverrides } from '@gyral/core';
+import { fakeHttp } from '@gyral/http/testing';
+import { fakeDriver } from '@gyral/testing';
+
+/** What the component copied to the clipboard, for the test to read. */
+export const copied: string[] = [];
+
+export const testDrivers: DriverOverrides = {
+  http: fakeHttp(),
+  clipboard: fakeDriver<string, undefined>('clipboard', (text) => void copied.push(text)),
+};
+```
 
 Removing an element interrupts its commands synchronously: when `el.remove()` returns, every
 running command's `signal.aborted` is `true` and its `abort` listeners have run, and no later
@@ -215,9 +292,117 @@ debounces, `periodic`, driver timeouts and retry delays alike. Advance the clock
 
 ## SSR and hydration tests
 
-Server rendering is tested in two halves. In Node, render the page and compare it with a golden
-file. In the browser, mount that output the way a page load would, then let the components
+A hydration test mounts real server markup in the browser, imports the component modules the
+way a page load would, and checks that each component took over the server's DOM instead of
+rendering again. The browser can't produce that markup itself (there, `define()` registers
+elements rather than server specs), so it comes from Node, in one of two ways.
+
+### Server markup on demand
+
+`renderOnServer` from `@gyral/testing/vitest` is a [Vitest browser
+command](https://vitest.dev/api/browser/commands): it runs in Vitest's Node process, loads your
+module through the project's Vite server and renders it with Gyral's server renderer. Register
+it in the browser project's config:
+
+```ts
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import { gyralVitePreset } from '@gyral/core/vite';
+import { renderOnServer } from '@gyral/testing/vitest';
+
+export default defineConfig({
+  ...gyralVitePreset(),
+  test: {
+    // Your browser setup (provider, instances) as usual, plus the command.
+    browser: { commands: { renderOnServer } },
+  },
+});
+```
+
+Then a browser test asks for the markup, mounts it, imports the component and waits for it to
 hydrate:
+
+```ts
+// src/lookup-ssr.browser.test.ts (in the browser)
+import { afterEach, describe, expect, it } from 'vitest';
+import { commands } from 'vitest/browser';
+import { settled } from '@gyral/core';
+import { fakeHttp } from '@gyral/http/testing';
+import {
+  hydrated,
+  mountSsr,
+  virtualTime,
+  withDrivers,
+  type MountedSsr,
+  type VirtualTime,
+} from '@gyral/testing';
+
+let page: MountedSsr | undefined;
+let time: VirtualTime | undefined;
+
+afterEach(() => {
+  time?.restore();
+  page?.unmount();
+});
+
+// The first call loads the module graph on the server, which can take seconds in a busy run.
+describe('the server-rendered lookup', { timeout: 60_000 }, () => {
+  it('hydrates in place and answers typing', async () => {
+    page = mountSsr(await commands.renderOnServer({ module: './lookup.ts', export: 'Lookup' }));
+    const host = page.root.querySelector('my-lookup');
+    const input = host?.shadowRoot?.querySelector('input');
+    const http = fakeHttp();
+    withDrivers(page.root, { http });
+
+    await import('./lookup.js'); // import after mounting, as a real page load would
+    await hydrated(page);
+    expect(host?.shadowRoot?.querySelector('input')).toBe(input); // the server's node, adopted
+
+    time = virtualTime();
+    if (input == null) throw new Error('missing input');
+    input.value = 'ada';
+    input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    await time.advance(300);
+    http.respondNext({ body: { name: 'Ada Lovelace' } });
+    await time.advance(0);
+    await settled();
+    expect(host?.shadowRoot?.querySelector('output')?.textContent).toBe('Ada Lovelace');
+  });
+});
+```
+
+- **`module`** is relative to the test file. **`export`** names a `define()` class (rendered
+  with `props`, which must be JSON), a function of `props` that returns a template, an HTML
+  string or a `Response` (a whole page from `renderPage`, store seed included), or a template.
+- The server keeps modules loaded between calls, like a dev server, so pass what a render needs
+  as `props`. Give the tests that make the first call a long timeout, as above.
+- If your `tsconfig.json` doesn't include `vitest.config.ts`, add
+  `import type {} from '@gyral/testing/vitest';` to the test for the command's types.
+
+### A golden fixture
+
+When the markup needs your whole server (routing, data loading, the page shell), or when you
+want markup changes to show up in review, render the page in a Node test and keep the output as
+a file:
+
+```ts
+// src/lookup-page.node.test.ts
+import { expect, it } from 'vitest';
+import { html } from '@gyral/core';
+import { renderPage } from '@gyral/ssr';
+import './lookup.js';
+
+it('renders the lookup page', async () => {
+  const response = renderPage({
+    title: 'Lookup',
+    body: html`<main><my-lookup></my-lookup></main>`,
+    scripts: ['/src/entry-client.ts'],
+  });
+  await expect(await response.text()).toMatchFileSnapshot('./fixtures/lookup-page.html');
+});
+```
+
+`vitest -u` rewrites the file. The browser test imports it with `?raw`:
 
 ```ts
 // src/page.browser.test.ts
@@ -235,13 +420,15 @@ it('hydrates the server page in place', async () => {
 });
 ```
 
+### mountSsr() and hydrated()
+
 - **`mountSsr(html)`** parses Declarative Shadow DOM, applies only the `<head>` styles, restores
   the store seed and `<meta>` tags, and starts recording console errors.
 - **`hydrated(page)`** waits until every component, including nested ones, has hydrated (it
   awaits `settled()`). It fails on a hydration mismatch, on any console error or warning since
   mounting, and on a server-rendered element whose module was never imported. Islands keep
   waiting unless you pass `{ releaseIslands: true }`.
-- Render the golden file with development output (Vitest does by default) and the browser also
+- Render the markup with development output (Vitest does by default) and the browser also
   checks each template's id while hydrating. Run the hydration tests against a production build
   of your components too: production hydration recovers from a mismatch instead of throwing, so
   only a warning shows it.
