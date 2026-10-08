@@ -74,8 +74,8 @@ const head = (meta: PageMeta, assets: Assets) => {
   `;
 };
 
-const isCurrent = (path: string, match: string | null): boolean =>
-  match !== null && path.startsWith(match);
+const isCurrent = (path: string, match: readonly string[]): boolean =>
+  match.some((prefix) => path.startsWith(prefix));
 
 const siteHeader = (path: string) => html`
   <a class="skip-link" href="#main">Skip to content</a>

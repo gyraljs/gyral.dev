@@ -19,13 +19,17 @@ export const LINKS = {
   cyclejs: 'https://cycle.js.org',
 } as const;
 
-/** The primary navigation, in order. `match` is the path prefix that marks the link current. */
+/**
+ * The primary navigation, in order. `match` lists the path prefixes that mark the link current:
+ * the error codes page lives at /errors/ (production builds of @gyral/core link there) but is a
+ * docs page, in the docs sidebar.
+ */
 export const NAV = [
-  { label: 'Docs', href: '/docs/', match: '/docs/' },
-  { label: 'Demos', href: '/what-you-can-build/', match: '/what-you-can-build/' },
-  { label: 'Examples', href: '/examples/', match: '/examples/' },
-  { label: 'Blog', href: '/blog/', match: '/blog/' },
-  { label: 'GitHub', href: LINKS.github, match: null },
+  { label: 'Docs', href: '/docs/', match: ['/docs/', '/errors/'] },
+  { label: 'Demos', href: '/what-you-can-build/', match: ['/what-you-can-build/'] },
+  { label: 'Examples', href: '/examples/', match: ['/examples/'] },
+  { label: 'Blog', href: '/blog/', match: ['/blog/'] },
+  { label: 'GitHub', href: LINKS.github, match: [] },
 ] as const;
 
 /** An absolute URL on the canonical origin. */

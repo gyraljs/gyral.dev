@@ -61,6 +61,9 @@ describe('error codes', () => {
       expect(html).toContain(`href="#${e.id}"`);
     }
     expect(html).toContain('<a href="/errors/" aria-current="page">Error codes</a>');
+    expect(html, 'the top nav marks Docs current').toContain(
+      '<a href="/docs/" aria-current="page">Docs</a>',
+    );
   });
 
   it('gives the Markdown twin a heading per code and no HTML', async () => {
