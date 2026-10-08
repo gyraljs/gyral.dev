@@ -48,6 +48,8 @@ Status: **accepted** (2026-10-05)
 - **Blog posts** are `content/blog/*.md` with `title`, `description` (50–160 characters),
   `date` (`YYYY-MM-DD`) and `author`; they render with `BlogPosting` structured data.
 - Docs code blocks may use Vite's client types (`?raw` imports) in `check-snippets`.
+- Browser-mode test blocks (`vitest/browser`, `commands.renderOnServer`) are checked too: the
+  site installs `@vitest/browser-playwright` as a dev dependency for its types only (site-1av).
 
 ## Addendum: content for agents (gyral-7se.3, 2026-10-05)
 

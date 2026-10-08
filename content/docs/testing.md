@@ -323,7 +323,7 @@ Then a browser test asks for the markup, mounts it, imports the component and wa
 hydrate:
 
 ```ts
-// src/lookup-ssr.browser.test.ts (in the browser)
+// src/lookup-ssr.browser.test.ts
 import { afterEach, describe, expect, it } from 'vitest';
 import { commands } from 'vitest/browser';
 import { settled } from '@gyral/core';
