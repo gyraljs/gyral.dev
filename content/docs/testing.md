@@ -240,6 +240,95 @@ it('debounces typing, then shows the answer', async () => {
 });
 ```
 
+### What a parser decides
+
+Some decisions happen during the event itself: whether a parser calls `preventDefault()`, or
+[declines](/docs/intent/#declining-passing-an-event-outward) so an outer intent gets the key. A
+model test can't see them, but a browser test can, because parsers run while the event is
+dispatched. Dispatch a cancelable event and read `defaultPrevented` as soon as
+`dispatchEvent()` returns. Take a listbox that owns the arrow keys of its orientation prop:
+
+```ts
+// src/folder-list.ts
+import { define, html, prop } from '@gyral/core';
+
+export type Msg = { readonly _tag: 'Step'; readonly by: -1 | 1 };
+
+export const FolderList = define<
+  { readonly active: number },
+  Msg,
+  { readonly orientation: string }
+>('my-folder-list', {
+  props: { orientation: prop.string({ default: 'vertical' }) },
+  init: () => ({ active: 0 }),
+  intent: {
+    Step: ({ key, event }, { props }) => {
+      const [back, next] =
+        props.orientation === 'horizontal' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown'];
+      const by = key === back ? -1 : key === next ? 1 : 0;
+      if (by === 0) return undefined;
+      event.preventDefault();
+      return { _tag: 'Step', by };
+    },
+  },
+  update: { Step: (s, m) => ({ active: Math.min(1, Math.max(0, s.active + m.by)) }) },
+  view: (s, i, { props }) => html`
+    <ul
+      role="listbox"
+      tabindex="0"
+      aria-label="Folders"
+      aria-orientation=${props.orientation}
+      data-intent-keydown=${i.Step}
+    >
+      <li role="option" aria-selected=${s.active === 0}>Inbox</li>
+      <li role="option" aria-selected=${s.active === 1}>Sent</li>
+    </ul>
+  `,
+});
+```
+
+```ts
+// src/folder-list.browser.test.ts
+import { afterEach, expect, it } from 'vitest';
+import { settled } from '@gyral/core';
+import { FolderList } from './folder-list.js';
+
+afterEach(() => {
+  document.body.replaceChildren();
+});
+
+/** Presses a key on `target` and returns the event, to read what the parser decided. */
+const press = (target: Element, key: string): KeyboardEvent => {
+  const event = new KeyboardEvent('keydown', {
+    key,
+    bubbles: true,
+    composed: true,
+    cancelable: true,
+  });
+  target.dispatchEvent(event);
+  return event;
+};
+
+it('takes only the arrow keys of its orientation', async () => {
+  const el = new FolderList();
+  el.orientation = 'horizontal';
+  document.body.append(el);
+  await settled();
+  const list = el.shadowRoot?.querySelector('[role="listbox"]');
+  if (list == null) throw new Error('missing listbox');
+
+  expect(press(list, 'ArrowDown').defaultPrevented).toBe(false); // left to the page
+  expect(press(list, 'ArrowRight').defaultPrevented).toBe(true);
+  await settled();
+  expect(el.state.active).toBe(1);
+});
+```
+
+Props reach the parser as they are when the event fires, so setting `el.orientation` before the
+key press is enough. Setting a prop to a value [equal to the current
+one](/docs/components/#when-a-prop-counts-as-changed) changes nothing, though: no render and no
+`PropsChanged`. A test that expects either must set a different value.
+
 ## Fake drivers and commands
 
 Substitute drivers by name, as the app would ([Effects](/docs/effects/#substituting-drivers)):
