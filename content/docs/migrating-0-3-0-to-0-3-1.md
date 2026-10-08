@@ -8,8 +8,9 @@ order: 3
 # Migrating from 0.3.0 to 0.3.1
 
 Gyral 0.3.1 is a patch release: nothing was removed, and most apps update by moving every
-`@gyral/*` package to 0.3.1 together (they share one version). Three changes can make a working
-app fail a check or a test, so read those first. Everything else is new API and smaller bundles.
+`@gyral/*` package to 0.3.1 together (they share one version). A few changes can make a working
+app fail a check or a test, or behave differently, so read those first. Everything else is new
+API and smaller bundles.
 
 ## Stricter checks inside `<svg>`
 
@@ -65,6 +66,35 @@ export async function loadingThenDone(
 
 - **A cycle now fails the test.** When messages never stop (more than 100 flushes or busy
   turns), `settled()` rejects with an error that names the likely cycle, like the loop guard.
+
+## The router scrolls and moves focus
+
+After a navigation, once the new page has rendered, the browser router now scrolls to the
+`#fragment` target or the top, restores the position on back and forward, and resets focus,
+with or without the Navigation API (see [Scroll and focus](/docs/routing/#scroll-and-focus)).
+0.3.0 did none of this on the History API path, and on the Navigation API path the browser did
+it against the old page.
+
+- **If your app scrolled or focused after navigating itself**, keep that code and turn the
+  router's off: `makeRouter({ scroll: false, focusReset: false })`, or per call
+  `navigate(url, { scroll: false, focusReset: false })`.
+- **If it moved focus to the new heading**, keep doing it with `focus('main h1')` from the
+  `Routed` reducer: focus your app moves during a navigation wins over the reset.
+- In browsers without the Navigation API, the History API code now loads on first use, so the
+  first navigation there resolves a moment later.
+
+## Smaller changes tests may notice
+
+- **`match()` returns `path` too**, the route's canonical path:
+  `{ name, params, path }`. A test that compares a whole match with `toEqual` needs the new
+  field. Servers can redirect to it ([One URL per page](/docs/routing/#one-url-per-page)).
+- **Empty segments never match**: `/users//7` no longer matches `/users/:id` in browsers
+  without URLPattern, as it already didn't with it. Patterns the two matchers would read
+  differently (`/v:id`, `:post-id`, a param named twice) throw.
+- **A `style` attribute written in the browser reads back as the browser serializes it**
+  (`color: red;`), because Gyral now writes it through the CSSOM (see
+  [inline styles](/docs/styling/#inline-styles-under-a-strict-csp)). Compare computed styles,
+  or the value with its trailing semicolon.
 
 ## Short error messages in production
 
@@ -124,6 +154,17 @@ dependency.
 - [Client-only builds](/docs/rendering-modes/#client-only-builds) with
   `gyralVitePreset({ clientOnly: true })`, the default in `create-gyral`'s `basic` template.
 - [`@gyral/time/delay`](/docs/effects/#built-in-drivers): `delay` and `debounce` alone.
+- `style` bindings and static `style="…"` attributes that work under a strict Content
+  Security Policy on the client ([inline styles](/docs/styling/#inline-styles-under-a-strict-csp)).
+- Router: a canonical `path` from `match()`, and [scroll and focus](/docs/routing/#scroll-and-focus)
+  after a navigation, with `scroll` and `focusReset` options.
+- Server: [hashed stylesheets](/docs/static-sites/#a-static-build) (`css` from
+  `clientAssetsFromManifest`, `renderPage({ stylesheets })`, `assets(modules)` in
+  `productionServer`), safer asset serving with `assetHandler`, and `toNodeListener` from
+  `@gyral/ssr/node` for Node's `http` module ([Deploying](/docs/deploying/#node)).
+- Testing: [`renderOnServer`](/docs/testing/#server-markup-on-demand) for hydration tests with
+  real server markup, `outputsIn` and `focusTargetsIn`, `fakeDriver(name, run)`, and drivers
+  that go into `el.drivers` with no cast.
 - [Development errors that name the template's file, line and column](/docs/views/#checked-before-it-runs),
   under Vite exactly, elsewhere from the stack trace.
 - `registryVersion()` from `@gyral/core/server`: `renderPage({ csp })` now rebuilds its header
