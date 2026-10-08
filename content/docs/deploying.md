@@ -156,6 +156,40 @@ request bodies in, writes each chunk of the page only as fast as the client read
 `request.signal` when the client leaves. Set `origin` when your pages build absolute URLs from
 the request: otherwise it comes from the `Host` header, which the client chooses.
 
+### The client's address
+
+A `Request` doesn't say who sent it. `toNodeListener` passes the handler a second argument,
+`{ incoming, remoteAddress }`: Node's request object and the client's IP address, for rate
+limits, logs and audits.
+
+```ts
+// server/rate-limit.ts
+import { createServer } from 'node:http';
+import { toNodeListener } from '@gyral/ssr/node';
+
+const LIMIT = 100;
+const hits = new Map<string, number>();
+
+createServer(
+  toNodeListener((_request, { remoteAddress }) => {
+    const client = remoteAddress ?? 'unknown';
+    const count = (hits.get(client) ?? 0) + 1;
+    hits.set(client, count);
+    return count > LIMIT
+      ? new Response('Too many requests', { status: 429, headers: { 'retry-after': '60' } })
+      : new Response('ok');
+  }),
+).listen(3000);
+```
+
+- **Behind a proxy or a load balancer, `remoteAddress` is the proxy's address.** The client's is
+  in a header such as `X-Forwarded-For`, but anyone can send that header. Read it only when the
+  request came from a proxy you run (`remoteAddress` is that proxy's address), and take the
+  address your proxy added, the last one in the list, not the first.
+- **`remoteAddress` is `undefined` once the connection has closed**, so give it a fallback.
+- **A Hono app gets the object as `c.env`**, the shape Hono's own Node adapter passes, so
+  `getConnInfo(c)` from `@hono/node-server/conninfo` works with it.
+
 ## Bun, Deno and Cloudflare Workers
 
 `renderPage` returns a web-standard `Response` (chunked, from a synchronous render), so
