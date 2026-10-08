@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
 import { headersFor, parseHeaders, withCsp } from '../scripts/lib/headers.js';
-import { lastCommitDates, sitemapDates, type Git } from '../scripts/lib/lastmod.js';
+import { lastCommitDates, runGit, sitemapDates, type Git } from '../scripts/lib/lastmod.js';
 import type { Post } from '../src/content/blog.js';
 import type { DocPage } from '../src/content/docs.js';
 import { parseRedirects, redirectFor } from '../scripts/lib/redirects.js';
@@ -248,11 +248,22 @@ describe('sitemap <lastmod>', () => {
   const doc = (slug: string, source?: string) =>
     ({ slug, path: `/docs/${slug}/`, source }) as unknown as DocPage;
   const post = { path: '/blog/hello/', date: '2026-10-05' } as Post;
-  /** A fake git: a full clone where every file was last committed on 2026-10-01. */
-  const git =
-    (shallow: boolean): Git =>
-    (args) =>
-      args[0] === 'rev-parse' ? String(shallow) : args[0] === 'log' ? '2026-10-01' : undefined;
+  /**
+   * A fake git where every file was last committed on 2026-10-01: a full clone, or a shallow one
+   * whose `git fetch --unshallow` succeeds (`fetches`) or fails (no network). Records its calls.
+   */
+  const git = (shallow: boolean, fetches = false, calls: string[][] = []): Git => {
+    let complete = !shallow;
+    return (args) => {
+      calls.push([...args]);
+      if (args[0] === 'rev-parse') return String(!complete);
+      if (args[0] === 'fetch') {
+        complete ||= fetches && args.includes('--unshallow');
+        return complete ? '' : undefined;
+      }
+      return args[0] === 'log' ? '2026-10-01' : undefined;
+    };
+  };
 
   it('writes <lastmod> only for the pages it is given a date for', () => {
     const xml = sitemap(['/', '/blog/hello/'], new Map([['/blog/hello/', '2026-10-05']]));
@@ -279,14 +290,40 @@ describe('sitemap <lastmod>', () => {
     expect([...sitemapDates([], [post], git(false), '2026-10-04')]).toEqual([]);
   });
 
-  it('gives docs no date in a shallow clone, where every file has the clone’s date', () => {
+  it('fetches the history of a shallow clone (Cloudflare Pages) before dating docs', () => {
+    const calls: string[][] = [];
+    expect([
+      ...sitemapDates([doc('intent')], [post], git(true, true, calls), '2026-10-07'),
+    ]).toEqual([
+      ['/docs/intent/', '2026-10-01'],
+      ['/blog/hello/', '2026-10-05'],
+    ]);
+    expect(calls).toContainEqual(
+      expect.arrayContaining(['fetch', '--unshallow', '--filter=blob:none']),
+    );
+    const full: string[][] = [];
+    sitemapDates([doc('intent')], [], git(false, false, full));
+    expect(full.some((c) => c[0] === 'fetch')).toBe(false);
+  });
+
+  it('gives docs no date when a shallow clone can’t be completed: every file has its date', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     expect([...sitemapDates([doc('intent')], [post], git(true), '2026-10-07')]).toEqual([
       ['/blog/hello/', '2026-10-05'],
     ]);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('<lastmod>'));
+    warn.mockRestore();
   });
 
   it('reads real commit dates, and none for a file git doesn’t know', () => {
-    const dates = lastCommitDates(['content/docs/intent.md', 'content/docs/no-such-page.md']);
+    // Real git, but no fetching from a test: a shallow checkout just gets no dates.
+    const local: Git = (args) => (args[0] === 'fetch' ? undefined : runGit(args));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const dates = lastCommitDates(
+      ['content/docs/intent.md', 'content/docs/no-such-page.md'],
+      local,
+    );
+    warn.mockRestore();
     if (dates.size === 0) return; // no git history here (a shallow or exported checkout)
     expect(dates.get('content/docs/intent.md')).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(dates.has('content/docs/no-such-page.md')).toBe(false);

@@ -1,6 +1,11 @@
 // `<lastmod>` dates for sitemap.xml, only where they are known: a blog post's front-matter
 // `date`, and a Markdown docs page's last commit. Generated pages (API reference, errors) and
 // the other pages get none rather than a guess.
+//
+// Cloudflare Pages builds from a shallow clone, where `git log` would give every file the
+// clone's date. So a shallow build first fetches the rest of the history, commits and trees
+// only (`--filter=blob:none`: no file contents, a fraction of a second for this repo); if that
+// fails (no network, no remote), docs get no date, as before.
 import { spawnSync } from 'node:child_process';
 import type { Post } from '../../src/content/blog.js';
 import type { DocPage } from '../../src/content/docs.js';
@@ -15,13 +20,30 @@ export const runGit: Git = (args) => {
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
+const isFullClone = (git: Git): boolean =>
+  git(['rev-parse', '--is-shallow-repository']) === 'false';
+
 /**
- * Each file's last commit date (`YYYY-MM-DD`). Empty without git or in a shallow clone, where
- * every file would get the clone's date; files never committed are left out.
+ * Makes a shallow clone a full one, fetching commits and trees but no blobs. `true` when the
+ * history is complete afterwards; `false` without git, or when the fetch fails.
+ */
+export function completeHistory(git: Git = runGit): boolean {
+  if (isFullClone(git)) return true;
+  git(['fetch', '--unshallow', '--filter=blob:none', '--no-tags', '--quiet', 'origin']);
+  return isFullClone(git);
+}
+
+/**
+ * Each file's last commit date (`YYYY-MM-DD`). A shallow clone is completed first
+ * (`completeHistory`); if it can't be, or there's no git, the map is empty, since every file
+ * would get the clone's date. Files never committed are left out.
  */
 export function lastCommitDates(files: readonly string[], git: Git = runGit): Map<string, string> {
   const dates = new Map<string, string>();
-  if (git(['rev-parse', '--is-shallow-repository']) !== 'false') return dates;
+  if (!completeHistory(git)) {
+    console.warn('sitemap: no full git history, so docs pages get no <lastmod>');
+    return dates;
+  }
   for (const file of files) {
     const day = git(['log', '-1', '--format=%cs', '--', file]);
     if (day !== undefined && DAY.test(day)) dates.set(file, day);

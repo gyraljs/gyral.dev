@@ -69,8 +69,13 @@ Status: **accepted** (2026-10-05)
 known (`scripts/lib/lastmod.ts`): a blog post's front-matter `date` (none while that date is
 still in the future), and a Markdown docs page's
 last commit (`git log -1 --format=%cs`). Generated pages (API reference, errors) and the other
-pages get none, and neither do docs pages in a shallow clone, where every file would carry the
-clone's date.
+pages get none.
+
+Cloudflare Pages builds from a shallow clone, where every file would carry the clone's date, so
+a shallow build first runs `git fetch --unshallow --filter=blob:none origin` (commits and trees,
+no file contents; site-wyn, 2026-10-08). Only if that fails (no network or remote) do docs pages
+get no date. A front-matter date or a committed dates file was the alternative; both are
+hand-kept copies of what git already records, and drift silently.
 
 ## Search (site-54d.23, 2026-10-05)
 
