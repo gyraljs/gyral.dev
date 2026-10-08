@@ -68,6 +68,16 @@ describe('markdown', () => {
   it('slugifies', () => {
     expect(slugify('Getting started!')).toBe('getting-started');
   });
+
+  it('decodes entities before slugifying: an apostrophe never becomes "39"', async () => {
+    expect(slugify('What&#39;s inside')).toBe('whats-inside');
+    expect(slugify('A &amp; B &#x27;c&#x27;')).toBe('a-b-c');
+    const { html, headings } = await renderMarkdown(
+      "## What's inside\n\n## Parse, don't validate\n",
+    );
+    expect(headings.map((h) => h.id)).toEqual(['whats-inside', 'parse-dont-validate']);
+    expect(html).not.toMatch(/id="[^"]*39/);
+  });
 });
 
 describe('docs collection', () => {

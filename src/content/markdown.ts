@@ -96,16 +96,6 @@ ${rules.join('\n\n')}
 `;
 }
 
-/** `Getting started!` → `getting-started`. */
-export const slugify = (text: string): string =>
-  text
-    .toLowerCase()
-    .replace(/<[^>]+>/g, '')
-    .replace(/&[a-z]+;/g, '')
-    .replace(/[^\p{L}\p{N}\s-]/gu, '')
-    .trim()
-    .replace(/\s+/g, '-');
-
 const escapeHtml = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -114,14 +104,35 @@ const ENTITIES: Readonly<Record<string, string>> = {
   lt: '<',
   gt: '>',
   quot: '"',
-  '#39': "'",
+  apos: "'",
+  nbsp: '\u00a0',
+};
+
+/** One character reference (`&amp;`, `&#39;`, `&#x27;`) decoded; an unknown name is kept. */
+const decodeEntity = (whole: string, ref: string): string => {
+  if (!ref.startsWith('#')) return ENTITIES[ref] ?? whole;
+  const code =
+    ref[1] === 'x' || ref[1] === 'X' ? parseInt(ref.slice(2), 16) : parseInt(ref.slice(1), 10);
+  return Number.isInteger(code) && code > 0 && code <= 0x10ffff
+    ? String.fromCodePoint(code)
+    : whole;
 };
 
 /** Plain text from rendered inline HTML: tags dropped, entities decoded (the outline escapes it again). */
 const toText = (html: string): string =>
-  html
-    .replace(/<[^>]+>/g, '')
-    .replace(/&(amp|lt|gt|quot|#39);/g, (whole, name: string) => ENTITIES[name] ?? whole);
+  html.replace(/<[^>]+>/g, '').replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, decodeEntity);
+
+/**
+ * `Getting started!` → `getting-started`. Takes text or rendered inline HTML: tags are dropped
+ * and entities decoded before punctuation is, so `What&#39;s inside` (Marked's escaped
+ * apostrophe) is `whats-inside`, not `what39s-inside`.
+ */
+export const slugify = (text: string): string =>
+  toText(text)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .trim()
+    .replace(/\s+/g, '-');
 
 const isLang = (lang: string): lang is (typeof LANGS)[number] =>
   (LANGS as readonly string[]).includes(lang);
