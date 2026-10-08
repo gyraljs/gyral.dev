@@ -116,6 +116,28 @@ sends an [output](/docs/components/#child-components-and-outputs) to the parent,
 msg)` writes to a [store](/docs/stores/), and `focus(selector)` moves
 [focus](/docs/views/#focus-is-a-command) after the next render.
 
+### Commands that answer nothing
+
+`focus()`, `emit()`, `navigate()`, `go()` and `setTitle()` return `Command<never>`: they produce
+no message. `never` fits any message type, so they go in any reducer's command list, and in a
+helper typed `Command<Msg>`, with no type argument:
+
+```ts
+// src/after-save.ts
+import { focus, type Command } from '@gyral/core';
+import { navigate } from '@gyral/router';
+
+export type Msg = { readonly _tag: 'Saved' } | { readonly _tag: 'Failed' };
+
+/** After a save: back to the list, with focus on its heading. */
+export const afterSave = (): readonly Command<Msg>[] => [navigate('/items'), focus('h1')];
+```
+
+Your own fire-and-forget commands can be typed the same way: pass `never` as the message type,
+`command<string, void, unknown, never>(log, text, { onSuccess: () => undefined })`, and type
+the helper's result `Command<never>`. Left to inference, the command would be a
+`Command<undefined>`, which fits no message union.
+
 Debounce is a delay under `switch`: each keystroke's `debounce(300, msg)` cancels the pending
 one. An app that only needs delays imports `delay` and `debounce` from **`@gyral/time/delay`**:
 the same commands over a delay-only driver, which leaves periodic ticks and animation frames out
@@ -131,15 +153,23 @@ A driver is a plain object with a `name` and a `run` function:
 // src/clipboard.ts
 import { command, defineDriver, type Command } from '@gyral/core';
 
+/** Why a copy failed. */
+export type CopyError = 'unavailable' | 'denied' | 'failed';
+
 /** Writes text to the clipboard. */
-export const clipboard = defineDriver<string, void, string>({
+export const clipboard = defineDriver<string, void, CopyError>({
   name: 'clipboard',
   run: (text) => navigator.clipboard.writeText(text),
   concurrency: 'switch',
-  toError: (cause) => (cause instanceof Error ? cause.message : 'Copy failed'),
+  toError: (cause) =>
+    cause instanceof TypeError
+      ? 'unavailable'
+      : cause instanceof DOMException && cause.name === 'NotAllowedError'
+        ? 'denied'
+        : 'failed',
 });
 
-export const copy = <M>(text: string, copied: M, failed: (reason: string) => M): Command<M> =>
+export const copyText = <M>(text: string, copied: M, failed: (error: CopyError) => M): Command<M> =>
   command(clipboard, text, { onSuccess: () => copied, onFailure: failed });
 ```
 
@@ -150,10 +180,65 @@ export const copy = <M>(text: string, copied: M, failed: (reason: string) => M):
 - `retry: { times, delayMs?, backoff? }` retries failures (`'fixed'` or `'exponential'`).
   Cancellations never retry.
 - `defineDriver` only helps TypeScript infer the input, output and error types. Wrap the driver
-  in typed command helpers like `copy`, as the built-in packages do.
+  in typed command helpers like `copyText`, as the built-in packages do.
 
 Nothing should run at import time: create resources when a command first runs, so modules are
 safe to import on a server.
+
+### A copy button
+
+With the driver above, a "Copy link" button is a message, a command and two answers:
+
+```ts
+// src/copy-link.ts
+import { define, html, prop } from '@gyral/core';
+import { copyText, type CopyError } from './clipboard.js';
+
+export interface State {
+  readonly status: 'idle' | 'copied' | CopyError;
+}
+
+export type Msg =
+  | { readonly _tag: 'Copy' }
+  | { readonly _tag: 'Copied' }
+  | { readonly _tag: 'CopyFailed'; readonly error: CopyError };
+
+const STATUS: Readonly<Record<State['status'], string>> = {
+  idle: '',
+  copied: 'Link copied.',
+  unavailable: 'Copying needs a secure (https) page. Select the link and copy it instead.',
+  denied: 'The browser blocked copying. Select the link and copy it instead.',
+  failed: 'Copying failed. Select the link and copy it instead.',
+};
+
+export const CopyLink = define<State, Msg, { readonly url: string }>('my-copy-link', {
+  props: { url: prop.string({ required: true }) },
+  init: () => ({ status: 'idle' }),
+  intent: { Copy: () => ({ _tag: 'Copy' }) },
+  update: {
+    Copy: (s, _m, { props }) => [
+      s,
+      [copyText<Msg>(props.url, { _tag: 'Copied' }, (error) => ({ _tag: 'CopyFailed', error }))],
+    ],
+    Copied: () => ({ status: 'copied' }),
+    CopyFailed: (_s, m) => ({ status: m.error }),
+  },
+  view: (s, i, { props }) => html`
+    <label for="link">Link</label>
+    <input id="link" readonly value=${props.url} />
+    <button type="button" data-intent=${i.Copy}>Copy link</button>
+    <p role="status">${STATUS[s.status]}</p>
+  `,
+});
+```
+
+- **`navigator.clipboard` exists only in a secure context**: https://, or localhost. Elsewhere
+  reading `writeText` throws a `TypeError`, which `toError` turns into `unavailable`.
+- **Browsers write only during a user activation.** Return the command from the reducer of the
+  click's message, as above: with a synchronous parser, it starts while the click is still
+  being handled. Started later, the browser rejects it with `NotAllowedError`, `denied` here.
+- **Tests never touch the real clipboard**: they substitute the driver by name,
+  `el.drivers = { clipboard: fakeDriver('clipboard') }` ([Testing](/docs/testing/#fake-drivers-and-commands)).
 
 ## Streaming results with emit
 
