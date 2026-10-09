@@ -65,6 +65,9 @@ don't bundle them ([Effects](/docs/effects/#retries)):
   `provideDrivers(document.body, { http: makeHttpDriver({ headers: csrfFromMeta('csrf-token') }) })`.
   `submitForm(…, { csrf: { token } })` stays for a token the app already holds. Development
   builds warn once when a `POST` goes out without the token while the page has the `<meta>`.
+- **`HttpError` has a timeout case.** `makeHttpDriver({ timeoutMs })` fails a slow attempt with
+  `HttpTimeoutError`, so a `switch` over `HttpError` that handles every case needs a branch for
+  it ([Retries](/docs/effects/#retries)).
 
 ## Stricter checks inside `<svg>`
 
@@ -165,6 +168,13 @@ These keep compiling but behave differently. Check each against your app and its
   [inline styles](/docs/styling/#inline-styles-under-a-strict-csp)). Declarations the browser
   doesn't understand are dropped. Compare computed styles, or the value with its trailing
   semicolon.
+- **Removing a component stops its commands one microtask later.** A component that is removed
+  and inserted again in the same task (a keyed list reordering rows, `appendChild` of an
+  attached element) is a move: its subscriptions, timers and requests keep running, where 0.3.0
+  stopped them for good. A test that checks a command was aborted right after `el.remove()`
+  awaits one microtask first (`await Promise.resolve()`). A component removed for real and
+  attached later can re-issue its watches from the new `Connected` message
+  ([Moves and reconnects](/docs/outside-state/#moves-and-reconnects)).
 - **`match()` returns `path` too**, the route's canonical path: `{ name, params, path }`. A test
   that compares a whole match with `toEqual` needs the new field. Servers can redirect to it
   ([One URL per page](/docs/routing/#one-url-per-page)).
@@ -253,7 +263,10 @@ dependency.
 - Router: a canonical `path` from `match()`, [scroll and focus](/docs/routing/#scroll-and-focus)
   after a navigation, with `scroll` and `focusReset` options, and the
   [head model](/docs/routing/#the-head) with `setHead()`.
-- `retry(driver, policy)` and `csrfFromMeta` on the driver ([Effects](/docs/effects/#retries)).
+- `retry(driver, policy)` with `jitter` and `retryIf`, `makeHttpDriver({ timeoutMs })` with
+  `retryableHttpError`, and `csrfFromMeta` on the driver ([Effects](/docs/effects/#retries)).
+- [Moves keep commands running](/docs/outside-state/#moves-and-reconnects), and the framework
+  message `Connected` for a component attached again after a real removal.
 - Server: opt-in [hashes for server-rendered `style` attributes](/docs/server-rendering/#content-security-policy)
   (`renderPage({ csp: { styleAttributes: 'hash' } })`), and a
   [Trusted Types](/docs/server-rendering/#trusted-types) policy named `gyral`.
@@ -262,9 +275,11 @@ dependency.
   `productionServer`), safer asset serving with `assetHandler`, and `toNodeListener` from
   `@gyral/ssr/node` for Node's `http` module ([Deploying](/docs/deploying/#node)), which
   passes the handler [the client's address](/docs/deploying/#the-clients-address).
+  `assetHandler` answers single `Range` requests, so media can seek, and `productionServer`
+  takes Vite's `base`.
 - Testing: [`renderOnServer`](/docs/testing/#server-markup-on-demand) for hydration tests with
-  real server markup, `outputsIn` and `focusTargetsIn`, `fakeDriver(name, run)`, and drivers
-  that go into `el.drivers` with no cast.
+  real server markup, `outputsIn` and `focusTargetsIn`, `fakeDriver(name, run)`, drivers
+  that go into `el.drivers` with no cast, and `virtualTime()` in Vitest node projects.
 - [Development errors that name the template's file, line and column](/docs/views/#checked-before-it-runs),
   under Vite exactly, elsewhere from the stack trace.
 - `registryVersion()` from `@gyral/core/server`: `renderPage({ csp })` now rebuilds its header

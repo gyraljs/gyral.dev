@@ -131,6 +131,15 @@ stay in memory once served (up to a bound; `cache: false` reads them from disk e
 malformed URL is a 400. A path that leads outside `assetsDir`, or a missing file, is a 404 with
 `cache-control: no-store`, so a CDN never caches a miss while a deploy lands. Pass
 `staticDir: false` if nothing is prerendered, so page requests don't look for a file first.
+A single `Range` request (`bytes=0-1023`) gets `206 Partial Content` with that slice, so an
+imported video or audio file can seek; every asset says `accept-ranges: bytes`. A range past the
+end is a 416, and several ranges or a malformed header get the whole file.
+
+Served under a path, with Vite's `base: '/app/'`? Pass the same base to `productionServer`:
+`productionServer({ distDir, createApp, base: '/app/' })` puts it in front of the entry,
+preload and stylesheet URLs and serves assets at `/app/assets/`. For a static build, pass it to
+the manifest helpers as their last argument:
+`clientAssetsFromManifest(path, entry, [], { base: '/app/' })`.
 
 After a deploy, tabs opened before it still ask for the old release's chunks. To keep serving
 them, point `assetsDir` at a volume that keeps every release's files, or use `assetHandler`

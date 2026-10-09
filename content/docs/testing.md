@@ -364,12 +364,14 @@ export const testDrivers: DriverOverrides = {
 };
 ```
 
-Removing an element interrupts its commands synchronously: when `el.remove()` returns, every
-running command's `signal.aborted` is `true` and its `abort` listeners have run, and no later
-result is dispatched. Assert right after `remove()`, with no need to yield. Only cleanup a
-driver runs after an `await` (a `finally` once its promise settles) happens later; yield with
-`await Promise.resolve()` (or `await clock.advance(0)` under `virtualTime()`) if you need to
-observe that.
+Removing an element stops its commands one microtask later, so that a move (removed and
+inserted again in the same task) keeps them running. After `el.remove(); await
+Promise.resolve();`, every running command's `signal.aborted` is `true`, its `abort` listeners
+have run, and no later result is dispatched. Cleanup a driver runs after an `await` (a
+`finally` once its promise settles) happens later still; yield again (or
+`await clock.advance(0)` under `virtualTime()`) to observe it. To test a component that is
+attached again after a real removal, step its `Connected` reducer:
+`step(spec, state, { _tag: 'Connected', reconnect: true })`.
 
 ## Virtual time
 
@@ -378,6 +380,29 @@ observe that.
 timer; `restore()` puts the real clock back. It patches the platform, not Gyral, so it covers
 debounces, `periodic`, driver timeouts and retry delays alike. Advance the clock, then
 `await settled()` before you assert on the DOM.
+
+It also works in a Vitest **node** project, where there is no `requestAnimationFrame` to fake,
+so driver and polling tests that need no DOM can use it:
+
+```ts
+// test/poll.node.test.ts
+import { afterEach, beforeEach, expect, it } from 'vitest';
+import { virtualTime, type VirtualTime } from '@gyral/testing';
+
+let time: VirtualTime;
+beforeEach(() => {
+  time = virtualTime();
+});
+afterEach(() => time.restore());
+
+it('polls every 30 s', async () => {
+  const seen: number[] = [];
+  const id = setInterval(() => seen.push(Date.now()), 30_000);
+  await time.advance(90_000);
+  clearInterval(id);
+  expect(seen).toHaveLength(3);
+});
+```
 
 ## SSR and hydration tests
 

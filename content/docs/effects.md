@@ -186,24 +186,54 @@ safe to import on a server.
 
 ### Retries
 
-`retry(driver, { times, delayMs?, backoff? })` from `@gyral/core` returns the same driver, under
-the same name, with failures tried again after the delay (`'fixed'` or `'exponential'`). A
-cancellation (the command switched away, the component disconnected) ends it at once and is
-never retried. Wrap the driver where you choose it, at app setup, in a component's `drivers` or
-in a test, and apps that never retry don't bundle the code:
+`retry(driver, { times, delayMs?, backoff?, jitter?, retryIf? })` from `@gyral/core` returns the
+same driver, under the same name, with failures tried again after the delay (`'fixed'` or
+`'exponential'`). `jitter: true` waits a random time between 0 and that delay, so many clients
+don't retry in step. `retryIf(error)` decides which failures to retry; it receives the
+driver's typed error (its `toError`, else the thrown value), and by default every failure is
+retried. A cancellation (the command switched away, the component removed) ends it at once and
+is never retried. Wrap the driver where you choose it, at app setup, in a component's `drivers`
+or in a test, and apps that never retry don't bundle the code.
+
+For `@gyral/http`, `makeHttpDriver({ timeoutMs })` gives each attempt a deadline: a slower
+attempt fails with `HttpTimeoutError` (`url`, `timeoutMs`), and the retry starts a fresh one.
+`retryableHttpError` retries only what a second try can fix: network errors, timeouts, 408, 429
+and 5xx. It doesn't read `Retry-After`.
 
 ```ts
 // src/main.ts
 import { provideDrivers, retry } from '@gyral/core';
-import { makeHttpDriver } from '@gyral/http';
+import { makeHttpDriver, retryableHttpError } from '@gyral/http';
 
 provideDrivers(document.body, {
-  http: retry(makeHttpDriver({ baseUrl: '/api' }), {
+  http: retry(makeHttpDriver({ baseUrl: '/api', timeoutMs: 8_000 }), {
     times: 2,
     delayMs: 300,
     backoff: 'exponential',
+    jitter: true,
+    retryIf: retryableHttpError,
   }),
 });
+```
+
+`HttpError` is a union, so a `switch` that handles every case needs one for timeouts:
+
+```ts
+// src/errors.ts
+import type { HttpError } from '@gyral/http';
+
+export const describeError = (e: HttpError): string => {
+  switch (e._tag) {
+    case 'HttpStatusError':
+      return `The server answered ${String(e.status)}.`;
+    case 'HttpNetworkError':
+      return 'You seem to be offline.';
+    case 'HttpTimeoutError':
+      return 'The server took too long to answer.';
+    case 'HttpDecodeError':
+      return 'The server sent something unexpected.';
+  }
+};
 ```
 
 ### A copy button

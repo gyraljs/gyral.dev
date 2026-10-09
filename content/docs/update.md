@@ -152,15 +152,16 @@ in depth.
 
 ## Framework messages
 
-Gyral sends four messages of its own. Their reducers are optional: leave one out and the
+Gyral sends five messages of its own. Their reducers are optional: leave one out and the
 message changes nothing.
 
-| Message          | Sent when                                                                                                                   |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `PropsChanged`   | A declared prop changed after the first render. Has `props` and `prev`. [Props](/docs/components/#reacting-to-prop-changes) |
-| `IntentRejected` | Input failed a schema in `form()` or `field()`, or the server rejected a form. [Forms](/docs/forms/)                        |
-| `StoreChanged`   | A store the component reads changed. [Shared state](/docs/stores/)                                                          |
-| `Hydrated`       | The component is live in the browser, once, after its first render. Has `serverRendered`.                                   |
+| Message          | Sent when                                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PropsChanged`   | A declared prop changed after the first render. Has `props` and `prev`. [Props](/docs/components/#reacting-to-prop-changes)                   |
+| `IntentRejected` | Input failed a schema in `form()` or `field()`, or the server rejected a form. [Forms](/docs/forms/)                                          |
+| `StoreChanged`   | A store the component reads changed. [Shared state](/docs/stores/)                                                                            |
+| `Hydrated`       | The component is live in the browser, once, after its first render. Has `serverRendered`.                                                     |
+| `Connected`      | The component was removed, its commands stopped, and it was attached again. [Moves and reconnects](/docs/outside-state/#moves-and-reconnects) |
 
 `Hydrated` is the hook for progressive enhancement: render the no-JavaScript version on the
 server and in the first client render (so hydration matches), then switch to the enhanced UI
