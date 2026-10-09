@@ -71,7 +71,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Clear' };
 
-export const CartBadge = define<State, Msg>('my-cart-badge', {
+export const CartBadge = define<State, Msg>()('my-cart-badge', {
   stores: [cart],
   init: () => ({ bumps: 0 }),
   intent: { Clear: () => ({ _tag: 'Clear' }) },

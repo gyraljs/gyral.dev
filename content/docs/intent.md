@@ -25,7 +25,7 @@ export type Msg =
   | { readonly _tag: 'Search'; readonly query: string }
   | { readonly _tag: 'Clear' };
 
-export const SearchBox = define<State, Msg>('my-search-box', {
+export const SearchBox = define<State, Msg>()('my-search-box', {
   init: () => ({ query: '', submitted: undefined }),
   intent: {
     Typed: ({ value }) => ({ _tag: 'Typed', query: value ?? '' }),
@@ -99,7 +99,7 @@ moves with the keyboard and tracks focus, all on the `<li>` itself:
 
 ```ts
 // src/task-list.ts
-import { define, each, html, intents } from '@gyral/core';
+import { define, each, html, intentsOf, type TemplateResult } from '@gyral/core';
 
 export interface Task {
   readonly id: string;
@@ -118,9 +118,11 @@ export type Msg =
   | { readonly _tag: 'Move'; readonly id: string; readonly by: -1 | 1 }
   | { readonly _tag: 'Focus'; readonly id: string };
 
-const i = intents<Msg>();
+// The component's intent names, for rows. A row's return type is written out, or the row and
+// `TaskList`'s type would infer each other.
+const i = intentsOf<typeof TaskList>();
 
-const TaskRow = (t: Task) =>
+const TaskRow = (t: Task): TemplateResult =>
   html`<li
     tabindex="0"
     data-id=${t.id}
@@ -144,7 +146,7 @@ const moved = (tasks: readonly Task[], id: string, to: (from: number) => number)
   return [...rest.slice(0, at), task, ...rest.slice(at)];
 };
 
-export const TaskList = define<State, Msg>('my-task-list', {
+export const TaskList = define<State, Msg>()('my-task-list', {
   init: () => ({
     tasks: [
       { id: 'a', title: 'Write the brief' },
@@ -283,7 +285,7 @@ export type Msg =
 const isSave = (event: Event, key: string | undefined): boolean =>
   key === 's' && event instanceof KeyboardEvent && (event.ctrlKey || event.metaKey);
 
-export const NoteEditor = define<State, Msg>('my-note-editor', {
+export const NoteEditor = define<State, Msg>()('my-note-editor', {
   init: () => ({ body: '', draft: '', tags: [], saving: false }),
   intent: {
     Body: ({ value }) => ({ _tag: 'Body', text: value ?? '' }),
@@ -361,7 +363,7 @@ const KEYS: Readonly<Record<string, readonly [string, string]>> = {
   horizontal: ['ArrowLeft', 'ArrowRight'],
 };
 
-export const Folders = define<{ readonly active: number }, Msg, Props>('my-folders', {
+export const Folders = define<{ readonly active: number }, Msg, Props>()('my-folders', {
   props: { orientation: prop.string({ default: 'vertical' }) },
   init: () => ({ active: 0 }),
   intent: {
@@ -463,7 +465,7 @@ export type Msg = {
 const FIELDS: readonly (keyof Filters)[] = ['category', 'sort'];
 const isField = (name: string): name is keyof Filters => FIELDS.some((f) => f === name);
 
-export const SearchFilters = define<Filters, Msg>('my-search-filters', {
+export const SearchFilters = define<Filters, Msg>()('my-search-filters', {
   init: () => ({ category: 'all', sort: 'relevance' }),
   intent: {
     // One parser for every <select>: the name says which filter changed.
@@ -496,20 +498,20 @@ export const SearchFilters = define<Filters, Msg>('my-search-filters', {
 });
 ```
 
-Give each control its own message only when the reducers really differ. An intent name that is
-neither a message tag nor declared (next section) fails to compile: in `intent`, TypeScript
-reports that `'Category' does not exist in type 'Intents<Msg, object>'`, and in the view that
-`Property 'Category' does not exist on type 'IntentNames<Msg>'`.
+Give each control its own message only when the reducers really differ. A view that names an
+intent with no parser fails to compile: `Property 'Category' does not exist on type
+'IntentNames<"Filter">'`.
 
 ## Intent names that aren't messages
 
 Sometimes each control does something different, but all of them end in the same message. A
 table toolbar's Archive, Restore and Duplicate buttons all become one request to the server.
-Declare their names in the message union with `IntentName<…>`:
+Give each control its own parser key: the keys of `intent` are the component's intent names,
+and a key that isn't a message tag may return any message.
 
 ```ts
 // src/doc-table.ts
-import { define, each, html, intents, type IntentName, type Messages } from '@gyral/core';
+import { define, each, html, intentsOf, type TemplateResult } from '@gyral/core';
 
 export interface Doc {
   readonly id: number;
@@ -520,24 +522,21 @@ export interface Doc {
 export type Action =
   { readonly kind: 'archive' | 'restore'; readonly id: number } | { readonly kind: 'duplicate' };
 
-export type Msg =
-  | { readonly _tag: 'Request'; readonly action: Action }
-  | IntentName<'Archive' | 'Restore' | 'Duplicate'>;
+export type Msg = { readonly _tag: 'Request'; readonly action: Action };
 
 export interface State {
   readonly docs: readonly Doc[];
   readonly pending: readonly Action[];
 }
 
-const i = intents<Msg>(); // the declared names are in it, so rows can use them
+const i = intentsOf<typeof DocTable>(); // the parser keys, for rows
 
 const idOf = (target: Element): number =>
   Number(target.closest('[data-id]')?.getAttribute('data-id'));
 
-// Helpers that build messages return Messages<Msg>: the union without its intent names.
-const request = (action: Action): Messages<Msg> => ({ _tag: 'Request', action });
+const request = (action: Action): Msg => ({ _tag: 'Request', action });
 
-const Row = (doc: Doc) =>
+const Row = (doc: Doc): TemplateResult =>
   html`<li data-id=${doc.id}>
     ${doc.title}
     <button type="button" data-intent=${doc.archived ? i.Restore : i.Archive}>
@@ -545,7 +544,7 @@ const Row = (doc: Doc) =>
     </button>
   </li>`;
 
-export const DocTable = define<State, Msg>('my-doc-table', {
+export const DocTable = define<State, Msg>()('my-doc-table', {
   init: () => ({ docs: [], pending: [] }),
   intent: {
     Archive: ({ target }) => request({ kind: 'archive', id: idOf(target) }),
@@ -554,7 +553,8 @@ export const DocTable = define<State, Msg>('my-doc-table', {
   },
   // One reducer for all three. In an app, it also returns the command that sends the request.
   update: { Request: (s, m) => ({ ...s, pending: [...s.pending, m.action] }) },
-  view: (s) => html`
+  // The view uses its own `i`; the module constant is for rows.
+  view: (s, i) => html`
     <ul>
       ${each(s.docs, (doc) => doc.id, Row)}
     </ul>
@@ -563,19 +563,21 @@ export const DocTable = define<State, Msg>('my-doc-table', {
 });
 ```
 
-- **Each declared name needs a parser**, which may return any message of the union. A
-  message tag's parser stays optional and still returns its own variant.
-- **Declared names get no reducer.** They are never dispatched, so `update` has no key for them.
-- **`i` and `intents<Msg>()` include them**, so markup names them exactly like tags, and a typo
-  still fails to compile.
-- **Nothing can build one.** An intent name is never sent with `el.send()` or produced by a
-  command. Helpers that build messages for such a component return `Messages<Msg>`, the union
-  without its intent names; typed with the whole union, they fail with
-  `Type 'IntentName<…>' is not assignable to type 'ParseResult<…>'`.
+- **The intent names are the keys of `intent`.** `define<State, Msg>()(…)` takes them from the
+  object you write, so there is nothing to declare twice.
+- **A key that is a message tag returns that message**, as before. Any other key may return any
+  message and gets no reducer: `update` has keys only for messages.
+- **`i` holds exactly the keys.** Markup that names an intent with no parser fails to compile.
+  For rows, `intentsOf<typeof Component>()` gives the same names as a module constant; write the
+  row's return type (`: TemplateResult`), and use the view's own `i` inside the component.
+- **A misspelled key is a new intent name.** The view's correct name then fails with
+  `Property 'Archive' does not exist on type 'IntentNames<"Archvie" | …>'. Did you mean
+'Archvie'?`, so fix the key; a key no template names at all is reported by the
+  `gyral/unused-intent` lint rule.
 
-It is a type-level feature only: nothing changes at runtime, and it costs no bytes. Prefer one
-shared intent ([previous section](#several-controls-one-intent)) when one parser that reads
-`name` is clearer; declare names when each control's parser differs.
+It is a type-level feature: the keys were always the names at runtime. Prefer one shared intent
+([previous section](#several-controls-one-intent)) when one parser that reads `name` is
+clearer; give each control its own key when the parsers differ.
 
 ## Press and hold
 
@@ -594,7 +596,7 @@ export type Msg = { readonly _tag: 'Record'; readonly down: boolean };
 
 const PRESS = new Set(['pointerdown', 'keydown']);
 
-export const RecordButton = define<State, Msg>('my-record-button', {
+export const RecordButton = define<State, Msg>()('my-record-button', {
   init: () => ({ recording: false }),
   intent: {
     Record: ({ event, key }) => {
@@ -660,7 +662,7 @@ export type Msg = { readonly _tag: 'Command'; readonly command: '--add' | '--cle
 
 const Item = (item: string) => html`<li>${item}</li>`;
 
-export const ShoppingList = define<State, Msg>('my-shopping-list', {
+export const ShoppingList = define<State, Msg>()('my-shopping-list', {
   init: () => ({ items: [] }),
   intent: {
     Command: ({ command }) =>

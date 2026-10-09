@@ -80,7 +80,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Increment' } | { readonly _tag: 'Decrement' };
 
-export const Counter = define<State, Msg>('my-counter', {
+export const Counter = define<State, Msg>()('my-counter', {
   init: () => ({ count: 0 }),
   intent: {
     Increment: () => ({ _tag: 'Increment' }),
@@ -146,7 +146,7 @@ export interface State {
 export type Msg =
   { readonly _tag: 'Increment' } | { readonly _tag: 'StepChanged'; readonly step: number };
 
-export const Stepper = define<State, Msg>('my-stepper', {
+export const Stepper = define<State, Msg>()('my-stepper', {
   init: () => ({ count: 0, step: 1 }),
   intent: {
     Increment: () => ({ _tag: 'Increment' }),

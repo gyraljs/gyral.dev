@@ -27,7 +27,7 @@ import { define, html } from '@gyral/core';
 
 export type Msg = { readonly _tag: 'Increment' };
 
-export const Counter = define<{ readonly count: number }, Msg>('my-counter', {
+export const Counter = define<{ readonly count: number }, Msg>()('my-counter', {
   init: () => ({ count: 0 }),
   intent: { Increment: () => ({ _tag: 'Increment' }) },
   update: { Increment: (s) => ({ count: s.count + 1 }) },

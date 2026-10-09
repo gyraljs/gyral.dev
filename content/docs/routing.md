@@ -43,9 +43,11 @@ export const app = routes({
 
 ```ts
 // src/shell.ts
-import { define, focus, html } from '@gyral/core';
-import { listen, makeRouter, setTitle, type RouteLocation, type RouteMatch } from '@gyral/router';
+import { define, focus, html, type Head } from '@gyral/core';
+import { listen, makeRouter, setHead, type RouteLocation, type RouteMatch } from '@gyral/router';
 import { app } from './routes.js';
+
+const ORIGIN = 'https://example.com';
 
 type Route = RouteMatch<typeof app.table> | undefined;
 
@@ -63,7 +65,16 @@ export const pageTitle = (route: Route): string =>
       ? `User ${route.params.id}`
       : route.name;
 
-export const Shell = define<State, Msg>('my-shell', {
+/** The page's head, used by the server's page() and by setHead() after a navigation. */
+export const pageHead = (route: Route): Head => ({
+  title: `${pageTitle(route)} · Example`,
+  description: 'Users and settings.',
+  ...(route === undefined
+    ? { robots: 'noindex' }
+    : { canonical: new URL(route.path, ORIGIN).href }),
+});
+
+export const Shell = define<State, Msg>()('my-shell', {
   // The page itself, so its content is light DOM and it captures same-origin link clicks.
   shadow: false,
   drivers: { router: makeRouter({ captureLinks: true }) },
@@ -72,9 +83,9 @@ export const Shell = define<State, Msg>('my-shell', {
   update: {
     Routed: (_s, m) => {
       const route = app.match(m.location.href);
-      const title = setTitle(pageTitle(route));
+      const head = setHead(pageHead(route));
       // After a navigation (not on the page load), move focus to the new page's heading.
-      return [{ route }, m.location.seq === 0 ? [title] : [title, focus('main h1')]];
+      return [{ route }, m.location.seq === 0 ? [head] : [head, focus('main h1')]];
     },
   },
   view: (s) => html`
@@ -101,7 +112,7 @@ Navigation is a command, returned from a reducer like any other:
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | `navigate(url, options?)`      | Push a history entry (`replace: true` replaces it; `scroll`, `focusReset`: [see below](#scroll-and-focus)) |
 | `back()`, `forward()`, `go(n)` | Move through history                                                                                       |
-| `setTitle(title)`              | Set `document.title`                                                                                       |
+| `setHead(head)`                | Make the document's head match a `Head` ([see below](#the-head))                                           |
 
 ```ts
 // src/save.ts
@@ -164,7 +175,7 @@ export type Msg =
   | { readonly _tag: 'Routed'; readonly location: RouteLocation }
   | { readonly _tag: 'Typed'; readonly query: string };
 
-export const ProductFilters = define<State, Msg>('my-product-filters', {
+export const ProductFilters = define<State, Msg>()('my-product-filters', {
   init: () => [{ query: '' }, [listen((location): Msg => ({ _tag: 'Routed', location }))]],
   intent: { Typed: ({ value }) => ({ _tag: 'Typed', query: value ?? '' }) },
   update: {
@@ -207,11 +218,31 @@ Captured clicks skip modified clicks (new tab), `target` other than `_self`, `do
 `rel="external"`, other origins and same-page `#hash` links. Anchors inside shadow roots work.
 `linkRoot: element` limits capture to one part of the page.
 
-## Titles
+## The head
 
-Titles often depend on data, such as a product's name, not only on the route. So they're
-computed by a pure function of state, `pageTitle` above, and set with `setTitle()` from the
-reducer. The server calls the same function for `<title>`, so the two can't disagree.
+A page's head is one value, a `Head` from `@gyral/core`: `title`, `description`, `canonical`,
+`robots`, `meta` (Open Graph and other name/property tags), `links` (alternates, icons),
+`jsonLd`, `lang` and `dir`. Compute it with a pure function, `pageHead` above, and use it twice:
+
+- **On the server**, spread it into `page()` / `renderPage()`, which writes each entry once,
+  right after `<title>`, marked `data-gyral-head`.
+- **In the browser**, return `setHead(pageHead(route))` from the `Routed` reducer. It changes
+  only the elements it manages: entries the new head drops are removed, and head markup you
+  wrote yourself is left alone. The first `Routed` after hydration finds the server's head and
+  changes nothing.
+
+So a client navigation leaves exactly the head a page load would, and the two can't disagree.
+Titles that depend on data, such as a product's name, come from state the same way. The page
+owns its head: components don't add to it, because the server writes the head before any
+component renders.
+
+- **`canonical` is absolute**: build it from `match().path` and your origin
+  ([One URL per page](#one-url-per-page)).
+- **Stylesheets, preloads and the charset aren't head entries.** They belong to `page()`'s own
+  options (`stylesheets`, `modulepreload`) or `extraHead`, because changing them on navigation
+  would unstyle the page or refetch modules. Development builds reject them in a `Head`.
+- **JSON-LD** is data, not script, so `script-src` doesn't apply to it. Under an enforced
+  Trusted Types policy, `setHead` leaves JSON-LD as the server wrote it and warns once.
 
 ## Server-side routes
 
@@ -223,7 +254,7 @@ import { Hono } from 'hono';
 import { html } from '@gyral/core';
 import { renderPage } from '@gyral/ssr';
 import { app as routes } from '../src/routes.js';
-import { pageTitle } from '../src/shell.js';
+import { pageHead } from '../src/shell.js';
 
 export const server = new Hono();
 
@@ -236,7 +267,7 @@ server.get('*', (c) => {
   }
   return renderPage(
     {
-      title: pageTitle(route),
+      ...pageHead(route),
       body: html`<my-shell></my-shell>`,
       scripts: ['/src/entry-client.ts'],
     },

@@ -1,16 +1,70 @@
 ---
 title: Migrating from 0.3.0 to 0.3.1
-description: Move a Gyral 0.3.0 app to 0.3.1 - stricter svg checks, a settled() that waits for message chains, declining parsers, prop equality - and what's new.
+description: Move a Gyral 0.3.0 app to 0.3.1 - the two-call define, the head model, retries and CSRF on the driver, behavior changes - and what's new.
 section: Reference
 order: 3
 ---
 
 # Migrating from 0.3.0 to 0.3.1
 
-Gyral 0.3.1 is a patch release: nothing was removed, and most apps update by moving every
-`@gyral/*` package to 0.3.1 together (they share one version). A few changes can make a working
-app fail a check or a test, or behave differently, so read those first. Everything else is new
-API and smaller bundles.
+Gyral 0.3.1 changes some 0.3.0 APIs. This is a one-time exception while Gyral is still before
+its first stable release: 0.3.1 takes the breaking changes once, so later 0.3 releases don't
+have to. Move every `@gyral/*` package to 0.3.1 together (they share one version), then work
+through the sections below. The API changes are type errors, so the type checker finds each
+place to change; the behavior changes after them keep compiling, so check those against your
+app and its tests.
+
+## `define` takes two calls
+
+`define` now takes the types you write in a first call and the tag and spec in a second, so
+TypeScript can infer the component's intent names from the keys of `intent`:
+
+```text
+define<State, Msg>('my-todos', spec)    →  define<State, Msg>()('my-todos', spec)
+define('my-badge', spec)                →  define()('my-badge', spec)
+const i = intents<Msg>()                →  const i = intentsOf<typeof Todos>()
+```
+
+- **List rows** that name intents through the module constant need a return type,
+  `(t: Todo): TemplateResult =>`, and the view uses its own `i` parameter, so the row and the
+  component don't infer each other's types ([Lists](/docs/views/#lists)).
+- **`IntentName<…>` and `Messages<M>` are gone.** Remove `IntentName<…>` from your message union
+  and keep the parsers: every key of `intent` is an intent name, and a key that isn't a message
+  tag may return any message ([Intent names that aren't messages](/docs/intent/#intent-names-that-arent-messages)).
+  Type helpers that built messages with `Msg` instead of `Messages<Msg>`.
+- **A view that names a tag with no parser** no longer compiles: the view's `i` offers only the
+  keys of `intent`. Add the parser.
+- **`IntentNames` takes the names** (`IntentNames<'Save' | 'Cancel'>`), not the message union.
+
+## The head model
+
+The page's head is one `Head` value, used by the server and the router alike
+([The head](/docs/routing/#the-head)):
+
+- **`setTitle(title)` is removed.** Return `setHead({ title })`, or better
+  `setHead(pageHead(route))` with the same function the server uses, from your `Routed`
+  reducer. A router fake's `{ _tag: 'Title' }` input is `{ _tag: 'Head', head }`, and
+  `snapshot().title` is `snapshot().head?.title`.
+- **`page({ head })` is `page({ extraHead })`.** Move the description, canonical, robots, Open
+  Graph meta, alternates and JSON-LD into the `Head` fields `page()` and `renderPage()` now take;
+  keep in `extraHead` only what the head model doesn't manage. Managed elements, the
+  description meta included, carry `data-gyral-head`, so tests that match their exact markup
+  change.
+
+## Retries and CSRF tokens
+
+Retries and CSRF tokens are now set where you choose the driver, so apps that don't use them
+don't bundle them ([Effects](/docs/effects/#retries)):
+
+- **`retry` is a wrapper.** The `retry` option of drivers, `subscription(…)`,
+  `makeHttpDriver(…)`, `fakeDriver(…)` and `fakeHttp(…)` is gone; wrap the driver instead:
+  `retry(makeHttpDriver({ … }), { times: 2, delayMs: 300 })`. In tests, keep reading `calls`
+  and `inputs` from the fake itself, not the wrapper.
+- **A CSRF token from a `<meta>` is a driver setting.** `request({ csrf: { meta } })` and
+  `submitForm(…, { csrf: { meta } })` are gone. Configure it once:
+  `provideDrivers(document.body, { http: makeHttpDriver({ headers: csrfFromMeta('csrf-token') }) })`.
+  `submitForm(…, { csrf: { token } })` stays for a token the app already holds. Development
+  builds warn once when a `POST` goes out without the token while the page has the `<meta>`.
 
 ## Stricter checks inside `<svg>`
 
@@ -80,8 +134,12 @@ it against the old page.
   `navigate(url, { scroll: false, focusReset: false })`.
 - **If it moved focus to the new heading**, keep doing it with `focus('main h1')` from the
   `Routed` reducer: focus your app moves during a navigation wins over the reset.
+- **A `replace` leaves scroll and focus alone**, so keeping a search box in sync with
+  `navigate('?q=…', { replace: true })` doesn't jump. Pass `scroll: true` or `focusReset: true`
+  to a replace that should.
 - In browsers without the Navigation API, the History API code now loads on first use, so the
-  first navigation there resolves a moment later.
+  first navigation there resolves a moment later. If it can't load, navigations become full
+  page loads.
 
 ## Behavior changes
 
@@ -168,8 +226,8 @@ dependency.
   `"pointerdown pointerup"`, [per-event attributes](/docs/intent/#one-element-an-intent-per-event)
   `data-intent-<event>`, [declining parsers](/docs/intent/#declining-passing-an-event-outward),
   [props and stores in a parser](/docs/intent/#props-and-stores-in-a-parser),
-  [`IntentName<…>`](/docs/intent/#intent-names-that-arent-messages) and `Messages<M>` for
-  intent names that aren't message tags, `detail` for every `CustomEvent`, and the
+  [intent names inferred from parser keys](/docs/intent/#intent-names-that-arent-messages),
+  including names that aren't message tags, `detail` for every `CustomEvent`, and the
   [`capturePointer()`](/docs/intent/#press-and-hold) hook for press-and-hold and drag.
 - Components: [`shadow: { delegatesFocus: true }`](/docs/views/#focusing-into-a-child-component),
   also written by the server, and [prop equality](/docs/components/#when-a-prop-counts-as-changed)
@@ -192,8 +250,13 @@ dependency.
 - [`@gyral/time/delay`](/docs/effects/#built-in-drivers): `delay` and `debounce` alone.
 - `style` bindings and static `style="…"` attributes that work under a strict Content
   Security Policy on the client ([inline styles](/docs/styling/#inline-styles-under-a-strict-csp)).
-- Router: a canonical `path` from `match()`, and [scroll and focus](/docs/routing/#scroll-and-focus)
-  after a navigation, with `scroll` and `focusReset` options.
+- Router: a canonical `path` from `match()`, [scroll and focus](/docs/routing/#scroll-and-focus)
+  after a navigation, with `scroll` and `focusReset` options, and the
+  [head model](/docs/routing/#the-head) with `setHead()`.
+- `retry(driver, policy)` and `csrfFromMeta` on the driver ([Effects](/docs/effects/#retries)).
+- Server: opt-in [hashes for server-rendered `style` attributes](/docs/server-rendering/#content-security-policy)
+  (`renderPage({ csp: { styleAttributes: 'hash' } })`), and a
+  [Trusted Types](/docs/server-rendering/#trusted-types) policy named `gyral`.
 - Server: [hashed stylesheets](/docs/static-sites/#a-static-build) (`css` from
   `clientAssetsFromManifest`, `renderPage({ stylesheets })`, `assets(modules)` in
   `productionServer`), safer asset serving with `assetHandler`, and `toNodeListener` from

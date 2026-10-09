@@ -50,7 +50,7 @@ below are a trimmed-down version.
 // src/counter.ts
 import { define, html } from '@gyral/core';
 
-export const Counter = define<{ readonly count: number }, { readonly _tag: 'Increment' }>(
+export const Counter = define<{ readonly count: number }, { readonly _tag: 'Increment' }>()(
   'my-counter',
   {
     init: () => ({ count: 0 }),

@@ -23,7 +23,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'NameChanged'; readonly name: string };
 
-export const Greeter = define<State, Msg>('my-greeter', {
+export const Greeter = define<State, Msg>()('my-greeter', {
   init: () => ({ name: '' }),
   intent: {
     NameChanged: ({ value }) => ({ _tag: 'NameChanged', name: value ?? '' }),
@@ -39,13 +39,15 @@ export const Greeter = define<State, Msg>('my-greeter', {
 });
 ```
 
-`define<State, Msg>(tag, spec)` registers `<my-greeter>` and returns its class. The spec has
-four required parts and a few optional ones:
+`define<State, Msg>()(tag, spec)` registers `<my-greeter>` and returns its class. It is two
+calls: the first takes the types you write (state, messages, props, outputs), the second the
+tag and spec, so TypeScript can still infer the intent names from the spec's `intent` keys. The
+spec has four required parts and a few optional ones:
 
 | Part      | What it is                                                                                                     | Guide                                                                                                 |
 | --------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `init`    | The starting state, computed from props. May also start commands.                                              | [Model and update](/docs/update/)                                                                     |
-| `intent`  | Parsers that turn platform events into messages, keyed by message tag.                                         | [Intent](/docs/intent/)                                                                               |
+| `intent`  | Parsers that turn platform events into messages. Their keys are the component's intent names.                  | [Intent](/docs/intent/)                                                                               |
 | `update`  | One pure reducer per message tag: state in, next state (and commands) out.                                     | [Model and update](/docs/update/)                                                                     |
 | `view`    | A pure function from state to an `html` template that _names_ intents.                                         | [Views](/docs/views/)                                                                                 |
 | `props`   | Inputs from the parent or from attributes, declared with `prop.*` builders.                                    | [below](#props)                                                                                       |
@@ -84,7 +86,7 @@ export interface Props {
   readonly note: string | undefined;
 }
 
-export const Badge = define<Stateless, never, Props>('my-badge', {
+export const Badge = define<Stateless, never, Props>()('my-badge', {
   props: {
     label: prop.string({ required: true }),
     count: prop.number({ default: 0 }),
@@ -168,7 +170,7 @@ const props = {
   holder: prop.value(v.nullable(v.string()), { default: 'Box office' }),
 };
 
-export const SeatPicker = define<Stateless, never, PropsOf<typeof props>>('my-seat-picker', {
+export const SeatPicker = define<Stateless, never, PropsOf<typeof props>>()('my-seat-picker', {
   props,
   intent: {},
   update: {},
@@ -253,7 +255,7 @@ const props = {
   sort: prop.value(isSort, { equals: (a, b) => a?.key === b?.key && a?.dir === b?.dir }),
 };
 
-export const ResultsTable = define<Stateless, never, PropsOf<typeof props>>('my-results-table', {
+export const ResultsTable = define<Stateless, never, PropsOf<typeof props>>()('my-results-table', {
   props,
   intent: {},
   update: {},
@@ -284,7 +286,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Typed'; readonly text: string };
 
-export const UserNotes = define<State, Msg, { readonly userId: string }>('my-user-notes', {
+export const UserNotes = define<State, Msg, { readonly userId: string }>()('my-user-notes', {
   props: { userId: prop.string({ required: true }) },
   init: () => ({ draft: '' }),
   intent: { Typed: ({ value }) => ({ _tag: 'Typed', text: value ?? '' }) },
@@ -309,7 +311,7 @@ A parent sets a child's props in its view, as attributes (`step="5"`) or as prop
 (`.step=${5}`, the way objects and arrays travel), and listens to the child's **outputs**. A
 child reports up by returning `emit(output)` from a reducer. `emit` is a command like any
 other, so the child stays pure and testable. Build it with `outputs<Out>()`, a module constant
-like `intents<Msg>()`: it is the same `emit`, typed by the output union, so an output of the
+like `intentsOf<typeof Component>()`: it is the same `emit`, typed by the output union, so an output of the
 wrong shape fails to compile in the child.
 
 ```ts
@@ -323,7 +325,7 @@ const emit = outputs<StepperOutput>();
 
 type Msg = { readonly _tag: 'Step'; readonly by: number };
 
-export const Stepper = define<Stateless, Msg, { readonly step: number }, StepperOutput>(
+export const Stepper = define<Stateless, Msg, { readonly step: number }, StepperOutput>()(
   'my-stepper',
   {
     props: { step: prop.number({ default: 1 }) },
@@ -355,7 +357,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Add'; readonly by: number };
 
-export const Total = define<State, Msg>('my-total', {
+export const Total = define<State, Msg>()('my-total', {
   init: () => ({ total: 0 }),
   intent: {
     Add: child(Stepper, (out) => ({ _tag: 'Add', by: out.by })),

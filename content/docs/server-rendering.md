@@ -29,7 +29,7 @@ import { define, html } from '@gyral/core';
 
 export type Msg = { readonly _tag: 'Increment' } | { readonly _tag: 'Decrement' };
 
-export const Counter = define<{ readonly count: number }, Msg>('my-counter', {
+export const Counter = define<{ readonly count: number }, Msg>()('my-counter', {
   init: () => ({ count: 0 }),
   intent: {
     Increment: () => ({ _tag: 'Increment' }),
@@ -62,7 +62,8 @@ app.get('/', () =>
   renderPage({
     title: 'Counter',
     description: 'A counter rendered on the server and hydrated in the browser.',
-    head: html`<link rel="icon" href="/favicon.svg" />`,
+    canonical: 'https://example.com/',
+    links: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
     body: html`<main>
       <h1>Counter</h1>
       <my-counter></my-counter>
@@ -79,8 +80,14 @@ app.get('/', () =>
   service worker can serve it.
 - **`page(options)`** is the document shell (doctype, `<head>`, `<body>`) on its own, for
   `renderToString` or `renderToStream`.
-- **`body`** and **`head`** are ordinary `html` templates from `@gyral/core`, the same tag your
-  components use. The shell itself is never hydrated; the components inside it are.
+- **The head fields** (`title`, `description`, `canonical`, `robots`, `meta`, `links`,
+  `jsonLd`, `lang`, `dir`) are a `Head` from `@gyral/core`, the same value the router's
+  `setHead()` applies after a client navigation ([Routing](/docs/routing/#the-head)). The
+  server writes each entry once, marked `data-gyral-head`.
+- **`body`** and **`extraHead`** are ordinary `html` templates from `@gyral/core`, the same tag
+  your components use. `extraHead` is for head markup the head model doesn't manage, such as a
+  `<meta>` with a `media` query. The shell itself is never hydrated; the components inside it
+  are.
 - **`styles`** takes your global CSS as text and writes it into `<style>` elements, escaped so
   it can't close the element early. Trusted CSS only.
 - **`stylesheets`** takes stylesheet URLs and writes a `<link rel="stylesheet">` for each, before
@@ -218,11 +225,48 @@ export function home(): Response {
 
 The header is built when the page renders, so it lists every shadow component registered by
 then, also those whose modules were imported lazily after startup, plus each entry of the
-page's `styles`. `<style>` elements you write in `head` aren't covered: move that CSS into
+page's `styles`. `<style>` elements you write in `extraHead` aren't covered: move that CSS into
 `styles` or a stylesheet. Linked stylesheets are same-origin, so `style-src 'self'` allows them
-without hashes. `style="…"` attributes in server HTML aren't covered either: under a strict
-policy they apply only once the component hydrates (see
-[Styling](/docs/styling/#inline-styles-under-a-strict-csp)).
+without hashes.
+
+`style="…"` attributes in server HTML aren't covered by default: under a strict policy they
+apply only once the component hydrates (see
+[Styling](/docs/styling/#inline-styles-under-a-strict-csp)). To have them paint at once, opt in
+with `styleAttributes: 'hash'`:
+
+```ts
+// server/upload.ts
+import { html } from '@gyral/core';
+import { renderPage } from '@gyral/ssr';
+
+export function upload(done: number): Response {
+  return renderPage({
+    title: 'Upload',
+    body: html`<div class="bar" style="--done: ${done}%"></div>`,
+    csp: { directives: { 'default-src': "'self'" }, styleAttributes: 'hash' },
+  });
+}
+```
+
+The header then gets `style-src-attr 'unsafe-hashes' 'sha256-…'` for every distinct `style`
+value the page wrote: static, bound and element-hook values, but not `raw()` markup. The page
+is rendered to a string first, so its body isn't sent in chunks, and each value adds about 54
+bytes of header. Development warns above 32 distinct values, and `maxStyleHashes` (default 128)
+caps the list; values past it wait for hydration as before. It applies to pages rendered per
+request: a prerendered page has no per-page header. If your `style-src-attr` already allows
+`'unsafe-inline'`, no hashes are added, since a hash would switch `'unsafe-inline'` off.
+
+### Trusted Types
+
+Gyral parses template HTML and `raw()` markup in the browser through one Trusted Types policy
+named `gyral`, created on first use; client-only apps are covered too. Under
+`require-trusted-types-for 'script'`, a policy that lists allowed policies must include it:
+`'trusted-types': 'gyral'`, plus your own. If the browser refuses the policy, Gyral falls back to
+plain strings, which works only while Trusted Types aren't enforced, and development builds warn
+once ([G0072](/errors/#G0072)). The policy trusts its input as the app's own HTML, so `raw()`
+still never takes user input.
+
+### Ahead of time
 
 `contentSecurityPolicy({ directives, styles? })` builds the same value ahead of time, for the
 components imported before the call. Use it where no page renders per request: a static site

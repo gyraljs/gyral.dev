@@ -26,15 +26,18 @@ components every page has in the client entry, and load the rest when their tag 
 // src/widgets.ts
 import { define, html } from '@gyral/core';
 
-export const Gallery = define<{ readonly index: number }, { readonly _tag: 'Next' }>('my-gallery', {
-  init: () => ({ index: 0 }),
-  intent: { Next: () => ({ _tag: 'Next' }) },
-  update: { Next: (s) => ({ index: s.index + 1 }) },
-  view: (s, i) => html`
-    <output>Photo ${s.index + 1}</output>
-    <button type="button" data-intent=${i.Next}>Next photo</button>
-  `,
-});
+export const Gallery = define<{ readonly index: number }, { readonly _tag: 'Next' }>()(
+  'my-gallery',
+  {
+    init: () => ({ index: 0 }),
+    intent: { Next: () => ({ _tag: 'Next' }) },
+    update: { Next: (s) => ({ index: s.index + 1 }) },
+    view: (s, i) => html`
+      <output>Photo ${s.index + 1}</output>
+      <button type="button" data-intent=${i.Next}>Next photo</button>
+    `,
+  },
+);
 ```
 
 ```ts

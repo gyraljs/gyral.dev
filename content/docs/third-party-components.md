@@ -32,7 +32,7 @@ export type Msg = { readonly _tag: 'SizeChanged'; readonly size: string };
 const valueOf = (el: Element): string | undefined =>
   'value' in el && typeof el.value === 'string' ? el.value : undefined;
 
-export const SizeField = define<State, Msg>('my-size-field', {
+export const SizeField = define<State, Msg>()('my-size-field', {
   init: () => ({ size: 'M' }),
   intent: {
     SizeChanged: ({ target }) => {
@@ -102,7 +102,7 @@ const isMarker = (u: unknown): u is Marker =>
 
 export type Msg = { readonly _tag: 'Select'; readonly marker: Marker };
 
-export const StoreFinder = define<{ readonly selected: string }, Msg>('my-store-finder', {
+export const StoreFinder = define<{ readonly selected: string }, Msg>()('my-store-finder', {
   init: () => ({ selected: '' }),
   intent: {
     Select: ({ detail }) => (isMarker(detail) ? { _tag: 'Select', marker: detail } : undefined),

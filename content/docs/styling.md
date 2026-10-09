@@ -19,7 +19,7 @@ custom states for reacting to the model.
 // src/tag.ts
 import { css, define, html, prop, type Stateless } from '@gyral/core';
 
-export const Tag = define<Stateless, never, { readonly label: string }>('my-tag', {
+export const Tag = define<Stateless, never, { readonly label: string }>()('my-tag', {
   props: { label: prop.string({ required: true }) },
   intent: {},
   update: {},
@@ -116,7 +116,7 @@ export interface Props {
   readonly compact: boolean;
 }
 
-export const SplitView = define<Stateless, never, Props>('my-split-view', {
+export const SplitView = define<Stateless, never, Props>()('my-split-view', {
   props: { sidebar: prop.number({ required: true }), compact: prop.boolean() },
   intent: {},
   update: {},
@@ -161,7 +161,10 @@ So plan the first paint around it. Values from a known set belong in the stylesh
 by a class or a data attribute such as `data-density` above: they apply from the first paint,
 with no inline style at all. Continuous values go in custom properties with a fallback in the
 stylesheet, such as `inline-size: var(--sidebar, 16rem)`: the first paint uses the fallback,
-and the user's width arrives with hydration.
+and the user's width arrives with hydration. A page rendered per request can also allow its own
+style attributes by hash, with `renderPage({ csp: { styleAttributes: 'hash' } })`
+([Server rendering](/docs/server-rendering/#content-security-policy)), so they paint before
+hydration.
 
 ## Custom states
 
@@ -178,7 +181,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Retry' };
 
-export const Upload = define<State, Msg>('my-upload', {
+export const Upload = define<State, Msg>()('my-upload', {
   init: () => ({ phase: 'idle' }),
   intent: { Retry: () => ({ _tag: 'Retry' }) },
   update: { Retry: () => ({ phase: 'uploading' }) },
@@ -220,7 +223,7 @@ those, `shadow: false` renders the view as the element's own children:
 // src/article-page.ts
 import { define, html, prop, type Stateless } from '@gyral/core';
 
-export const ArticlePage = define<Stateless, never, { readonly heading: string }>(
+export const ArticlePage = define<Stateless, never, { readonly heading: string }>()(
   'my-article-page',
   {
     shadow: false,

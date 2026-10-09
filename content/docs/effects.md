@@ -33,7 +33,7 @@ export type Msg =
   | { readonly _tag: 'Loaded'; readonly name: string; readonly email: string }
   | { readonly _tag: 'Failed'; readonly error: HttpError };
 
-export const UserCard = define<State, Msg>('my-user-card', {
+export const UserCard = define<State, Msg>()('my-user-card', {
   init: () => ({ _tag: 'Idle' }),
   intent: { Load: ({ value }) => ({ _tag: 'Load', id: Number(value) }) },
   update: {
@@ -108,7 +108,7 @@ delivered. When a component disconnects, all its commands are cancelled the same
 | --------------- | -------------------------------------------------------------------------------------- |
 | `@gyral/http`   | `get(url, handlers)`, `request(req, handlers)`, `submitForm(url, formData, handlers)`  |
 | `@gyral/time`   | `delay(ms, msg)`, `debounce(ms, msg)`, `periodic(ms, toMsg)`, `animationFrames(toMsg)` |
-| `@gyral/router` | `navigate(url)`, `back()`, `forward()`, `go(n)`, `setTitle(title)`, `listen(toMsg)`    |
+| `@gyral/router` | `navigate(url)`, `back()`, `forward()`, `go(n)`, `setHead(head)`, `listen(toMsg)`      |
 | `@gyral/core`   | `random(count, toMsg)`, `randomInt(min, max, toMsg)`                                   |
 
 Three more commands are handled by the component itself rather than a driver: `emit(output)`
@@ -118,7 +118,7 @@ msg)` writes to a [store](/docs/stores/), and `focus(selector)` moves
 
 ### Commands that answer nothing
 
-`focus()`, `emit()`, `navigate()`, `go()` and `setTitle()` return `Command<never>`: they produce
+`focus()`, `emit()`, `navigate()`, `go()` and `setHead()` return `Command<never>`: they produce
 no message. `never` fits any message type, so they go in any reducer's command list, and in a
 helper typed `Command<Msg>`, with no type argument:
 
@@ -177,13 +177,34 @@ export const copyText = <M>(text: string, copied: M, failed: (error: CopyError) 
   aborts.
 - `toError` turns whatever was thrown into the driver's typed error, which `onFailure` receives.
 - `concurrency` is the default policy for the driver's commands; a command can override it.
-- `retry: { times, delayMs?, backoff? }` retries failures (`'fixed'` or `'exponential'`).
-  Cancellations never retry.
+- Retries aren't a driver option: wrap the driver where you choose it (next section).
 - `defineDriver` only helps TypeScript infer the input, output and error types. Wrap the driver
   in typed command helpers like `copyText`, as the built-in packages do.
 
 Nothing should run at import time: create resources when a command first runs, so modules are
 safe to import on a server.
+
+### Retries
+
+`retry(driver, { times, delayMs?, backoff? })` from `@gyral/core` returns the same driver, under
+the same name, with failures tried again after the delay (`'fixed'` or `'exponential'`). A
+cancellation (the command switched away, the component disconnected) ends it at once and is
+never retried. Wrap the driver where you choose it, at app setup, in a component's `drivers` or
+in a test, and apps that never retry don't bundle the code:
+
+```ts
+// src/main.ts
+import { provideDrivers, retry } from '@gyral/core';
+import { makeHttpDriver } from '@gyral/http';
+
+provideDrivers(document.body, {
+  http: retry(makeHttpDriver({ baseUrl: '/api' }), {
+    times: 2,
+    delayMs: 300,
+    backoff: 'exponential',
+  }),
+});
+```
 
 ### A copy button
 
@@ -211,7 +232,7 @@ const STATUS: Readonly<Record<State['status'], string>> = {
   failed: 'Copying failed. Select the link and copy it instead.',
 };
 
-export const CopyLink = define<State, Msg, { readonly url: string }>('my-copy-link', {
+export const CopyLink = define<State, Msg, { readonly url: string }>()('my-copy-link', {
   props: { url: prop.string({ required: true }) },
   init: () => ({ status: 'idle' }),
   intent: { Copy: () => ({ _tag: 'Copy' }) },
@@ -291,7 +312,7 @@ For example, give every request of a component default headers:
 import { define, html, type Stateless } from '@gyral/core';
 import { csrfFromMeta, makeHttpDriver } from '@gyral/http';
 
-export const ApiClient = define<Stateless, never>('my-api-client', {
+export const ApiClient = define<Stateless, never>()('my-api-client', {
   drivers: { http: makeHttpDriver({ headers: csrfFromMeta('csrf-token') }) },
   intent: {},
   update: {},
@@ -300,7 +321,11 @@ export const ApiClient = define<Stateless, never>('my-api-client', {
 ```
 
 `csrfFromMeta` reads `<meta name="csrf-token">` when each request runs, so components never read
-the DOM for it. [Testing](/docs/testing/) uses the same lookup to swap in fakes.
+the DOM for it. The driver's headers are the one place a CSRF token from a `<meta>` is
+configured; set it once for the app with `provideDrivers(document.body, { http:
+makeHttpDriver({ headers: csrfFromMeta('csrf-token') }) })`. Development builds warn once when a
+`POST`, `PUT`, `PATCH` or `DELETE` goes out without the token while the page has a CSRF
+`<meta>`. [Testing](/docs/testing/) uses the same lookup to swap in fakes.
 
 ## On the server
 

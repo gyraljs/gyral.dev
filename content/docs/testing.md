@@ -39,7 +39,7 @@ export type Msg =
   | { readonly _tag: 'Found'; readonly query: string; readonly name: string }
   | { readonly _tag: 'Failed' };
 
-export const Lookup = define<State, Msg>('my-lookup', {
+export const Lookup = define<State, Msg>()('my-lookup', {
   init: () => ({ query: '', found: undefined }),
   intent: { Typed: ({ value }) => ({ _tag: 'Typed', query: value ?? '' }) },
   update: {
@@ -140,7 +140,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Add'; readonly tag: string };
 
-export const TagEditor = define<State, Msg, object, TagEditorOutput>('my-tag-editor', {
+export const TagEditor = define<State, Msg, object, TagEditorOutput>()('my-tag-editor', {
   init: () => ({ tags: [] }),
   intent: { Add: ({ value }) => ({ _tag: 'Add', tag: value ?? '' }) },
   update: {
@@ -258,7 +258,7 @@ export const FolderList = define<
   { readonly active: number },
   Msg,
   { readonly orientation: string }
->('my-folder-list', {
+>()('my-folder-list', {
   props: { orientation: prop.string({ default: 'vertical' }) },
   init: () => ({ active: 0 }),
   intent: {

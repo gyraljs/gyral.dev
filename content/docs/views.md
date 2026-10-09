@@ -23,7 +23,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Edit' } | { readonly _tag: 'Save'; readonly name: string };
 
-export const Profile = define<State, Msg>('my-profile', {
+export const Profile = define<State, Msg>()('my-profile', {
   init: () => ({ editing: false, name: 'Ada' }),
   intent: {
     Edit: () => ({ _tag: 'Edit' }),
@@ -110,7 +110,7 @@ const tile = (service: Service) => svg`<g transform="translate(${(service.id - 1
   <text x="1" y="13">${service.name}</text>
 </g>`;
 
-export const StatusStrip = define<{ readonly services: readonly Service[] }, never>(
+export const StatusStrip = define<{ readonly services: readonly Service[] }, never>()(
   'my-status-strip',
   {
     init: () => ({ services: [{ id: 1, status: 'up', name: 'API' }] }),
@@ -210,12 +210,14 @@ component in it, to its item, so reordering moves elements instead of rewriting 
 
 A row re-renders only when its item or its `pick` result changes, and is skipped otherwise.
 That makes long lists cheap, and it has one rule: **a row reads only its arguments and
-module-level values.** Name intents with a module-level `intents<Msg>()`, the same names the view
-gets as `i`, and pass anything else from the view, such as the selection, through `pick`:
+module-level values.** Name intents with a module-level `intentsOf<typeof Component>()`, the
+same names the view gets as `i`, and pass anything else from the view, such as the selection,
+through `pick`. Write the row's return type (`: TemplateResult`) and use the view's own `i`, so
+the row and the component don't infer each other's types:
 
 ```ts
 // src/todos.ts
-import { define, each, html, intents } from '@gyral/core';
+import { define, each, html, intentsOf, type TemplateResult } from '@gyral/core';
 
 export interface Todo {
   readonly id: number;
@@ -233,10 +235,10 @@ export type Msg =
   | { readonly _tag: 'Select'; readonly id: number };
 
 // The intent names as a module constant, so rows can use them and stay pure.
-const i = intents<Msg>();
+const i = intentsOf<typeof Todos>();
 
 // A row: reads only its item, what `pick` returned, and module constants.
-const Row = (todo: Todo, selected: boolean) =>
+const Row = (todo: Todo, selected: boolean): TemplateResult =>
   html`<li class=${selected ? 'selected' : ''}>
     <label>
       <input type="checkbox" value=${todo.id} ?checked=${todo.done} data-intent=${i.Toggle} />
@@ -250,7 +252,7 @@ const idOf = (value: string | undefined): number | undefined => {
   return Number.isInteger(id) ? id : undefined;
 };
 
-export const Todos = define<State, Msg>('my-todos', {
+export const Todos = define<State, Msg>()('my-todos', {
   init: () => ({ todos: [{ id: 1, text: 'Write docs', done: false }], selected: 1 }),
   intent: {
     Toggle: ({ value }) => {
@@ -315,7 +317,7 @@ appears somewhere else, plays the move with the Web Animations API.
 
 ```ts
 // src/board.ts
-import { define, defineHook, each, html, intents } from '@gyral/core';
+import { define, defineHook, each, html, intentsOf, type TemplateResult } from '@gyral/core';
 
 /** Where each key was last seen, in page coordinates. */
 const seen = new Map<string, { readonly x: number; readonly y: number }>();
@@ -350,9 +352,9 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Move'; readonly id: string };
 
-const i = intents<Msg>();
+const i = intentsOf<typeof Board>();
 
-const TaskCard = (t: Task, slot: number) =>
+const TaskCard = (t: Task, slot: number): TemplateResult =>
   html`<li ${flip(t.id, slot)}>
     <button type="button" value=${t.id} data-intent=${i.Move}>${t.label}</button>
   </li>`;
@@ -370,7 +372,7 @@ const column = (label: string, tasks: readonly Task[]) =>
     </ul>
   </section>`;
 
-export const Board = define<State, Msg>('my-board', {
+export const Board = define<State, Msg>()('my-board', {
   init: () => ({
     todo: [
       { id: 'a', label: 'Write the release notes' },
@@ -473,7 +475,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Next' };
 
-export const Steps = define<State, Msg>('my-steps', {
+export const Steps = define<State, Msg>()('my-steps', {
   init: () => ({ current: 0 }),
   intent: { Next: () => ({ _tag: 'Next' }) },
   update: { Next: (s) => ({ current: (s.current + 1) % 3 }) },
@@ -502,7 +504,7 @@ export interface Props {
   readonly total: number;
 }
 
-export const UploadProgress = define<Stateless, never, Props>('my-upload-progress', {
+export const UploadProgress = define<Stateless, never, Props>()('my-upload-progress', {
   props: { sent: prop.number({ default: 0 }), total: prop.number({ default: 1 }) },
   intent: {},
   update: {},
@@ -569,7 +571,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Arrived' };
 
-export const InboxBadge = define<State, Msg>('my-inbox-badge', {
+export const InboxBadge = define<State, Msg>()('my-inbox-badge', {
   init: () => ({ unread: 0, pulses: 0 }),
   intent: { Arrived: () => ({ _tag: 'Arrived' }) },
   update: { Arrived: (s) => ({ unread: s.unread + 1, pulses: s.pulses + 1 }) },
@@ -650,7 +652,7 @@ interface State {
 
 type Msg = { readonly _tag: 'Add' };
 
-export const SceneEditor = define<State, Msg>('my-scene-editor', {
+export const SceneEditor = define<State, Msg>()('my-scene-editor', {
   init: () => ({ scene: { cubes: 1 } }),
   intent: { Add: () => ({ _tag: 'Add' }) },
   update: { Add: (s) => ({ scene: { cubes: s.scene.cubes + 1 } }) },
@@ -729,7 +731,7 @@ export interface State {
 
 export type Msg = { readonly _tag: 'Next' };
 
-export const Pager = define<State, Msg>('my-pager', {
+export const Pager = define<State, Msg>()('my-pager', {
   init: () => ({ page: 1 }),
   intent: { Next: () => ({ _tag: 'Next' }) },
   update: {
@@ -756,7 +758,7 @@ focusing the host then focuses its first focusable element.
 import { define, html, type Stateless } from '@gyral/core';
 
 /** Focusing <my-name-field> focuses its input. */
-export const NameField = define<Stateless, never>('my-name-field', {
+export const NameField = define<Stateless, never>()('my-name-field', {
   shadow: { delegatesFocus: true },
   intent: {},
   update: {},
@@ -771,7 +773,7 @@ import './name-field.js';
 
 export type Msg = { readonly _tag: 'Edit' };
 
-export const ContactForm = define<Stateless, Msg>('my-contact-form', {
+export const ContactForm = define<Stateless, Msg>()('my-contact-form', {
   intent: { Edit: () => ({ _tag: 'Edit' }) },
   update: { Edit: (s) => [s, [focus('my-name-field')]] },
   view: (_s, i) => html`
