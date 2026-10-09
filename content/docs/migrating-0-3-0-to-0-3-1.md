@@ -1,6 +1,6 @@
 ---
 title: Migrating from 0.3.0 to 0.3.1
-description: Move a Gyral 0.3.0 app to 0.3.1 - the two-call define, the head model, retries and CSRF on the driver, behavior changes - and what's new.
+description: Move a Gyral 0.3.0 app to 0.3.1 - the two-call define, the head model, retries and CSRF on the driver, one error channel, behavior changes - and what's new.
 section: Reference
 order: 3
 ---
@@ -144,6 +144,54 @@ it against the old page.
   first navigation there resolves a moment later. If it can't load, navigations become full
   page loads.
 
+## Errors go through one channel
+
+Every failure Gyral catches in a component (`init`, a reducer, the view, a parser, a command's
+mappers, a driver without `onFailure`, an element hook, a store) is now a `GyralError`, reported
+once through one channel ([Error handling](/docs/error-handling/)). That changes what your tests
+and logs see:
+
+- **Failures that were only logged now reach `window`'s `error` event** through
+  `reportError()`, so monitoring sees them, and so does a test runner: Vitest fails a run on
+  one. In a browser test that makes a component fail on purpose, use `collectErrors()` from
+  `@gyral/testing` and assert on the errors it collected. Tests that spied on `console.error`
+  for these failures switch to it too.
+- **A driver failure without `onFailure` is an error**, no longer a warning. Give every command
+  whose failure is expected an `onFailure` that maps it to a message.
+- **Nothing throws to the caller.** A throwing `init`, synchronous parser or intent reducer is
+  reported with its component and phase instead of escaping, `el.send()` reports a failing
+  reducer instead of throwing, and a store reducer that throws doesn't throw to the sender. A
+  reducer that throws changes nothing.
+- **Fixed:** a store subscriber that throws no longer keeps the other subscribers stale; an
+  element hook that throws no longer skips the other hooks of that render; a failed
+  `PropsChanged` is sent again with the next render.
+- **`Errored` is a framework message name**, like `PropsChanged`: rename an app message that
+  uses it. Devtools' `DevEvent` has a new `kind: 'error'`.
+- **On the server, a failing component no longer truncates the page.** It renders its `error`
+  view (or nothing) and the rest of the page is sent; pass `onError: 'throw'` to `renderPage` to
+  fail the whole page instead.
+- New error codes G0073 to G0078; G0031, G0040 and G0041 have new texts
+  ([error codes](/errors/)).
+
+## Exports removed from the public API
+
+0.3.1 reviews every export before the API locks; the full list is in Gyral's
+`docs/references/public-api-0.3.1.md`. These are no longer exported, and `tsc` names any you
+used:
+
+- `@gyral/core`: `StoreRegistry` and `withStoreScope` (import them from `@gyral/core/server`);
+  the internals `headEntries`, `HEAD_ATTRIBUTE`, `HeadEntry`, `scriptSafeJson`, `STORE_SEND`,
+  `StoreSendInput`, `STORE_SEED_ATTRIBUTE`, `warnJsonHazard`, `formFields`, `formDataToObject`,
+  `intentRejectedSchema`, `runInit`, `ISLAND_ATTRIBUTE`, `devtoolsEnabled` and
+  `devtoolsLiveComponents` (use the documented APIs: `Head` with `page()` and `setHead()`,
+  `form()`, `submitForm()`, `validateForm()`, `step()`); `isLightComponent`, `findInScope`.
+- `@gyral/core/vite`: everything but `gyralVitePreset`, `gyralTemplateCompiler`,
+  `gyralClientOnly` and their option types. `@gyral/core/eslint`: the rule re-exports (use the
+  plugin).
+- `@gyral/router`: `capturedUrl`. `@gyral/testing`: `customElementsIn`, `undefinedElementsIn`.
+  `@gyral/time`: `makeTime`, `TimeOptions`; `@gyral/time/delay`: `makeDelayTime`.
+- `@gyral/devtools`, `@gyral/mcp` and `create-gyral`: only their documented entry points.
+
 ## Behavior changes
 
 These keep compiling but behave differently. Check each against your app and its tests.
@@ -184,11 +232,12 @@ These keep compiling but behave differently. Check each against your app and its
 - **Empty segments never match**: `/users//7` no longer matches `/users/:id` in browsers
   without URLPattern, as it already didn't with it. Patterns the two matchers would read
   differently (`/v:id`, `:post-id`, a param named twice) throw.
-- **A parser takes a second argument**, the read-only context `{ props, read }`
-  ([Props and stores in a parser](/docs/intent/#props-and-stores-in-a-parser)). Parsers with
-  one parameter still fit, and so do direct calls of `form()`, `field()` and `child()`. A test
-  that calls a parser from a spec, `SearchBox.spec.intent.Search?.(input)`, must now pass a
-  context: `{ props: {}, read: readerOf([]) }`, with `readerOf` from `@gyral/testing`.
+- **A parser takes a second argument**, the read-only context `{ props, state, read }`
+  ([Props, state and stores in a parser](/docs/intent/#props-state-and-stores-in-a-parser)).
+  Parsers with one parameter still fit, and so do direct calls of `form()`, `field()` and
+  `child()`. A test that calls a parser from a spec, `SearchBox.spec.intent.Search?.(input)`,
+  must now pass a context: `{ props: {}, state, read: readerOf([]) }`, with `readerOf` from
+  `@gyral/testing`. `IntentParser` takes the state type as a third type parameter.
 
 ## Short error messages in production
 
@@ -235,12 +284,17 @@ dependency.
 - Intents: [`data-intent-on` lists](/docs/intent/#trigger-events) such as
   `"pointerdown pointerup"`, [per-event attributes](/docs/intent/#one-element-an-intent-per-event)
   `data-intent-<event>`, [declining parsers](/docs/intent/#declining-passing-an-event-outward),
-  [props and stores in a parser](/docs/intent/#props-and-stores-in-a-parser),
+  [props, state and stores in a parser](/docs/intent/#props-state-and-stores-in-a-parser),
   [intent names inferred from parser keys](/docs/intent/#intent-names-that-arent-messages),
   including names that aren't message tags, `detail` for every `CustomEvent`, and the
   [`capturePointer()`](/docs/intent/#press-and-hold) hook for press-and-hold and drag.
+- Errors: [one channel](/docs/error-handling/) with a `GyralError` per failure, parent
+  boundaries through a cancelable `error` event, a component's `error` view and `Errored`
+  reducer, isolated failures on the server with `renderPage({ onError })`, and
+  `collectErrors()` for tests.
 - Components: [`shadow: { delegatesFocus: true }`](/docs/views/#focusing-into-a-child-component),
-  also written by the server, and [prop equality](/docs/components/#when-a-prop-counts-as-changed)
+  also written by the server, [`focus(selector, { wait: true })`](/docs/views/#focusing-what-a-later-render-brings)
+  for a target a later render brings, and [prop equality](/docs/components/#when-a-prop-counts-as-changed)
   with an `equals` option for `prop.json` and `prop.value`.
 - [`svg` templates](/docs/views/#svg-fragments) for SVG fragments that are templates of their
   own.
@@ -267,6 +321,8 @@ dependency.
   `retryableHttpError`, and `csrfFromMeta` on the driver ([Effects](/docs/effects/#retries)).
 - [Moves keep commands running](/docs/outside-state/#moves-and-reconnects), and the framework
   message `Connected` for a component attached again after a real removal.
+- Patterns: [the element under a captured pointer](/docs/intent/#the-element-under-a-captured-pointer)
+  and [telling a refused request from no change](/docs/effects/#telling-a-refused-request-from-no-change).
 - Server: opt-in [hashes for server-rendered `style` attributes](/docs/server-rendering/#content-security-policy)
   (`renderPage({ csp: { styleAttributes: 'hash' } })`), and a
   [Trusted Types](/docs/server-rendering/#trusted-types) policy named `gyral`.
@@ -285,10 +341,12 @@ dependency.
 - `registryVersion()` from `@gyral/core/server`: `renderPage({ csp })` now rebuilds its header
   whenever a component registers.
 - Smaller bundles: view transitions, the frame lane and custom states ship only when a module
-  names their spec field, and production messages are codes. Hello-world's first load went
-  from 8.9 to 8.4 KiB gzip (7.4 KiB built client-only); see [Packages](/docs/packages/).
+  names their spec field, and production messages are codes. Those savings pay for most of
+  0.3.1's additions; error handling adds about 0.75 KiB to every app. Hello-world's first load
+  is 9.3 KiB gzip (8.9 on 0.3.0; 8.2 KiB built client-only); see [Packages](/docs/packages/).
 
-This site's islands got slightly smaller. Their entry chunk was 13.7 KiB gzip (level 9) on 0.3.0
-and is 13.6 KiB on 0.3.1: the size work and retries leaving the command runner paid for the
-search box's new debounce with `@gyral/time/delay` (0.25 KiB) and for 0.3.1's additions (Trusted
-Types, prop equality, declining parsers). The hydration chunk stays at about 2.8 KiB.
+This site's islands grew a little. Their entry chunk was 13.7 KiB gzip (level 9) on 0.3.0 and
+is 14.4 KiB on 0.3.1: the size work and retries leaving the command runner paid for the search
+box's new debounce with `@gyral/time/delay` (0.25 KiB) and for most of 0.3.1's additions
+(Trusted Types, prop equality, declining parsers), and error handling adds about 0.75 KiB. The
+hydration chunk stays at about 2.8 KiB.

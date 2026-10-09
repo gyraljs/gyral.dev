@@ -122,17 +122,18 @@ Measured on Gyral's examples (KiB gzip, production builds with the preset):
 
 | App                      | 0.2.0 | 0.3.1: first load | 0.3.1: all chunks |
 | ------------------------ | ----- | ----------------- | ----------------- |
-| hello-world              | 12.2  | 8.4               | 10.9              |
-| hello-world, client-only | —     | 7.4               | 7.4               |
-| isomorphic (SSR)         | 17.3  | 13.0              | 16.0              |
-| no-js-first (SSR, forms) | 18.7  | 15.9              | 18.3              |
+| hello-world              | 12.2  | 9.3               | 11.7              |
+| hello-world, client-only | —     | 8.2               | 8.2               |
+| isomorphic (SSR)         | 17.3  | 14.5              | 17.5              |
+| no-js-first (SSR, forms) | 18.7  | 16.6              | 19.2              |
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any
 lazy `import()`. On 0.3.0 the same first loads were 8.9, 12.9 and 16.6 KiB. 0.3.1 leaves out
 view transitions, the frame lane and custom states unless a module names their spec field (the
 build reads your code and the packages that depend on Gyral; see [what the build
 reads](/docs/rendering-modes/#what-the-build-reads)), and its production builds print short
-[error codes](/errors/) instead of messages. The client-only
+[error codes](/errors/) instead of messages. Those savings pay for most of 0.3.1's additions;
+the largest, [error handling](/docs/error-handling/), adds about 0.75 KiB to every app. The client-only
 row is the same app built with [`clientOnly: true`](/docs/rendering-modes/#client-only-builds).
 The isomorphic example routes, and the router's [scroll and focus
 handling](/docs/routing/#scroll-and-focus) costs it about 0.5 KiB of first load; the History API
