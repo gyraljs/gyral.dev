@@ -162,6 +162,7 @@ message changes nothing.
 | `StoreChanged`   | A store the component reads changed. [Shared state](/docs/stores/)                                                                            |
 | `Hydrated`       | The component is live in the browser, once, after its first render. Has `serverRendered`.                                                     |
 | `Connected`      | The component was removed, its commands stopped, and it was attached again. [Moves and reconnects](/docs/outside-state/#moves-and-reconnects) |
+| `Errored`        | An update, parser or command of this component failed. Has `phase` and `error` (a `GyralError`). [Error handling](/docs/error-handling/)      |
 
 `Hydrated` is the hook for progressive enhancement: render the no-JavaScript version on the
 server and in the first client render (so hydration matches), then switch to the enhanced UI

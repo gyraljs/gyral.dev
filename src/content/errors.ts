@@ -153,8 +153,8 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   },
   31: {
     explanation:
-      'A component’s `view` threw during a render. Gyral logs it and keeps rendering the other components, so this one’s DOM shows its previous state.',
-    fix: 'Fix the exception in the view, using the error logged with this message. It is often a field read on state that has a different shape than the view expects.',
+      'A component’s `view` threw during a render. Gyral reports a `GyralError` (phase `view`) through its error channel and keeps rendering the other components. The component renders its `error` view if its spec has one; otherwise its DOM shows its previous state.',
+    fix: 'Fix the exception in the view, using the `cause` of the reported error. It is often a field read on state that has a different shape than the view expects. Give the spec an `error(failure, state)` view so users see a fallback ([Error handling](/docs/error-handling/)).',
   },
   32: {
     explanation:
@@ -174,13 +174,13 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   // Commands
   40: {
     explanation:
-      'A command’s `onSuccess` or `onFailure` mapper threw while turning a driver’s result into a message, so the result never reached `update`.',
+      'A command’s `onSuccess` or `onFailure` mapper threw while turning a driver’s result into a message, so the result never reached `update`. It is reported as a `GyralError` (phase `command`), and the component’s `Errored` reducer, if any, receives it.',
     fix: 'Make the mapper total: return a message, or `undefined`, for every input.',
   },
   41: {
     explanation:
-      'A driver failed, after its `retry` policy, and the command has no `onFailure`. The failure is dropped, so the component can’t react: a spinner may spin forever.',
-    fix: 'Give the command an `onFailure` that turns the error into a message, and handle that message in `update`.',
+      'A driver failed, after any `retry()` policy, and the command has no `onFailure`. Since 0.3.1 this is an error, not a warning: it is reported as a `GyralError` (phase `command`) and reaches the component’s `Errored` reducer, if any. Without one, the component can’t react: a spinner may spin forever.',
+    fix: 'Give the command an `onFailure` that turns the error into a message, and handle that message in `update`. Expected failures (the network, a 5xx, a refusal) should always be messages.',
   },
   42: {
     explanation:
@@ -254,6 +254,37 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
     explanation:
       "Gyral parses template HTML and `raw()` markup through a Trusted Types policy named `gyral`. The page’s Content-Security-Policy has a `trusted-types` directive that lists allowed policy names without `gyral`, so the browser refused to create it. Gyral falls back to plain strings, which works only while the page doesn’t enforce Trusted Types (`require-trusted-types-for 'script'`). Development warns once.",
     fix: 'Add `gyral` to the policy list: `trusted-types gyral` (with your own policies, if any). If you don’t use Trusted Types, remove the `trusted-types` directive.',
+  },
+  // Errors (ADR 0024)
+  73: {
+    explanation:
+      'A reducer threw while handling the named message. Nothing changed: the state stays as it was and the commands that reducer would have returned don’t run. It is reported as a `GyralError` (phase `update`), and the component’s `Errored` reducer, if any, receives it.',
+    fix: 'Fix the exception in that reducer, using the `cause` of the reported error. Add an `Errored` reducer if the component should show an error state ([Error handling](/docs/error-handling/)).',
+  },
+  74: {
+    explanation:
+      'A component’s `init` threw, so it has no state. It renders its `error(failure, undefined)` view if its spec has one, or stays empty. The error is reported as a `GyralError` (phase `init`).',
+    fix: 'Fix the exception in `init`, using the `cause` of the reported error; often a prop or seed read with an unexpected shape. Give the spec an `error` view for a visible fallback.',
+  },
+  75: {
+    explanation:
+      'An element hook’s `client` function threw. Gyral reported it (phase `hook`) and still ran the other hooks of that render; the element itself is in the DOM.',
+    fix: 'Fix the exception in the hook, using the `cause` of the reported error.',
+  },
+  76: {
+    explanation:
+      'A store’s reducer threw while handling the named message. The store’s state is unchanged and its commands don’t run. The error is reported as a `GyralError` (phase `store`); the sender isn’t affected.',
+    fix: 'Fix the exception in that store reducer, using the `cause` of the reported error.',
+  },
+  77: {
+    explanation:
+      'A component that reads the store threw while handling `StoreChanged`. The other subscribers were still notified and the store’s commands still ran.',
+    fix: 'Fix the exception in that component’s `StoreChanged` reducer (or the code it calls), using the `cause` of the reported error.',
+  },
+  78: {
+    explanation:
+      'A component’s `init` or view threw during server rendering. It rendered its `error` view (or nothing), marked `data-gyral-error` and without a seed, and the rest of the page was sent; the browser starts that component fresh. `renderPage`’s `onError` received the error.',
+    fix: "Fix the exception, using the error your `onError` received. Pass `onError: 'throw'` to `renderPage` if a failing component should fail the whole page instead, so the route can answer with its error page.",
   },
 };
 
