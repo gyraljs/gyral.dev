@@ -1,8 +1,8 @@
-# Vendored Gyral 0.3.1-next.4
+# Vendored Gyral 0.3.1-next.5
 
 These are the `@gyral/*` packages the site uses (core, ssr, devtools, http, router, testing,
-time) at **0.3.1-next.4**, a prerelease of Gyral 0.3.1, packed with `pnpm pack` from Gyral's
-`next` branch at commit `f95ede8` (`../gyral-tarballs/SOURCE-0.3.1-next.4.json`). `@gyral/mcp`
+time) at **0.3.1-next.5**, a prerelease of Gyral 0.3.1, packed with `pnpm pack` from Gyral's
+`next` branch at commit `cc05cb6` (`../gyral-tarballs/SOURCE-0.3.1-next.5.json`). `@gyral/mcp`
 and `create-gyral` are not used, so they are not here.
 
 **Why:** neither 0.3.0 nor 0.3.1 is on npm yet. 0.3.0 is released on GitHub and staged on npm
@@ -10,7 +10,7 @@ and `create-gyral` are not used, so they are not here.
 0.3.1, so it builds against the prerelease. Vendoring lets `main`, CI and a Cloudflare Git build
 install without a sibling `../gyral-tarballs` folder. `package.json` points every `@gyral/*`
 dependency and pnpm override at `file:./vendor/…`; the overrides are needed because the
-packages depend on each other at exactly `0.3.1-next.4`.
+packages depend on each other at exactly `0.3.1-next.5`.
 
 **Updating** to a newer prerelease: copy the new `gyral-{core,ssr,devtools,http,router,testing,time}-<version>.tgz`
 from `../gyral-tarballs` here, delete the old ones, replace the version in every `file:` path in
