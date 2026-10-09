@@ -2,7 +2,16 @@
 // "Using Gyral in other frameworks" and "Using third-party web components" docs pages, run in
 // Chromium against the published @gyral/core.
 import * as v from 'valibot';
-import { define, each, html, intents, OUTPUT_EVENT, outputs, prop } from '@gyral/core';
+import {
+  define,
+  each,
+  html,
+  intentsOf,
+  OUTPUT_EVENT,
+  outputs,
+  prop,
+  type TemplateResult,
+} from '@gyral/core';
 
 /** The page awaits `settled` instead of polling: every component has rendered. */
 export { OUTPUT_EVENT, settled } from '@gyral/core';
@@ -14,8 +23,8 @@ const emit = outputs<PickerOut>();
 
 type PickerMsg = { readonly _tag: 'Pick'; readonly id: string };
 
-const pickerIntents = intents<PickerMsg>();
-const PickerItem = (id: string) =>
+const pickerIntents = intentsOf<typeof Picker>();
+const PickerItem = (id: string): TemplateResult =>
   html`<li><button value=${id} data-intent=${pickerIntents.Pick}>${id}</button></li>`;
 
 interface PickerProps {
@@ -24,7 +33,7 @@ interface PickerProps {
   readonly items: readonly string[];
 }
 
-export const Picker = define<{ readonly picks: number }, PickerMsg, PickerProps, PickerOut>(
+export const Picker = define<{ readonly picks: number }, PickerMsg, PickerProps, PickerOut>()(
   'interop-picker',
   {
     props: {
@@ -81,7 +90,7 @@ customElements.define('plain-child', PlainChild);
 type ParentMsg = { readonly _tag: 'Heard'; readonly id: string };
 
 /** A Gyral parent of a non-Gyral child: the child's output arrives as `detail`. */
-export const Parent = define<{ readonly heard: string }, ParentMsg>('interop-parent', {
+export const Parent = define<{ readonly heard: string }, ParentMsg>()('interop-parent', {
   init: () => ({ heard: '' }),
   intent: {
     Heard: ({ detail }) =>
@@ -100,7 +109,7 @@ type HostMsg = { readonly _tag: 'Changed'; readonly value: string };
 
 /** A Gyral component hosting the third-party element. */
 /** No `events` field: a static data-intent-on value is enough (the docs say so). */
-export const Host = define<{ readonly value: string }, HostMsg>('interop-host', {
+export const Host = define<{ readonly value: string }, HostMsg>()('interop-host', {
   init: () => ({ value: '' }),
   intent: {
     Changed: ({ detail, target }) => {
@@ -122,20 +131,23 @@ export const Host = define<{ readonly value: string }, HostMsg>('interop-host', 
 });
 
 /** The same element and event through a per-event attribute: no data-intent, no data-intent-on. */
-export const HostPerEvent = define<{ readonly value: string }, HostMsg>('interop-host-per-event', {
-  init: () => ({ value: '' }),
-  intent: {
-    Changed: ({ detail }) =>
-      typeof detail === 'object' && detail !== null && 'value' in detail
-        ? { _tag: 'Changed', value: String(detail.value) }
-        : undefined,
+export const HostPerEvent = define<{ readonly value: string }, HostMsg>()(
+  'interop-host-per-event',
+  {
+    init: () => ({ value: '' }),
+    intent: {
+      Changed: ({ detail }) =>
+        typeof detail === 'object' && detail !== null && 'value' in detail
+          ? { _tag: 'Changed', value: String(detail.value) }
+          : undefined,
+    },
+    update: { Changed: (_s, m) => ({ value: m.value }) },
+    view: (s, i) => html`
+      <fake-select data-intent-fake-change=${i.Changed}>pick</fake-select>
+      <output>${s.value}</output>
+    `,
   },
-  update: { Changed: (_s, m) => ({ value: m.value }) },
-  view: (s, i) => html`
-    <fake-select data-intent-fake-change=${i.Changed}>pick</fake-select>
-    <output>${s.value}</output>
-  `,
-});
+);
 
 declare global {
   interface HTMLElementTagNameMap {

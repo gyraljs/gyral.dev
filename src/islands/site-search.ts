@@ -68,7 +68,7 @@ const indexOf = (target: EventTarget | null): number => {
 const hitsOf = (s: State): readonly Hit[] =>
   s._tag === 'Live' && s.result._tag === 'Found' ? s.result.hits : [];
 
-export const SiteSearch = define<State, Msg>('gd-site-search', {
+export const SiteSearch = define<State, Msg>()('gd-site-search', {
   init: () => ({ _tag: 'Static' }),
   intent: {
     Typed: ({ value }) => ({ _tag: 'Typed', query: value ?? '' }),

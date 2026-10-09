@@ -15,7 +15,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 | Command              | What it does                                                                                        |
 | -------------------- | --------------------------------------------------------------------------------------------------- |
-| `pnpm install`       | Install. `@gyral/*` 0.3.1-next.3 comes from `vendor/` until 0.3.1 is on npm (vendor/README.md)      |
+| `pnpm install`       | Install. `@gyral/*` 0.3.1-next.4 comes from `vendor/` until 0.3.1 is on npm (vendor/README.md)      |
 | `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual |
 | `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                          |
 | `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                   |

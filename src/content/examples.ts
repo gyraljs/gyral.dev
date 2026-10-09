@@ -148,7 +148,7 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
         slug: 'routing-view',
         title: 'Routing',
         summary:
-          'A typed route table, listen() streaming every location, setTitle(), and a View Transition between pages.',
+          'A typed route table, listen() streaming every location, setHead(), and a View Transition between pages.',
         shows: [['Routing', '/docs/routing/']],
         file: 'src/app.ts',
       },

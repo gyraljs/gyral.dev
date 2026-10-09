@@ -11,7 +11,7 @@ export interface State {
   readonly last: Msg['_tag'] | null;
 }
 
-export const LoopCounter = define<State, Msg>('gd-loop-counter', {
+export const LoopCounter = define<State, Msg>()('gd-loop-counter', {
   init: () => ({ count: 0, last: null }),
   intent: {
     Increment: () => ({ _tag: 'Increment' }),
