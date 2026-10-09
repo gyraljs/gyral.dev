@@ -28,8 +28,8 @@ describe('pages', () => {
   it('renders the home page with SEO tags, structured data and the counter island', async () => {
     const { status, html } = await get('/');
     expect(status).toBe(200);
-    expect(html).toContain('<link rel="canonical" href="https://gyral.dev/">');
-    expect(html).toContain('<meta property="og:image" content="https://gyral.dev/og.png">');
+    expect(html).toContain('<link rel="canonical" href="https://gyral.dev/');
+    expect(html).toContain('<meta property="og:image" content="https://gyral.dev/og.png');
     expect(html).toContain('"@type":"WebSite"');
     expect(html).toContain('<gd-loop-counter');
     expect(html).toContain('<template shadowroot'); // Declarative Shadow DOM
@@ -51,7 +51,7 @@ describe('pages', () => {
     expect(html).toContain('<form action="/search/" method="get">');
     expect(html).toContain('<details class="docs-menu" data-pagefind-ignore>');
     expect(html).toContain(
-      '<link rel="alternate" type="text/markdown" href="/docs/getting-started/index.md">',
+      '<link rel="alternate" type="text/markdown" href="/docs/getting-started/index.md',
     );
   });
 
@@ -68,7 +68,7 @@ describe('pages', () => {
     for (const path of ['/nope/', '/docs/no-such-page/', '/blog/no-such-post/']) {
       const { status, html } = await get(path);
       expect(status).toBe(404);
-      expect(html).toContain('<meta name="robots" content="noindex">');
+      expect(html).toContain('<meta name="robots" content="noindex');
     }
   });
 
@@ -148,7 +148,7 @@ describe('search', () => {
     expect(status).toBe(200);
     expect(html).toContain('<gd-site-search');
     expect(html).toContain('needs JavaScript');
-    expect(html).toContain('<meta name="robots" content="noindex">');
+    expect(html).toContain('<meta name="robots" content="noindex');
     expect(html).not.toContain('data-pagefind-body');
     expect(html).not.toContain('id="site-search-q"'); // no second box in the header
     const site = await createSite(assets);

@@ -1,14 +1,12 @@
-// Structured data (schema.org JSON-LD). Rendered as one script element; `<` is escaped so no
-// string in the data can close the element.
-import { nothing, raw, type ChildValue } from '@gyral/core';
+// Structured data (schema.org JSON-LD). Several items become one `@graph`, so a page has one
+// script element; @gyral/ssr's page() writes it (the head model, ADR 0019) and escapes `<`.
+import type { JsonValue } from '@gyral/core';
 
-export type JsonLd = Readonly<Record<string, unknown>>;
+export type JsonLd = { readonly [key: string]: JsonValue };
 
-export const jsonLdScript = (items: readonly JsonLd[]): ChildValue =>
-  items.length === 0
-    ? nothing
-    : raw(
-        `<script type="application/ld+json">${JSON.stringify(
-          items.length === 1 ? items[0] : { '@context': 'https://schema.org', '@graph': items },
-        ).replace(/</g, '\\u003c')}</script>`,
-      );
+/** The page's structured data as one value, or none. */
+export const jsonLdValue = (items: readonly JsonLd[]): readonly JsonValue[] => {
+  const [only, ...rest] = items;
+  if (only === undefined) return [];
+  return [rest.length === 0 ? only : { '@context': 'https://schema.org', '@graph': items }];
+};

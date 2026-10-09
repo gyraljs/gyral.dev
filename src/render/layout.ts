@@ -1,9 +1,9 @@
 // The document shell every page shares: head (SEO, icons, styles), header, footer.
 // Server-only: written with core's html and rendered by @gyral/ssr, never hydrated. Interactive
 // parts are islands (src/islands) placed inside a page body as plain custom elements.
-import { html, nothing, type ChildValue } from '@gyral/core';
+import { html, nothing, type ChildValue, type Head } from '@gyral/core';
 import { page } from '@gyral/ssr';
-import { jsonLdScript, type JsonLd } from './json-ld.js';
+import { jsonLdValue, type JsonLd } from './json-ld.js';
 import { absolute, COPYRIGHT_YEAR, LINKS, NAV, SITE_NAME, TAGLINE } from '../site.js';
 
 /** Where the built CSS and JS live; dev and production differ (scripts/dev.ts, scripts/build.ts). */
@@ -46,33 +46,47 @@ export interface PageMeta {
 export const fullTitle = (meta: Pick<PageMeta, 'path' | 'title'>): string =>
   meta.path === '/' ? meta.title : `${meta.title} · ${SITE_NAME}`;
 
-const head = (meta: PageMeta, assets: Assets) => {
+// The managed head (ADR 0019): canonical or robots, Open Graph, icons, the Markdown twin and
+// JSON-LD, written by page() with data-gyral-head. The site is static, so nothing updates it
+// on the client.
+const pageHead = (meta: PageMeta): Head => {
   const url = absolute(meta.path);
   const title = fullTitle(meta);
-  return html`
-    ${meta.noindex === true ? html`<meta name="robots" content="noindex" />` : html`<link rel="canonical" href=${url} />`}
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121317" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <link rel="stylesheet" href=${assets.stylesheet} />
-    ${meta.markdown === true ? html`<link rel="alternate" type="text/markdown" href=${`${meta.path}index.md`} />` : nothing}
-    <meta property="og:type" content=${meta.type ?? 'website'} />
-    <meta property="og:site_name" content=${SITE_NAME} />
-    <meta property="og:title" content=${title} />
-    <meta property="og:description" content=${meta.description} />
-    <meta property="og:url" content=${url} />
-    <meta property="og:image" content=${absolute('/og.png')} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content=${`${SITE_NAME}: ${TAGLINE}`} />
-    <meta name="twitter:card" content="summary_large_image" />
-    ${jsonLdScript(meta.jsonLd ?? [])}
-  `;
+  return {
+    title,
+    description: meta.description,
+    ...(meta.noindex === true ? { robots: 'noindex' } : { canonical: url }),
+    meta: [
+      { name: 'color-scheme', content: 'light dark' },
+      { property: 'og:type', content: meta.type ?? 'website' },
+      { property: 'og:site_name', content: SITE_NAME },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: meta.description },
+      { property: 'og:url', content: url },
+      { property: 'og:image', content: absolute('/og.png') },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
+      { property: 'og:image:alt', content: `${SITE_NAME}: ${TAGLINE}` },
+      { name: 'twitter:card', content: 'summary_large_image' },
+    ],
+    links: [
+      { rel: 'icon', href: '/favicon.ico', sizes: '32x32' },
+      { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      { rel: 'manifest', href: '/site.webmanifest' },
+      ...(meta.markdown === true
+        ? [{ rel: 'alternate', type: 'text/markdown', href: `${meta.path}index.md` }]
+        : []),
+    ],
+    jsonLd: jsonLdValue(meta.jsonLd ?? []),
+  };
 };
+
+// What the head model doesn't manage: the theme colours carry a media query.
+const extraHead = html`
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121317" />
+`;
 
 const isCurrent = (path: string, match: readonly string[]): boolean =>
   match.some((prefix) => path.startsWith(prefix));
@@ -178,9 +192,9 @@ const siteFooter = () => html`
 /** A complete HTML document for one page. */
 export function layout(meta: PageMeta, body: ChildValue, assets: Assets): ChildValue {
   return page({
-    title: fullTitle(meta),
-    description: meta.description,
-    head: head(meta, assets),
+    ...pageHead(meta),
+    stylesheets: [assets.stylesheet],
+    extraHead,
     modulepreload: meta.islands === true ? assets.clientPreload : [],
     scripts: [
       assets.shortcuts,
