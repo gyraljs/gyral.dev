@@ -210,7 +210,7 @@ itself would work as well.
 ## What a parser receives
 
 A parser gets an `IntentInput` object, and the component's read-only context as a second
-argument (see [props and stores in a parser](#props-and-stores-in-a-parser)):
+argument (see [props, state and stores in a parser](#props-state-and-stores-in-a-parser)):
 
 | Field      | Holds                                                                          |
 | ---------- | ------------------------------------------------------------------------------ |
@@ -336,10 +336,10 @@ section's `Save` sees Ctrl+S from there too.
 Before Gyral 0.3.1, `undefined` ended the lookup, so an outer intent never saw an event that an
 inner parser ignored. See the [migration guide](/docs/migrating-0-3-0-to-0-3-1/#behavior-changes).
 
-## Props and stores in a parser
+## Props, state and stores in a parser
 
-A parser's second argument is the read-only context reducers get: `props`, as they are when the
-event fires, and `read(store)` for the stores in the spec's `stores`. Parsers that don't need it
+A parser's second argument is a read-only context: `props` and the component's `state`, as they
+are when the event fires, and `read(store)` for the stores in the spec's `stores`. Parsers that don't need it
 take one parameter. Use it when the decision must be made during the event, such as whether to
 call `preventDefault()`: by the time a reducer runs, the browser has already acted.
 
@@ -398,6 +398,41 @@ export const Folders = define<{ readonly active: number }, Msg, Props>()('my-fol
   `,
 });
 ```
+
+Where the user is often decides the default, and that's state. A seat grid keeps Tab while
+there is a next seat, and lets it move focus on from the last one:
+
+```ts
+// src/seats.ts
+import { define, html } from '@gyral/core';
+
+interface Grid {
+  readonly cell: number;
+  readonly cells: number;
+}
+type Msg = { readonly _tag: 'NextCell' };
+
+export const Seats = define<Grid, Msg>()('my-seat-grid', {
+  init: () => ({ cell: 0, cells: 12 }),
+  intent: {
+    NextCell: ({ key, event }, { state }) => {
+      if (key !== 'Tab' || state.cell === state.cells - 1) return undefined;
+      event.preventDefault();
+      return { _tag: 'NextCell' };
+    },
+  },
+  update: { NextCell: (s) => ({ ...s, cell: s.cell + 1 }) },
+  view: (s, i) => html`
+    <div role="grid" tabindex="0" aria-label="Seats" data-intent-keydown=${i.NextCell}>
+      Seat ${s.cell + 1} of ${s.cells}
+    </div>
+  `,
+});
+```
+
+`state` includes messages sent earlier in the same task, before the next render. Read it,
+don't write it: apart from `preventDefault()`, a parser stays pure, and the view doesn't need
+to write `data-first`/`data-last` attributes just so a parser can read them.
 
 Keep parsers pure apart from `preventDefault()`: they read the context, they never write.
 `form()`, `field()` and `child()` return one-parameter parsers, so code that calls one directly,
@@ -643,6 +678,59 @@ auto-repeat.
   controls.
 - Keys reach the button only while it has focus. For a shortcut anywhere on the page, read keys
   in a driver: a [subscription](/docs/outside-state/) to `keydown` and `keyup` on `window`.
+
+## The element under a captured pointer
+
+While an element holds pointer capture, every move lands on it, not on what the pointer is
+over. To trace a path across items (drawing across a grid of cells, selecting a range of days
+by dragging), capture on the container and ask the component's root which element is under the
+pointer: `elementFromPoint` on the shadow root (or `document` for a light-DOM component) sees
+inside the shadow tree. The cell carries its index in `data-cell`:
+
+```ts
+// src/path-grid.ts
+import { capturePointer, define, html } from '@gyral/core';
+
+interface State {
+  readonly path: readonly number[];
+}
+type Msg = { readonly _tag: 'Trace'; readonly cell: number; readonly start: boolean };
+
+const CELLS = Array.from({ length: 16 }, (_, n) => n);
+
+export const PathGrid = define<State, Msg>()('my-path-grid', {
+  init: () => ({ path: [] }),
+  intent: {
+    Trace: ({ event, target }) => {
+      if (!(event instanceof PointerEvent)) return undefined;
+      if (event.type === 'pointermove' && event.buttons === 0) return undefined;
+      const root = target.getRootNode() as Document | ShadowRoot;
+      const under = root.elementFromPoint(event.clientX, event.clientY);
+      const cell = under?.closest('[data-cell]')?.getAttribute('data-cell');
+      if (cell == null) return undefined;
+      return { _tag: 'Trace', cell: Number(cell), start: event.type === 'pointerdown' };
+    },
+  },
+  update: {
+    Trace: (s, m) =>
+      m.start ? { path: [m.cell] } : s.path.at(-1) === m.cell ? s : { path: [...s.path, m.cell] },
+  },
+  view: (s, i) => html`
+    <div
+      class="grid"
+      ${capturePointer()}
+      data-intent=${i.Trace}
+      data-intent-on="pointerdown pointermove"
+    >
+      ${CELLS.map(
+        (n) => html`<span data-cell=${n} class=${s.path.includes(n) ? 'on' : ''}>${n}</span>`,
+      )}
+    </div>
+  `,
+});
+```
+
+Give the container `touch-action: none` so a finger traces instead of scrolling.
 
 ## Invoker commands
 

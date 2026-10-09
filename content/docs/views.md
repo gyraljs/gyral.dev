@@ -747,6 +747,65 @@ export const Pager = define<State, Msg>()('my-pager', {
 
 Headings aren't focusable by default, hence `tabindex="-1"`.
 
+### Focusing what a later render brings
+
+`focus()` runs after the render its update caused. When the target only appears later, such as
+the first result once a search answers, pass `wait: true`: the request stays pending until a
+render of the component produces the target. A newer `focus()` from the component replaces it,
+and after one second it gives up with the usual warning. `settled()` doesn't wait for it.
+
+```ts
+// src/result-search.ts
+import { command, define, defineDriver, focus, html } from '@gyral/core';
+
+interface Result {
+  readonly id: string;
+  readonly title: string;
+}
+export interface State {
+  readonly query: string;
+  readonly results: readonly Result[];
+}
+export type Msg =
+  | { readonly _tag: 'Search'; readonly query: string }
+  | { readonly _tag: 'Found'; readonly results: readonly Result[] };
+
+const search = defineDriver<string, readonly Result[]>({
+  name: 'search',
+  run: async (query, { signal }) => {
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal });
+    return (await response.json()) as readonly Result[];
+  },
+});
+
+export const ResultSearch = define<State, Msg>()('my-result-search', {
+  init: () => ({ query: '', results: [] }),
+  intent: {
+    Search: ({ formData }) => ({ _tag: 'Search', query: String(formData?.get('q') ?? '') }),
+  },
+  update: {
+    // The first result exists only after `Found` renders: the focus waits for it.
+    Search: (s, m) => [
+      { ...s, query: m.query },
+      [
+        command(search, m.query, { onSuccess: (results): Msg => ({ _tag: 'Found', results }) }),
+        focus('#results li:first-child a', { wait: true }),
+      ],
+    ],
+    Found: (s, m) => ({ ...s, results: m.results }),
+  },
+  view: (s, i) => html`
+    <form data-intent=${i.Search}>
+      <input name="q" aria-label="Search" .value=${s.query} />
+      <button>Search</button>
+    </form>
+    <ul id="results">
+      ${s.results.map((r) => html`<li><a href=${`/items/${r.id}`}>${r.title}</a></li>`)}
+    </ul>
+  `,
+});
+```
+
 ### Focusing into a child component
 
 `focus()` looks inside the component's own root, so it can't reach an element in a child's
