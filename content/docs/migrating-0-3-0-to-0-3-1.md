@@ -273,7 +273,7 @@ dependency.
   names their spec field, and production messages are codes. Hello-world's first load went
   from 8.9 to 8.4 KiB gzip (7.4 KiB built client-only); see [Packages](/docs/packages/).
 
-This site's islands stayed the same size. Their entry chunk was 13.7 KiB gzip (level 9) on 0.3.0
-and is 13.7 KiB on 0.3.1: the size work paid for the search box's new debounce with
-`@gyral/time/delay` (0.25 KiB) and for 0.3.1's additions (Trusted Types, prop equality, declining
-parsers). The hydration chunk stays at about 2.8 KiB.
+This site's islands got slightly smaller. Their entry chunk was 13.7 KiB gzip (level 9) on 0.3.0
+and is 13.6 KiB on 0.3.1: the size work and retries leaving the command runner paid for the
+search box's new debounce with `@gyral/time/delay` (0.25 KiB) and for 0.3.1's additions (Trusted
+Types, prop equality, declining parsers). The hydration chunk stays at about 2.8 KiB.
