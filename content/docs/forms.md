@@ -45,8 +45,8 @@ the way `form()` does, and `SignupForm.values(data)` returns the submitted value
 form, without its secret fields.
 
 **Secret fields are never echoed.** After a failed submit, the submitted values come back so the
-form can be re-filled, except fields listed in `secret` and any field whose name contains
-`password` or `passcode`. They're left out of `IntentRejected.values` on both paths and out of
+form can be re-filled, except fields listed in `secret` (any posted field name, not only the
+schema's) and any field whose name contains `password`, `passcode`, `csrf` or `xsrf`. They're left out of `IntentRejected.values` on both paths and out of
 `values()`, and the devtools timeline shows them as `[secret]`. Development builds warn once
 about an unlisted field whose name looks secret (`token`, `card`, `cvc`, …).
 

@@ -140,11 +140,24 @@ export default defineConfig({
 });
 ```
 
-The server still imports the components it renders. A component rendered inside another
-component's shadow root loads with that component, since its module imports the other's. A
+The server still imports the components it renders. The loader finds the tags in the page and,
+as it defines components, the tags rendered in their shadow roots too, at any depth, so a
+component inside another component's shadow DOM loads without its parent importing it. A
 rendered tag that no client module defines is a development warning, so a missing island can't
 fail silently. For app-wide setup in the browser (providing drivers to the page), keep a small
 client entry and pass it in `scripts` next to `components`.
+
+To wait until the page's components are defined and have rendered, await `componentsReady()`
+from `@gyral/core`, in a page script or a browser test. It resolves once every rendered tag the
+loader knows about is defined and the page has settled; without automatic components it is
+`settled()`:
+
+```ts
+import { componentsReady } from '@gyral/core';
+
+await componentsReady();
+document.querySelector('site-search')?.focus();
+```
 
 Hydration is built into `@gyral/core`, and module order doesn't matter. When a server-rendered
 component connects in the browser, it reads the state the server rendered (each one carries a

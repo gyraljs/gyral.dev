@@ -195,6 +195,8 @@ arriving. Await it before you look at the DOM; there's nothing to poll.
   the messages they deliver.
 - **It never waits for timers or the network.** Answer fake drivers and advance virtual time
   first, then `await settled()`.
+- **On a page that loads its components automatically**, await `componentsReady()` instead:
+  it first waits until the loader has defined every rendered component, then settles.
 
 Because it waits for the whole chain, a fake that answers at once runs to the end before
 `settled()` resolves. To see an in-between state such as "Loading…", use a fake that waits for

@@ -184,8 +184,11 @@ export const Clock = define<State, Msg>()('my-clock', {
 After the first render and after every update and props change, Gyral compares the list with
 what is running, lane by lane (a command's `key`, else its driver's name): a new lane starts, a
 missing lane is stopped, a lane whose input changed restarts, and an unchanged lane keeps
-running. Moving the element keeps subscriptions running, removing it stops them, and attaching
-it again starts them from the current state. So there is no start in `init`, no restart on
+running. Inputs are compared as data: functions inside them are ignored, so an inline selector
+such as `(s) => s.unread` doesn't restart a lane on every update. To restart when a selector
+changes, put what it depends on in the key, for example one that includes the room id.
+Moving the element keeps subscriptions running, removing it stops them, and attaching it again
+starts them from the current state. So there is no start in `init`, no restart on
 `PropsChanged` and no reconnect handling. `every(ms, (now) => msg)` sends the time at once and
 then every `ms`. In model tests, `subscriptionsFor(Component, state, props)` returns the list.
 
