@@ -11,12 +11,19 @@ import { parseRedirects, redirectFor } from '../scripts/lib/redirects.js';
 
 const assets = {
   stylesheet: '/assets/site.css',
-  clientEntry: '/assets/entry.js',
-  clientPreload: ['/assets/hydration-client.js'],
   shortcuts: '/assets/shortcuts.js',
   demoVideos: '/assets/demo-videos.js',
+  // What componentsFromManifest() reads from a build: the loader and one module per island.
+  components: {
+    loader: '/assets/components.js',
+    preload: ['/assets/hydration-client.js'],
+    modules: new Map([
+      ['gd-loop-counter', { preload: ['/assets/loop-counter.js'], stylesheets: [] }],
+      ['gd-site-search', { preload: ['/assets/site-search.js'], stylesheets: [] }],
+    ]),
+  },
 };
-/** Pages without islands load only the search shortcut, never the islands' entry. */
+/** Pages without islands load only the search shortcut, never the components loader. */
 const NO_ISLANDS = /<script type="module" src="(?!\/assets\/shortcuts\.js")/;
 const get = async (path: string) => {
   const site = await createSite(assets);
@@ -33,8 +40,9 @@ describe('pages', () => {
     expect(html).toContain('"@type":"WebSite"');
     expect(html).toContain('<gd-loop-counter');
     expect(html).toContain('<template shadowroot'); // Declarative Shadow DOM
-    expect(html).toContain('<script type="module" src="/assets/entry.js">');
-    expect(html).toContain('<link rel="modulepreload" href="/assets/hydration-client.js">');
+    expect(html).toContain('<script type="module" src="/assets/components.js">');
+    expect(html).toContain('<link rel="modulepreload" href="/assets/loop-counter.js">');
+    expect(html).not.toContain('/assets/site-search.js'); // only the islands this page rendered
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
   });
 

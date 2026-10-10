@@ -139,5 +139,4 @@ const searchHistory = defineDriver<string, undefined>({
 });
 
 /** Keeps `?q=` in the address bar in step with the box, so a results page can be shared. */
-export const writeQuery = <M>(query: string): Command<M> =>
-  command<string, undefined, unknown, M>(searchHistory, query, { onSuccess: () => undefined });
+export const writeQuery = (query: string): Command<never> => command(searchHistory, query);

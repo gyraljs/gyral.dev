@@ -19,7 +19,9 @@ Build the site with Gyral and its own SSR package, with no site framework:
   rendered by `@gyral/ssr`). **Docs pages
   ship no JavaScript.**
 - Interactive parts are **islands**: `define()` components server-rendered with Declarative
-  Shadow DOM and hydrated by `src/entry-client.ts`. Pages opt in with `islands: true`.
+  Shadow DOM. `gyralVitePreset({ components: true })` builds one module per island and
+  `renderPage({ components })` loads only the ones a page rendered (Gyral 0.3.1), so there is
+  no client entry and no per-page flag.
 - Markdown and highlighting (marked, Shiki) run at build time only.
 - TypeScript, Vite, Vitest, Playwright: the same toolchain as gyral and gyral-shop. No Effect.
 
@@ -48,7 +50,7 @@ gone; templates are compiled by the Vite preset and linted with `@gyral/core/esl
 
 The docs describe Gyral 0.3.1 (`svg` templates, `subscription()`, typed outputs, client-only
 builds, `@gyral/time/delay`, production error codes linking to `/errors/`), which is still on
-Gyral's `next` branch. `vendor/` now holds `0.3.1-next.6`, packed from `next` at `209304e`
+Gyral's `next` branch. `vendor/` now holds `0.3.1-next.7`, packed from `next` at `0b96681`
 (`0.3.1-next.2` at `751f76a`, `0.3.1-next.1` at `bd2acc9` and `0.3.1-next.0` at `207e864` before it), in place of the 0.3.0 release tarballs, and
 `pnpm sync:examples` / `sync:demos` read the `../gyral-next` worktree by default. When 0.3.1 is published: `^0.3.1` from npm, no `vendor/`,
 and the sync default back to `../gyral` (vendor/README.md).

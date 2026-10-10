@@ -9,7 +9,6 @@ export const searchMeta: PageMeta = {
   path: '/search/',
   title: 'Search',
   description: 'Search the Gyral documentation, API reference, examples and blog.',
-  islands: true,
   noindex: true,
 };
 

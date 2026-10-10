@@ -2,21 +2,19 @@
 // Server-only: written with core's html and rendered by @gyral/ssr, never hydrated. Interactive
 // parts are islands (src/islands) placed inside a page body as plain custom elements.
 import { html, nothing, type ChildValue, type Head } from '@gyral/core';
-import { page } from '@gyral/ssr';
+import type { ComponentAssets, PageOptions } from '@gyral/ssr';
 import { jsonLdValue, type JsonLd } from './json-ld.js';
 import { absolute, COPYRIGHT_YEAR, LINKS, NAV, SITE_NAME, TAGLINE } from '../site.js';
 
 /** Where the built CSS and JS live; dev and production differ (scripts/dev.ts, scripts/build.ts). */
 export interface Assets {
   readonly stylesheet: string;
-  /** The client entry; only pages with islands load it. */
-  readonly clientEntry: string;
   /**
-   * Chunks the client entry needs, preloaded with it on pages with islands: its static imports
-   * and Gyral's lazily loaded hydration chunk, which the browser would otherwise find one round
-   * trip later (@gyral/ssr's clientAssetsFromManifest). Empty in dev.
+   * The islands' client modules (gyralVitePreset({ components }) finds every define()'d tag under
+   * src/). renderPage loads, preloads and hashes only the ones a page rendered, so a page with no
+   * island ships no component JavaScript. Undefined in tests.
    */
-  readonly clientPreload: readonly string[];
+  readonly components?: ComponentAssets;
   /** The keyboard shortcut for search (`/`, Ctrl/⌘+K): tiny, on every page. */
   readonly shortcuts: string;
   /** Plays the demo recordings while they are on screen (src/demo-videos.ts). */
@@ -31,8 +29,6 @@ export interface PageMeta {
   readonly description: string;
   readonly type?: 'website' | 'article';
   readonly jsonLd?: readonly JsonLd[];
-  /** True when the body contains islands that need the client entry. */
-  readonly islands?: boolean;
   /** Indexed by the site search (Pagefind reads `<main data-pagefind-body>`). */
   readonly searchable?: boolean;
   /** Not indexed by search engines and left out of the sitemap (404, search results). */
@@ -47,7 +43,7 @@ export const fullTitle = (meta: Pick<PageMeta, 'path' | 'title'>): string =>
   meta.path === '/' ? meta.title : `${meta.title} · ${SITE_NAME}`;
 
 // The managed head (ADR 0019): canonical or robots, Open Graph, icons, the Markdown twin and
-// JSON-LD, written by page() with data-gyral-head. The site is static, so nothing updates it
+// JSON-LD, written by renderPage with data-gyral-head. The site is static, so nothing updates it
 // on the client.
 const pageHead = (meta: PageMeta): Head => {
   const url = absolute(meta.path);
@@ -58,6 +54,8 @@ const pageHead = (meta: PageMeta): Head => {
     ...(meta.noindex === true ? { robots: 'noindex' } : { canonical: url }),
     meta: [
       { name: 'color-scheme', content: 'light dark' },
+      { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#ffffff' },
+      { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#121317' },
       { property: 'og:type', content: meta.type ?? 'website' },
       { property: 'og:site_name', content: SITE_NAME },
       { property: 'og:title', content: title },
@@ -81,12 +79,6 @@ const pageHead = (meta: PageMeta): Head => {
     jsonLd: jsonLdValue(meta.jsonLd ?? []),
   };
 };
-
-// What the head model doesn't manage: the theme colours carry a media query.
-const extraHead = html`
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121317" />
-`;
 
 const isCurrent = (path: string, match: readonly string[]): boolean =>
   match.some((prefix) => path.startsWith(prefix));
@@ -189,20 +181,15 @@ const siteFooter = () => html`
   </footer>
 `;
 
-/** A complete HTML document for one page. */
-export function layout(meta: PageMeta, body: ChildValue, assets: Assets): ChildValue {
-  return page({
+/** A complete HTML document for one page, ready for renderPage. */
+export function layout(meta: PageMeta, body: ChildValue, assets: Assets): PageOptions {
+  return {
     ...pageHead(meta),
     stylesheets: [assets.stylesheet],
-    extraHead,
-    modulepreload: meta.islands === true ? assets.clientPreload : [],
-    scripts: [
-      assets.shortcuts,
-      ...(meta.islands === true ? [assets.clientEntry] : []),
-      ...(meta.demoVideos === true ? [assets.demoVideos] : []),
-    ],
+    ...(assets.components === undefined ? {} : { components: assets.components }),
+    scripts: [assets.shortcuts, ...(meta.demoVideos === true ? [assets.demoVideos] : [])],
     body: html`${siteHeader(meta.path)}
       <main id="main" data-pagefind-body=${meta.searchable === true ? '' : nothing}>${body}</main>
       ${siteFooter()}`,
-  });
+  };
 }

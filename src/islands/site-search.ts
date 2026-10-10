@@ -3,7 +3,7 @@
 // `Hydrated`: it reads `?q=` (the header form lands here), searches as you type, and keeps the
 // address bar in step. Keys: arrows move between the box and the results, Escape clears.
 import { css, define, each, focus, html, nothing, type Command } from '@gyral/core';
-import { debounce } from '@gyral/time/delay';
+import { debounce } from '@gyral/time';
 import { readQuery, search, writeQuery, type Hit } from './pagefind.js';
 
 /** Typing pauses this long before a search runs; a newer keystroke cancels the pending one. */
@@ -49,13 +49,10 @@ const find = (query: string): Command<Msg> =>
  */
 const live = (query: string, typed: boolean): readonly [State, readonly Command<Msg>[]] => {
   const q = query.trim();
-  if (q === '') return [{ _tag: 'Live', query, result: { _tag: 'Empty' } }, [writeQuery<Msg>('')]];
+  if (q === '') return [{ _tag: 'Live', query, result: { _tag: 'Empty' } }, [writeQuery('')]];
   return [
     { _tag: 'Live', query, result: { _tag: 'Searching' } },
-    [
-      writeQuery<Msg>(query),
-      typed ? debounce<Msg>(DEBOUNCE_MS, { _tag: 'Paused', query: q }) : find(q),
-    ],
+    [writeQuery(query), typed ? debounce<Msg>(DEBOUNCE_MS, { _tag: 'Paused', query: q }) : find(q)],
   ];
 };
 

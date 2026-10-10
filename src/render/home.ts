@@ -91,7 +91,6 @@ export const homeMeta: PageMeta = {
   path: '/',
   title: `${SITE_NAME}: Model-View-Intent web components`,
   description: DESCRIPTION,
-  islands: true,
   jsonLd: [
     {
       '@context': 'https://schema.org',

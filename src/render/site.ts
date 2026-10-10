@@ -1,7 +1,7 @@
 // The route table and the request handler: one function renders every page, and it serves
 // both the dev server (per request) and the build (prerendered to files).
 import { html, type ChildValue } from '@gyral/core';
-import { renderToStream, renderToString } from '@gyral/ssr';
+import { renderPage } from '@gyral/ssr';
 import { loadApiPages } from '../content/api.js';
 import { loadErrorsPage } from '../content/errors.js';
 import { byReadingOrder, loadDocs, type DocPage } from '../content/docs.js';
@@ -79,7 +79,7 @@ export async function createSite(
     table.set(doc.path, { meta: docMeta(doc), body: () => docBody(pages, doc) });
   }
 
-  const notFound = async () => renderToString(layout(notFoundMeta, notFoundBody(), assets));
+  const notFound = async () => renderPage(layout(notFoundMeta, notFoundBody(), assets)).text();
 
   return {
     paths: [...table.keys()],
@@ -91,8 +91,7 @@ export async function createSite(
       if (route === undefined) {
         return new Response(await notFound(), { status: 404, headers: HTML });
       }
-      const document = layout(route.meta, await route.body(), assets);
-      return new Response(renderToStream(document), { headers: HTML });
+      return renderPage(layout(route.meta, await route.body(), assets), { headers: HTML });
     },
   };
 }

@@ -27,40 +27,13 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
       {
         slug: 'hello-world',
         title: 'Hello world',
-        summary: 'Type a name and see a greeting: one input intent, one reducer, one view.',
-        shows: [['Intent', '/docs/intent/']],
+        summary:
+          'Two fields and a checkbox, and a greeting derived from state: input intents, reducers and ?checked, with valid and invalid input as plain values.',
+        shows: [
+          ['Intent', '/docs/intent/'],
+          ['Views', '/docs/views/#form-state'],
+        ],
         file: 'src/hello.ts',
-      },
-      {
-        slug: 'counter',
-        title: 'Counter',
-        summary: 'Two buttons and a number. The smallest complete Model-View-Intent loop.',
-        shows: [['Getting started', '/docs/getting-started/']],
-        file: 'src/counter.ts',
-      },
-      {
-        slug: 'checkbox',
-        title: 'Checkbox',
-        summary:
-          'A checkbox whose state the model owns, bound with ?checked so it is right on the server and in the browser.',
-        shows: [['Views', '/docs/views/#form-state']],
-        file: 'src/checkbox.ts',
-      },
-      {
-        slug: 'hello-lastname',
-        title: 'Hello, last name',
-        summary:
-          'Two fields and a greeting derived from state: valid and invalid input are plain values in the model.',
-        shows: [['Model and update', '/docs/update/']],
-        file: 'src/hello-lastname.ts',
-      },
-      {
-        slug: 'bmi',
-        title: 'BMI calculator',
-        summary:
-          'Range inputs parsed and bounded by a schema with field(), so the model only sees valid numbers.',
-        shows: [['Forms', '/docs/forms/']],
-        file: 'src/bmi.ts',
       },
     ],
   },
@@ -72,15 +45,15 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
         slug: 'seconds-elapsed',
         title: 'Seconds elapsed',
         summary:
-          'A periodic command started from init streams ticks until the component disconnects.',
-        shows: [['Effects and drivers', '/docs/effects/#streaming-results-with-emit']],
+          'A clock as a subscription: every() sends the time each second for as long as the component is on the page.',
+        shows: [['Subscriptions', '/docs/update/#subscriptions']],
         file: 'src/seconds-elapsed.ts',
       },
       {
         slug: 'http-random-user',
         title: 'Random user',
         summary:
-          'Randomness and HTTP as commands: pick a random id with randomInt, fetch the user, decode it with a schema.',
+          'Randomness and HTTP as commands: a six-line random driver picks an id, then the user is fetched and decoded with a schema.',
         shows: [['Effects and drivers', '/docs/effects/']],
         file: 'src/random-user.ts',
       },
@@ -180,7 +153,7 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
         slug: 'animation',
         title: 'Animation',
         summary:
-          'The model counts runs and CSS does the motion: no per-frame state, restarted by a one-item each().',
+          'The model counts runs and CSS does the motion: no per-frame state, each run restarted with keyed().',
         shows: [['Views', '/docs/views/#lists']],
         file: 'src/animation.ts',
       },

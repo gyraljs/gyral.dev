@@ -186,7 +186,6 @@ describe('API reference', () => {
     const core = pages[0];
     expect(core?.html).toContain('<code>define</code>');
     expect(core?.html).toContain('@gyral/core/vite');
-    expect(core?.html).toContain('@gyral/core/server');
     expect(core?.html).toContain('@gyral/core/eslint');
     expect(core?.html).not.toMatch(/\blit\b/i);
     expect(core?.headings.map((h) => h.text)).toContain('Functions');

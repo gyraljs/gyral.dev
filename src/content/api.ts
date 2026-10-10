@@ -15,12 +15,12 @@ import { renderMarkdown, slugify } from './markdown.js';
  * (kept for 0.2 imports; it does nothing since hydration moved into core).
  */
 export const API_PACKAGES = [
-  { name: 'core', entries: ['.', './server', './vite', './eslint'] },
+  { name: 'core', entries: ['.', './vite', './eslint'] },
   { name: 'http', entries: ['.', './testing'] },
   { name: 'router', entries: ['.'] },
   { name: 'time', entries: ['.'] },
-  { name: 'ssr', entries: ['.', './static'] },
-  { name: 'testing', entries: ['.', './arbitraries'] },
+  { name: 'ssr', entries: ['.', './static', './node'] },
+  { name: 'testing', entries: ['.', './vitest'] },
   { name: 'devtools', entries: ['.'] },
 ] as const;
 

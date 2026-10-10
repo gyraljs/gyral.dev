@@ -102,7 +102,7 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   1: {
     explanation:
       'Outside the browser, `define()` only records your component for the server renderer, so there is no element class to construct: `new MyElement()` on the server throws this.',
-    fix: 'Render the component on the server through `@gyral/ssr` (`page()`, `renderToString`) or `@gyral/core/server`, instead of constructing it.',
+    fix: 'Render the component on the server through `@gyral/ssr` (`renderPage`, `renderToString`), instead of constructing it.',
   },
   10: {
     explanation:
@@ -187,6 +187,11 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
       'The function (or `unsubscribe()`) a `subscription()` returned threw when Gyral released the source, so the source may still be sending values or holding listeners.',
     fix: 'Make the stop function that `subscribe` returns safe to call once, and return a function or an object with `unsubscribe()`.',
   },
+  43: {
+    explanation:
+      'The command’s driver is a token: `defineDriver<I, O, E>(name)` without an implementation of its own. Nothing above the component provides that name, so the command can’t run. It is reported through the error channel (phase `command`); `onFailure` isn’t called, because there was no driver to fail.',
+    fix: 'Provide the driver where the app starts, `provideDrivers(document.body, { name: implementation })`, or on the element with `el.drivers`. In tests, pass a fake by the same name ([Drivers the app provides](/docs/effects/#drivers-the-app-provides)).',
+  },
   // Stores
   50: {
     explanation:
@@ -248,7 +253,7 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   71: {
     explanation:
       'A page shell, a template with `<!doctype>`, `<html>`, `<head>` or `<body>`, was rendered in the browser. Only the server renders document-level tags. Development reports it as template rule 11, with the full explanation.',
-    fix: 'Render the page shell on the server (`@gyral/ssr`’s `page()`, or `@gyral/core/server`), and render only components in the browser.',
+    fix: 'Render the page shell on the server with `@gyral/ssr`’s `renderPage`, and render only components in the browser.',
   },
   72: {
     explanation:
@@ -285,6 +290,26 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
     explanation:
       'A component’s `init` or view threw during server rendering. It rendered its `error` view (or nothing), marked `data-gyral-error` and without a seed, and the rest of the page was sent; the browser starts that component fresh. `renderPage`’s `onError` received the error.',
     fix: "Fix the exception, using the error your `onError` received. Pass `onError: 'throw'` to `renderPage` if a failing component should fail the whole page instead, so the route can answer with its error page.",
+  },
+  79: {
+    explanation:
+      'The component’s `subscriptions` returned two commands in the same lane: the same `key`, or no key and the same driver. Gyral keeps one running command per lane, so only the first runs. Development warns.',
+    fix: 'Give each subscription its own `key`, such as one per room or per URL.',
+  },
+  80: {
+    explanation:
+      'A subscription restarted again and again: its input changed with every message it sent, so each new state asked for a different input, which restarted it. Gyral stops after 100 rounds rather than loop.',
+    fix: 'Keep a subscription’s input to what should restart it (an id, a URL), not values that its own messages change, such as a counter or a timestamp.',
+  },
+  85: {
+    explanation:
+      'A `call(selector, method, …args)` command failed after the render: no element of the component matched the selector, the element has no such method, or the method threw or rejected. The reported error’s `cause` says which. It is reported through the error channel (phase `command`).',
+    fix: 'Check that the element is rendered when the command runs (return the command from the reducer whose new state renders it), that the selector matches inside the component’s own tree, and that the method exists on that element.',
+  },
+  86: {
+    explanation:
+      'Development checks that a `call()` command’s arguments are plain data that can be cloned (strings, numbers, arrays and plain objects). A function, an element or a class instance would make the command impossible to compare or record in a test.',
+    fix: 'Pass plain data, and let the element look up anything else itself.',
   },
 };
 
