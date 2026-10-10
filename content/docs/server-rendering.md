@@ -147,6 +147,28 @@ rendered tag that no client module defines is a development warning, so a missin
 fail silently. For app-wide setup in the browser (providing drivers to the page), keep a small
 client entry and pass it in `scripts` next to `components`.
 
+The preset finds components written as `export const X = define<…>()('my-tag', …)`. A component
+created through a helper of your own (one that calls `define()` with a tag it was given) is
+invisible to that scan, so list it with its module, relative to the project root:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { gyralVitePreset } from '@gyral/core/vite';
+
+export default defineConfig({
+  ...gyralVitePreset({
+    components: { modules: { 'member-form': 'src/forms/member.ts' } },
+  }),
+  build: { outDir: 'dist/client', emptyOutDir: true },
+});
+```
+
+A component module that the client entry or another component also imports is bundled into that
+chunk; it still loads, and its preload is that chunk. In a large app, measure before you switch
+from a hand-written loader: each component becomes its own chunk, and the loader carries the
+list of their dependencies.
+
 To wait until the page's components are defined and have rendered, await `componentsReady()`
 from `@gyral/core`, in a page script or a browser test. It resolves once every rendered tag the
 loader knows about is defined and the page has settled; without automatic components it is
