@@ -202,7 +202,7 @@ with a warning.
 The hydration code is a lazily loaded chunk: client-only pages never fetch it, and server-rendered
 pages preload it. Islands (`hydrate: 'idle' | 'visible' | 'interaction'`) can sit anywhere,
 including inside other components. See
-[Hydration and the client entry](/docs/server-rendering/#hydration-and-the-client-entry).
+[Hydration and the client entry](/docs/server-rendering/#loading-components-in-the-browser).
 
 ### Strict CSP, and the platform first
 
