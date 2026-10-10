@@ -1,14 +1,11 @@
 // /errors/ must answer every link a production build of @gyral/core prints
 // (`https://gyral.dev/errors/#G0010`), so it is checked against the installed package's own
 // diagnostic table, not against a copy.
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   ERROR_NOTES,
   ERRORS_PATH,
   loadErrorsPage,
-  messagesFile,
   readGyralErrors,
 } from '../src/content/errors.js';
 import { createSite } from '../src/render/site.js';
@@ -35,10 +32,8 @@ describe('error codes', () => {
   });
 
   it('links from production messages land on this page', () => {
-    // message.js builds every production link from this constant.
-    const message = readFileSync(join(dirname(messagesFile()), 'message.js'), 'utf8');
-    const url = /ERRORS_URL = '([^']+)'/.exec(message)?.[1];
-    expect(url).toBe(`${absolute(ERRORS_PATH)}#`);
+    // The table carries the exact link production prints for each code.
+    for (const e of errors) expect(e.url).toBe(`${absolute(ERRORS_PATH)}#${e.id}`);
   });
 
   it('explains every code, and only codes that exist', () => {

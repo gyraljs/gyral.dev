@@ -1,13 +1,12 @@
 // The error codes page, /errors/. Production builds of @gyral/core print a short line instead of
 // a message, `Gyral G0010 my-cart Add https://gyral.dev/errors/#G0010`, so this page must have
 // an anchor for every code (test/errors.test.ts). The codes, their groups and their texts come
-// from the installed package's own table (dist/view/messages.js, which Gyral's
-// docs/references/errors.json is generated from), so they can't drift; the explanations and
-// fixes below are the site's. Server-only (reads files).
+// from the installed package's own diagnostics table, `@gyral/core/errors.json` (the published
+// copy of Gyral's docs/references/errors.json), so they can't drift; the explanations and fixes
+// below are the site's. Server-only (reads files).
 import { readFileSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
 import type { DocPage } from './docs.js';
 import { renderMarkdown } from './markdown.js';
 
@@ -20,7 +19,7 @@ export interface GyralError {
   /** `G0010`, the anchor on this page. */
   readonly id: string;
   readonly code: number;
-  /** The `// Group` comment it follows in the table: Components, Props, … */
+  /** The table's group: Components, Props, … */
   readonly group: string;
   /** The development text, with `{name}` placeholders. */
   readonly message: string;
@@ -36,61 +35,33 @@ export interface ErrorNote {
 
 export const codeName = (code: number): string => `G${String(code).padStart(4, '0')}`;
 
-const placeholders = (text: string): string[] => [
-  ...new Set(Array.from(text.matchAll(/\{(\w+)\}/g), (m) => m[1] ?? '')),
-];
-
-/** A string literal, or literals joined with `+`. */
-function evalString(node: ts.Expression, source: ts.SourceFile): string {
-  if (ts.isStringLiteralLike(node)) return node.text;
-  if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-    return evalString(node.left, source) + evalString(node.right, source);
-  }
-  if (ts.isParenthesizedExpression(node)) return evalString(node.expression, source);
-  throw new Error(`messages.js: not a plain string: ${node.getText(source)}`);
+/** One row of `@gyral/core/errors.json`. */
+interface TableRow {
+  readonly code: string;
+  readonly group: string;
+  readonly message: string;
+  readonly arguments: readonly string[];
+  readonly url: string;
 }
 
-/** Where the installed @gyral/core keeps its diagnostic table (not an exported entry point). */
-export const messagesFile = (): string =>
-  join(realpathSync(join(NODE_MODULES, '@gyral', 'core')), 'dist', 'view', 'messages.js');
+/** The installed @gyral/core's diagnostics table (`@gyral/core/errors.json`). */
+export const errorsFile = (): string =>
+  join(realpathSync(join(NODE_MODULES, '@gyral', 'core')), 'dist', 'errors.json');
 
-/** Every diagnostic in the installed @gyral/core, in table order. */
-export function readGyralErrors(file: string = messagesFile()): readonly GyralError[] {
-  const source = ts.createSourceFile(
-    file,
-    readFileSync(file, 'utf8'),
-    ts.ScriptTarget.Latest,
-    true,
-  );
-  const errors: GyralError[] = [];
-  const visit = (node: ts.Node): void => {
-    if (
-      ts.isVariableDeclaration(node) &&
-      node.name.getText(source) === 'MESSAGES' &&
-      node.initializer !== undefined
-    ) {
-      let table = node.initializer;
-      while (ts.isAsExpression(table) || ts.isParenthesizedExpression(table)) {
-        table = table.expression;
-      }
-      if (!ts.isObjectLiteralExpression(table)) throw new Error('messages.js: MESSAGES moved');
-      let group = '';
-      for (const property of table.properties) {
-        if (!ts.isPropertyAssignment(property)) continue;
-        for (const c of ts.getLeadingCommentRanges(source.text, property.pos) ?? []) {
-          group = source.text.slice(c.pos + 2, c.end).trim();
-        }
-        const code = Number(property.name.getText(source));
-        const message = evalString(property.initializer, source);
-        errors.push({ id: codeName(code), code, group, message, args: placeholders(message) });
-      }
-      return;
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(source);
-  if (errors.length === 0) throw new Error(`no MESSAGES table in ${file}`);
-  return errors;
+/** Every diagnostic in the installed @gyral/core, in table order, with the URL production prints. */
+export function readGyralErrors(
+  file: string = errorsFile(),
+): readonly (GyralError & { url: string })[] {
+  const rows = JSON.parse(readFileSync(file, 'utf8')) as readonly TableRow[];
+  if (rows.length === 0) throw new Error(`no diagnostics in ${file}`);
+  return rows.map((row) => ({
+    id: row.code,
+    code: Number(row.code.slice(1)),
+    group: row.group,
+    message: row.message,
+    args: row.arguments,
+    url: row.url,
+  }));
 }
 
 /**
