@@ -20,6 +20,11 @@ Status: **accepted** (2026-10-05)
   publication have been removed.
 - **CI** is `.github/workflows/ci.yml`, `workflow_dispatch` only, run with `pnpm ci:local`.
 
+- **Code examples preserve literal text.** Highlighted and plain fenced code is enclosed in
+  Cloudflare's `email_off` comments, so example addresses are not rewritten into links or
+  replaced with an injected decoding script. Markdown and llms sources stay unchanged
+  ([Cloudflare's documented markers](https://developers.cloudflare.com/waf/tools/scrape-shield/email-address-obfuscation/#prevent-cloudflare-from-obfuscating-email)).
+
 - **No analytics** (owner decision 2026-10-05, site-54d.32). Cloudflare Web Analytics stays
   disabled on the Pages project: its injected beacon would need a third-party CSP exception.
 

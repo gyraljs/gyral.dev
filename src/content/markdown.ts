@@ -137,6 +137,10 @@ export const slugify = (text: string): string =>
 const isLang = (lang: string): lang is (typeof LANGS)[number] =>
   (LANGS as readonly string[]).includes(lang);
 
+/** Preserve literal examples under Cloudflare's email-address HTML rewriting. */
+const codeFigure = (html: string, lang: string): string =>
+  `<figure class="code" data-lang="${escapeHtml(lang)}"><!--email_off-->${html}<!--/email_off--></figure>`;
+
 /** One highlighted code block, as the docs render it (a `<figure class="code">`). */
 export async function highlight(code: string, lang: (typeof LANGS)[number]): Promise<string> {
   const shiki = await getHighlighter();
@@ -146,7 +150,7 @@ export async function highlight(code: string, lang: (typeof LANGS)[number]): Pro
     defaultColor: false,
     transformers: [styleToClass],
   });
-  return `<figure class="code" data-lang="${lang}">${html}</figure>`;
+  return codeFigure(html, lang);
 }
 
 export async function renderMarkdown(source: string): Promise<Rendered> {
@@ -180,7 +184,7 @@ export async function renderMarkdown(source: string): Promise<Rendered> {
               transformers: [styleToClass],
             })
           : `<pre class="shiki" tabindex="0"><code>${escapeHtml(token.text)}</code></pre>`;
-        return `<figure class="code" data-lang="${escapeHtml(label)}">${highlighted}</figure>\n`;
+        return `${codeFigure(highlighted, label)}\n`;
       },
       link(this: { parser: { parseInline: (t: Tokens.Generic[]) => string } }, token) {
         const inner = this.parser.parseInline(token.tokens);

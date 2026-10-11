@@ -4,7 +4,13 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseFrontmatter } from '../src/content/frontmatter.js';
-import { codeCss, renderMarkdown, slugify, styleClasses } from '../src/content/markdown.js';
+import {
+  codeCss,
+  highlight,
+  renderMarkdown,
+  slugify,
+  styleClasses,
+} from '../src/content/markdown.js';
 import { loadAllDocs, loadDoc, loadDocs } from '../src/content/docs.js';
 import { API_PACKAGES, docMarkdown, loadApiPages } from '../src/content/api.js';
 import { longDate, loadPost, loadPosts } from '../src/content/blog.js';
@@ -45,6 +51,16 @@ describe('markdown', () => {
     expect(html).toContain('data-lang="ts"');
     expect(html).toMatch(/class="sl-[0-9a-f]{6} sd-[0-9a-f]{6}"/);
     expect(html).toContain('&lt;b&gt;');
+  });
+
+  it('protects literal example emails from Cloudflare rewriting in every code renderer', async () => {
+    const source = "const email = 'ada@example.com';";
+    for (const html of [
+      await highlight(source, 'ts'),
+      (await renderMarkdown(`\`\`\`ts\n${source}\n\`\`\``)).html,
+      (await renderMarkdown(`\`\`\`text\n${source}\n\`\`\``)).html,
+    ])
+      expect(html).toMatch(/<!--email_off-->[\s\S]*ada@example\.com[\s\S]*<!--\/email_off-->/);
   });
 
   it('colours code with classes, never inline styles (the CSP has no unsafe-inline)', async () => {
