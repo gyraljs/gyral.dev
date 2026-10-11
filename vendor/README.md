@@ -1,16 +1,15 @@
-# Vendored Gyral 0.3.1-next.9
+# Vendored Gyral 0.3.1-next.34
 
 These are the `@gyral/*` packages the site uses (core, ssr, devtools, http, router, testing,
-time) at **0.3.1-next.9**, a prerelease of Gyral 0.3.1, packed with `pnpm pack` from Gyral's
-`next` branch at commit `78052c4` (`../gyral-tarballs/SOURCE-0.3.1-next.9.json`). `@gyral/mcp`
+time) at **0.3.1-next.34**, a prerelease of Gyral 0.3.1, packed with `pnpm pack` from Gyral's
+`next` branch at commit `dc73fc6` (`../gyral-tarballs/SOURCE-0.3.1-next.34.json`). `@gyral/mcp`
 and `create-gyral` are not used, so they are not here.
 
-**Why:** neither 0.3.0 nor 0.3.1 is on npm yet. 0.3.0 is released on GitHub and staged on npm
-(the owner approves it on 2026-10-10); 0.3.1 is still on Gyral's `next` branch. The site documents
+**Why:** 0.3.0 is published on npm; 0.3.1 is still on Gyral's `next` branch. The site documents
 0.3.1, so it builds against the prerelease. Vendoring lets `main`, CI and a Cloudflare Git build
 install without a sibling `../gyral-tarballs` folder. `package.json` points every `@gyral/*`
 dependency and pnpm override at `file:./vendor/…`; the overrides are needed because the
-packages depend on each other at exactly `0.3.1-next.9`.
+packages depend on each other at exactly `0.3.1-next.34`.
 
 **Updating** to a newer prerelease: copy the new `gyral-{core,ssr,devtools,http,router,testing,time}-<version>.tgz`
 from `../gyral-tarballs` here, delete the old ones, replace the version in every `file:` path in
@@ -26,5 +25,5 @@ from `../gyral-tarballs` here, delete the old ones, replace the version in every
    `docs/design-docs/0001-stack.md` / `0003-hosting.md`, and sync examples from Gyral's `main`
    again (`GYRAL_DIR` unset).
 
-If 0.3.0 reaches npm before 0.3.1 does, stay on the vendored prerelease: the docs describe 0.3.1
+Stay on the vendored prerelease until 0.3.1 is published: the docs describe 0.3.1
 APIs (`svg`, `subscription()`, `every`, `keyed`, …) that 0.3.0 doesn't have.

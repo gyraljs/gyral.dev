@@ -187,6 +187,10 @@ describe('API reference', () => {
     expect(core?.html).toContain('<code>define</code>');
     expect(core?.html).toContain('@gyral/core/vite');
     expect(core?.html).toContain('@gyral/core/eslint');
+    expect(core?.markdown).toContain('makeLocalStorageDriver');
+    expect(core?.markdown).toContain('makeIndexedDBDriver');
+    expect(pages.find((p) => p.slug === 'api/http')?.markdown).toContain('makeEventSourceDriver');
+    expect(pages.find((p) => p.slug === 'api/http')?.markdown).toContain('makeWebSocketDriver');
     expect(core?.html).not.toMatch(/\blit\b/i);
     expect(core?.headings.map((h) => h.text)).toContain('Functions');
   });
