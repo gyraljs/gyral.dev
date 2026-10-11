@@ -42,8 +42,7 @@ Gyral 0.3 replaces Lit with its own view layer (Gyral ADR 0018). The site moved 
 branch into `../gyral-tarballs` (`file:` dependencies plus pnpm `overrides`, because the
 tarballs depend on each other at the prerelease version). On 2026-10-07, with Gyral 0.3.0
 released on GitHub (tag `v0.3.0`) but not yet on npm, the release tarballs were vendored into
-`vendor/` and the branch merged to `main`; switch to `^0.3.0` from npm when it is published
-(vendor/README.md). `lit`, `@lit-labs/ssr`, `@lit-labs/ssr-client` and the `lit-html` pin are
+`vendor/` and the branch merged to `main`. `lit`, `@lit-labs/ssr`, `@lit-labs/ssr-client` and the `lit-html` pin are
 gone; templates are compiled by the Vite preset and linted with `@gyral/core/eslint`.
 
 ## Addendum: Gyral 0.3.1 prerelease (2026-10-07)
@@ -52,5 +51,11 @@ The docs describe Gyral 0.3.1 (`svg` templates, `subscription()`, typed outputs,
 builds, `@gyral/time/delay`, production error codes linking to `/errors/`), which is still on
 Gyral's `next` branch. `vendor/` now holds `0.3.1-next.7`, packed from `next` at `0b96681`
 (`0.3.1-next.2` at `751f76a`, `0.3.1-next.1` at `bd2acc9` and `0.3.1-next.0` at `207e864` before it), in place of the 0.3.0 release tarballs, and
-`pnpm sync:examples` / `sync:demos` read the `../gyral-next` worktree by default. When 0.3.1 is published: `^0.3.1` from npm, no `vendor/`,
-and the sync default back to `../gyral` (vendor/README.md).
+`pnpm sync:examples` / `sync:demos` read the `../gyral-next` worktree by default during prerelease testing.
+
+## Addendum: Gyral 0.3.1 release (2026-10-11, site-wuk)
+
+All nine Gyral packages are published on npm as 0.3.1. Registry-only installs of both
+`create-gyral` templates typecheck, build and pass their tests. The site uses `^0.3.1`
+registry dependencies, with no vendored packages or overrides. The sync default is
+`../gyral`, matching the framework's `main` branch and the published API.
