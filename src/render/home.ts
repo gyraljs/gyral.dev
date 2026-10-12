@@ -1,5 +1,6 @@
 // The home page. Static except for one island, the live counter, which is server-rendered
 // with Declarative Shadow DOM and hydrated by the client entry.
+import { readFile } from 'node:fs/promises';
 import { html, raw, type ChildValue } from '@gyral/core';
 import { loadDemos } from '../content/demos.js';
 import { highlight } from '../content/markdown.js';
@@ -8,43 +9,11 @@ import { DESCRIPTION, LINKS, ORIGIN, SITE_NAME, TAGLINE } from '../site.js';
 import type { PageMeta } from './layout.js';
 import '../islands/loop-counter.js'; // registers <gd-loop-counter> for server rendering
 
-const COUNTER_SOURCE = `
-import { define, html } from '@gyral/core';
-
-type Msg = { _tag: 'Increment' } | { _tag: 'Decrement' };
-
-define<{ count: number }, Msg>('my-counter', {
-  init: () => ({ count: 0 }),
-  // Intent: parse platform events into typed messages.
-  intent: {
-    Increment: () => ({ _tag: 'Increment' }),
-    Decrement: () => ({ _tag: 'Decrement' }),
-  },
-  // Model: one pure reducer per message, exhaustive by type.
-  update: {
-    Increment: (s) => ({ count: s.count + 1 }),
-    Decrement: (s) => ({ count: s.count - 1 }),
-  },
-  // View: a pure template that names intents. No closures.
-  view: (s, i) => html\`
-    <button type="button" data-intent=\${i.Decrement}>−</button>
-    <output>\${s.count}</output>
-    <button type="button" data-intent=\${i.Increment}>+</button>
-  \`,
-});`;
-
-const TEST_SOURCE = `
-import { run, step } from '@gyral/testing';
-import { Counter } from './counter.js';
-
-// No DOM, no mocks: the model is a function.
-const inc = { _tag: 'Increment' } as const;
-
-step(Counter.spec, { count: 1 }, inc).state;
-// → { count: 2 }
-
-run(Counter.spec, [inc, inc, inc]).state;
-// → { count: 3 }`;
+// The code samples live in content/home/ as text: in a .ts file under src/, the component
+// scan of `gyralVitePreset({ components: true })` would take their define() for a real one.
+// scripts/check-snippets.mjs typechecks them against the real Gyral packages.
+const COUNTER_SOURCE = new URL('../../content/home/counter.ts.txt', import.meta.url);
+const TEST_SOURCE = new URL('../../content/home/counter.test.ts.txt', import.meta.url);
 
 const INSTALL = 'pnpm add @gyral/core';
 
@@ -114,8 +83,8 @@ export const homeMeta: PageMeta = {
 
 export async function homeBody(): Promise<ChildValue> {
   const [counterCode, testCode, installCode, demos] = await Promise.all([
-    highlight(COUNTER_SOURCE, 'ts'),
-    highlight(TEST_SOURCE, 'ts'),
+    readFile(COUNTER_SOURCE, 'utf8').then((code) => highlight(code, 'ts')),
+    readFile(TEST_SOURCE, 'utf8').then((code) => highlight(code, 'ts')),
     highlight(INSTALL, 'sh'),
     loadDemos(),
   ]);

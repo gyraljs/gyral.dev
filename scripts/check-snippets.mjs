@@ -1,7 +1,8 @@
 // The docs' code must compile. Every ```ts block in a published docs page whose first line
 // names a file (`// src/counter.ts`) is written to .smoke/snippets/<page>/<file> and
 // typechecked together with the other files from the same page, against the real Gyral
-// packages. Blocks without a file comment are fragments and are skipped.
+// packages. Blocks without a file comment are fragments and are skipped. The home page's
+// samples (content/home/*.ts.txt) are checked the same way, as one more page.
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -22,6 +23,16 @@ for (const file of readdirSync(DOCS).filter((f) => f.endsWith('.md'))) {
     writeFileSync(target, code);
     count += 1;
   }
+}
+
+for (const [file, source] of [
+  ['src/counter.ts', 'content/home/counter.ts.txt'],
+  ['src/counter.test.ts', 'content/home/counter.test.ts.txt'],
+]) {
+  const target = join(OUT, 'home', file);
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, readFileSync(source, 'utf8'));
+  count += 1;
 }
 
 writeFileSync(

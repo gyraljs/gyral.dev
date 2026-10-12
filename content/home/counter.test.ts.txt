@@ -1,0 +1,11 @@
+import { run, step } from '@gyral/testing';
+import { Counter } from './counter.js';
+
+// No DOM, no mocks: the model is a function.
+const inc = { _tag: 'Increment' } as const;
+
+step(Counter.spec, { count: 1 }, inc).state;
+// → { count: 2 }
+
+run(Counter.spec, [inc, inc, inc]).state;
+// → { count: 3 }

@@ -1,0 +1,23 @@
+import { define, html } from '@gyral/core';
+
+type Msg = { _tag: 'Increment' } | { _tag: 'Decrement' };
+
+export const Counter = define<{ count: number }, Msg>()('my-counter', {
+  init: () => ({ count: 0 }),
+  // Intent: parse platform events into typed messages.
+  intent: {
+    Increment: () => ({ _tag: 'Increment' }),
+    Decrement: () => ({ _tag: 'Decrement' }),
+  },
+  // Model: one pure reducer per message, exhaustive by type.
+  update: {
+    Increment: (s) => ({ count: s.count + 1 }),
+    Decrement: (s) => ({ count: s.count - 1 }),
+  },
+  // View: a pure template that names intents. No closures.
+  view: (s, i) => html`
+    <button type="button" data-intent=${i.Decrement}>−</button>
+    <output>${s.count}</output>
+    <button type="button" data-intent=${i.Increment}>+</button>
+  `,
+});
