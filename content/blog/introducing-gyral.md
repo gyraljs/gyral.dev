@@ -35,6 +35,11 @@ define<{ readonly count: number }, Msg>('my-counter', {
 });
 ```
 
+> **Update, 2026-10-12:** since Gyral 0.3.1, `define` takes two calls so TypeScript can infer
+> the rest of the spec: `define<{ readonly count: number }, Msg>()('my-counter', { … })`. And
+> `periodic` became `every`, which sends the current time. See
+> [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
+
 **Intent** turns platform events into typed messages. **Update** turns messages into new
 state, one reducer per message, checked for completeness by TypeScript. **View** turns state
 into HTML and names intents instead of attaching event handlers. The result is a standard custom

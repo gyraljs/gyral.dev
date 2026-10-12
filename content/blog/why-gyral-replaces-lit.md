@@ -12,6 +12,12 @@ no longer renders with [Lit](https://lit.dev). Templates, server rendering and h
 from a view layer written for Gyral alone. `define()`, intents, reducers, commands, stores, forms
 and the router work as they did in 0.2.
 
+> **Update, 2026-10-12:** Gyral 0.3.1 changed a few of the 0.3.0 APIs this post shows.
+> `define` takes two calls, `define<State, Msg>()(tag, spec)`; `intents<Msg>()` became
+> `intentsOf<typeof Component>()`; and `@gyral/core/server` is internal, so apps render with
+> `@gyral/ssr`. The view layer described here is unchanged. See
+> [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
+
 This post explains why I made that change, what the new view layer does differently, and what it
 measured, including the places where Gyral is still behind.
 
