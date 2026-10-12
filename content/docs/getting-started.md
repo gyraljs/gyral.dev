@@ -206,6 +206,10 @@ rendering, hydration and virtual time. See [Testing](/docs/testing/).
 
 ## Next steps
 
+- Build something real from a [recipe](/docs/recipes/): a
+  [todo list with filters](/docs/recipes/#a-todo-list-with-filters) and a
+  [signup form with validation](/docs/recipes/#a-signup-form-with-native-validation), each a
+  complete component with tests that needs nothing beyond a `basic` app.
 - Learn the three parts in depth: [Intent](/docs/intent/), [Model and update](/docs/update/)
   and [Views](/docs/views/).
 - Browse the [examples](/examples/): forms, HTTP, routing, shared state and server rendering.

@@ -3,6 +3,7 @@
 // it is written; each draft has a bead (docs/design-docs/0002-content.md).
 import { readdir, readFile } from 'node:fs/promises';
 import { parseFrontmatter } from './frontmatter.js';
+import { expandIncludes } from './includes.js';
 import { renderMarkdown, type Heading } from './markdown.js';
 
 /** Sidebar sections, in display order. A page's `section` must be one of these. */
@@ -35,7 +36,7 @@ const isSection = (value: unknown): value is Section =>
 
 /** Parses and validates one page. Errors name the file, so a bad header fails the build clearly. */
 export async function loadDoc(file: string, source: string): Promise<DocPage> {
-  const { data, body } = parseFrontmatter(source);
+  const { data, body: written } = parseFrontmatter(source);
   const slug = file.replace(/\.md$/, '');
   const fail = (why: string): never => {
     throw new Error(`content/docs/${file}: ${why}`);
@@ -46,6 +47,8 @@ export async function loadDoc(file: string, source: string): Promise<DocPage> {
   if (!isSection(section)) fail(`section must be one of: ${SECTIONS.join(', ')}`);
   if (typeof order !== 'number') fail('order must be a number');
   if (typeof draft !== 'boolean') fail('draft must be true or false');
+  // Shared recipes and sections are expanded first, so the HTML and the Markdown twin match.
+  const body = await expandIncludes(written, `content/docs/${file}`);
   const { html, headings } = await renderMarkdown(body);
   return {
     slug,

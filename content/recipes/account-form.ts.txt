@@ -1,0 +1,138 @@
+// src/account-form.ts
+import { define, focus, html } from '@gyral/core';
+
+/** The fields, in the order they appear: the first one with an error gets focus. */
+export const FIELDS = ['name', 'email', 'password'] as const;
+export type Field = (typeof FIELDS)[number];
+
+/** One message per field; `''` means no error. */
+export type Errors = Readonly<Record<Field, string>>;
+
+export const NO_ERRORS: Errors = { name: '', email: '', password: '' };
+
+export interface State {
+  readonly errors: Errors;
+  /** The trimmed name after a successful signup. */
+  readonly welcome: string | undefined;
+}
+
+export type Msg =
+  | { readonly _tag: 'Rejected'; readonly errors: Errors }
+  | { readonly _tag: 'SignedUp'; readonly name: string; readonly email: string }
+  | { readonly _tag: 'Checked'; readonly field: Field; readonly error: string };
+
+const isField = (name: string): name is Field => FIELDS.some((f) => f === name);
+
+/**
+ * Your message for a field's first problem, from the browser's own checks (`validity`), or
+ * `''` when the field is fine. The constraints in the markup (`required`, `type="email"`,
+ * `minlength`) still decide what is wrong; `novalidate` only stops the browser from
+ * blocking the submit and showing its own bubble.
+ */
+export function problemWith(input: HTMLInputElement): string {
+  const { validity } = input;
+  // `required` accepts "   ", so a blank value counts as missing too.
+  const missing = validity.valueMissing || input.value.trim() === '';
+  switch (input.name) {
+    case 'name':
+      return missing ? 'Enter your name.' : '';
+    case 'email':
+      if (missing) return 'Enter your email address.';
+      return validity.typeMismatch ? 'Enter an email address like ada@example.com.' : '';
+    case 'password':
+      if (missing) return 'Enter a password.';
+      // `tooShort` is set only for typed values; the length check also covers a pre-filled one.
+      return validity.tooShort || input.value.length < input.minLength
+        ? 'Use at least 8 characters.'
+        : '';
+    default:
+      return '';
+  }
+}
+
+/** Reads a submitted form: every field's error, or the clean values. */
+function submission(form: Element, data: FormData | undefined): Msg | undefined {
+  if (!(form instanceof HTMLFormElement) || data === undefined) return undefined;
+  const errors: Record<Field, string> = { ...NO_ERRORS };
+  for (const field of FIELDS) {
+    const input = form.elements.namedItem(field);
+    if (input instanceof HTMLInputElement) errors[field] = problemWith(input);
+  }
+  if (FIELDS.some((f) => errors[f] !== '')) return { _tag: 'Rejected', errors };
+  const text = (field: Field): string => {
+    const value = data.get(field);
+    return typeof value === 'string' ? value.trim() : '';
+  };
+  // The password stays in the form data: never keep it in state.
+  return { _tag: 'SignedUp', name: text('name'), email: text('email') };
+}
+
+export const AccountForm = define<State, Msg>()('my-account-form', {
+  init: () => ({ errors: NO_ERRORS, welcome: undefined }),
+  intent: {
+    // Not a message tag, so it may return either message.
+    Submit: ({ target, formData }) => submission(target, formData),
+    Checked: ({ target }) =>
+      target instanceof HTMLInputElement && isField(target.name)
+        ? { _tag: 'Checked', field: target.name, error: problemWith(target) }
+        : undefined,
+  },
+  update: {
+    // Show every error at once, and move focus to the first field that has one.
+    Rejected: (s, m) => {
+      const first = FIELDS.find((f) => m.errors[f] !== '');
+      return [{ ...s, errors: m.errors }, first === undefined ? [] : [focus(`#${first}`)]];
+    },
+    // In an app, this also returns the command that posts the form.
+    SignedUp: (_s, m) => ({ errors: NO_ERRORS, welcome: m.name }),
+    // While the user types, only a field that already shows an error is checked again,
+    // so a message changes or disappears as soon as the value is fixed.
+    Checked: (s, m) =>
+      s.errors[m.field] === '' ? s : { ...s, errors: { ...s.errors, [m.field]: m.error } },
+  },
+  view: (s, i) => html`
+    <form novalidate data-intent=${i.Submit}>
+      <label for="name">Name</label>
+      <input
+        id="name"
+        name="name"
+        autocomplete="name"
+        required
+        aria-invalid=${s.errors.name !== ''}
+        aria-describedby="name-error"
+        data-intent=${i.Checked}
+      />
+      <p id="name-error">${s.errors.name}</p>
+
+      <label for="email">Email</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        aria-invalid=${s.errors.email !== ''}
+        aria-describedby="email-error"
+        data-intent=${i.Checked}
+      />
+      <p id="email-error">${s.errors.email}</p>
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="new-password"
+        required
+        minlength="8"
+        aria-invalid=${s.errors.password !== ''}
+        aria-describedby="password-error"
+        data-intent=${i.Checked}
+      />
+      <p id="password-error">${s.errors.password}</p>
+
+      <button>Create account</button>
+    </form>
+    <p role="status">${s.welcome === undefined ? '' : `Welcome, ${s.welcome}!`}</p>
+  `,
+});

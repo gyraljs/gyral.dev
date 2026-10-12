@@ -1,0 +1,48 @@
+// src/todo-app.test.ts
+import { expect, it } from 'vitest';
+import { focusTargetsIn, parse, run, step } from '@gyral/testing';
+import { TodoApp, visible } from './todo-app.js';
+
+const added = run(TodoApp.spec, [
+  { _tag: 'Add', text: 'Write docs' },
+  { _tag: 'Add', text: 'Ship it' },
+  { _tag: 'Add', text: 'Celebrate' },
+]).state;
+
+it('adds todos with their own ids and clears the input', () => {
+  expect(added.todos.map((t) => [t.id, t.text])).toEqual([
+    [1, 'Write docs'],
+    [2, 'Ship it'],
+    [3, 'Celebrate'],
+  ]);
+  expect(added.draft).toBe('');
+  const { commands } = step(TodoApp.spec, added, { _tag: 'Add', text: 'More' });
+  expect(focusTargetsIn(commands)).toEqual([{ selector: '#new-todo' }]);
+});
+
+it('toggles and deletes by id, whatever the filter shows', () => {
+  const { state } = run(
+    TodoApp.spec,
+    [
+      { _tag: 'Toggle', id: 1 },
+      { _tag: 'Show', filter: 'active' },
+      // "Celebrate" is the second row on screen now, but the message names it by id.
+      { _tag: 'Toggle', id: 3 },
+      { _tag: 'Delete', id: 2 },
+    ],
+    { state: added },
+  );
+  expect(state.todos).toEqual([
+    { id: 1, text: 'Write docs', done: true },
+    { id: 3, text: 'Celebrate', done: true },
+  ]);
+  expect(visible(state.todos, 'active')).toEqual([]);
+  expect(visible(state.todos, 'done').map((t) => t.id)).toEqual([1, 3]);
+});
+
+it('reads ids and filters from the markup, and ignores anything else', () => {
+  expect(parse(TodoApp, 'Toggle', { value: '3' })).toEqual({ _tag: 'Toggle', id: 3 });
+  expect(parse(TodoApp, 'Toggle', { value: 'three' })).toBeUndefined();
+  expect(parse(TodoApp, 'Show', { value: 'done' })).toEqual({ _tag: 'Show', filter: 'done' });
+  expect(parse(TodoApp, 'Show', { value: 'archived' })).toBeUndefined();
+});

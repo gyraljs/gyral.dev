@@ -1,0 +1,134 @@
+// src/todo-app.ts
+import { define, each, focus, html, intentsOf, type TemplateResult } from '@gyral/core';
+
+export interface Todo {
+  readonly id: number;
+  readonly text: string;
+  readonly done: boolean;
+}
+
+export type Filter = 'all' | 'active' | 'done';
+
+export interface State {
+  readonly todos: readonly Todo[];
+  readonly nextId: number;
+  readonly draft: string;
+  readonly filter: Filter;
+}
+
+export type Msg =
+  | { readonly _tag: 'Typed'; readonly text: string }
+  | { readonly _tag: 'Add'; readonly text: string }
+  | { readonly _tag: 'Toggle'; readonly id: number }
+  | { readonly _tag: 'Delete'; readonly id: number }
+  | { readonly _tag: 'Show'; readonly filter: Filter };
+
+const FILTERS: readonly Filter[] = ['all', 'active', 'done'];
+const LABELS: Readonly<Record<Filter, string>> = { all: 'All', active: 'Active', done: 'Done' };
+
+const isFilter = (value: string | undefined): value is Filter => FILTERS.some((f) => f === value);
+
+/** A row's id from its control's `value`, or `undefined` for anything else. */
+const idOf = (value: string | undefined): number | undefined =>
+  value !== undefined && /^\d+$/.test(value) ? Number(value) : undefined;
+
+/** The todos a filter shows. State keeps the whole list; the view shows this. */
+export const visible = (todos: readonly Todo[], filter: Filter): readonly Todo[] =>
+  filter === 'all' ? todos : todos.filter((t) => t.done === (filter === 'done'));
+
+// The intent names as a module constant, so rows can use them and stay pure.
+const i = intentsOf<typeof TodoApp>();
+
+// A row reads only its todo and module constants. Its controls carry the id, never a position.
+const Row = (todo: Todo): TemplateResult =>
+  html`<li>
+    <label>
+      <input type="checkbox" value=${todo.id} ?checked=${todo.done} data-intent=${i.Toggle} />
+      ${todo.text}
+    </label>
+    <button
+      type="button"
+      value=${todo.id}
+      aria-label=${`Delete ${todo.text}`}
+      data-intent=${i.Delete}
+    >
+      Delete
+    </button>
+  </li>`;
+
+export const TodoApp = define<State, Msg>()('my-todo-app', {
+  init: () => ({ todos: [], nextId: 1, draft: '', filter: 'all' }),
+  intent: {
+    Typed: ({ value }) => ({ _tag: 'Typed', text: value ?? '' }),
+    Add: ({ formData }) => {
+      const text = formData?.get('text');
+      return typeof text === 'string' && text.trim() !== ''
+        ? { _tag: 'Add', text: text.trim() }
+        : undefined;
+    },
+    Toggle: ({ value }) => {
+      const id = idOf(value);
+      return id === undefined ? undefined : { _tag: 'Toggle', id };
+    },
+    Delete: ({ value }) => {
+      const id = idOf(value);
+      return id === undefined ? undefined : { _tag: 'Delete', id };
+    },
+    Show: ({ value }) => (isFilter(value) ? { _tag: 'Show', filter: value } : undefined),
+  },
+  update: {
+    Typed: (s, m) => ({ ...s, draft: m.text }),
+    // Clearing `draft` empties the input; focus goes back to it for the next todo.
+    Add: (s, m) => [
+      {
+        ...s,
+        todos: [...s.todos, { id: s.nextId, text: m.text, done: false }],
+        nextId: s.nextId + 1,
+        draft: '',
+      },
+      [focus('#new-todo')],
+    ],
+    Toggle: (s, m) => ({
+      ...s,
+      todos: s.todos.map((t) => (t.id === m.id ? { ...t, done: !t.done } : t)),
+    }),
+    // The deleted row had focus: give it to the input, not to the page body.
+    Delete: (s, m) => [{ ...s, todos: s.todos.filter((t) => t.id !== m.id) }, [focus('#new-todo')]],
+    Show: (s, m) => ({ ...s, filter: m.filter }),
+  },
+  view: (s, i) => {
+    const shown = visible(s.todos, s.filter);
+    const left = s.todos.filter((t) => !t.done).length;
+    return html`
+      <form data-intent=${i.Add}>
+        <label for="new-todo">New todo</label>
+        <input
+          id="new-todo"
+          name="text"
+          autocomplete="off"
+          value=${s.draft}
+          data-intent=${i.Typed}
+        />
+        <button>Add</button>
+      </form>
+      <div role="group" aria-label="Show">
+        ${FILTERS.map(
+          (f) =>
+            html`<button
+              type="button"
+              value=${f}
+              aria-pressed=${s.filter === f}
+              data-intent=${i.Show}
+            >
+              ${LABELS[f]}
+            </button>`,
+        )}
+      </div>
+      <ul aria-label="Todos">
+        ${each(shown, (t) => t.id, Row)}
+      </ul>
+      <p>${shown.length === 0 ? 'Nothing to show.' : ''}</p>
+      <p><output aria-live="polite">${left} left</output></p>
+    `;
+  },
+});

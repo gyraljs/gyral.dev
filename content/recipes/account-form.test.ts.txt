@@ -1,0 +1,37 @@
+// src/account-form.test.ts
+import { expect, it } from 'vitest';
+import { focusTargetsIn, run, step } from '@gyral/testing';
+import { AccountForm, NO_ERRORS } from './account-form.js';
+
+const rejected = {
+  name: '',
+  email: 'Enter an email address like ada@example.com.',
+  password: 'Use at least 8 characters.',
+};
+
+it('shows every error and focuses the first invalid field', () => {
+  const { state, commands } = step(
+    AccountForm.spec,
+    { errors: NO_ERRORS, welcome: undefined },
+    { _tag: 'Rejected', errors: rejected },
+  );
+  expect(state.errors).toEqual(rejected);
+  expect(focusTargetsIn(commands)).toEqual([{ selector: '#email' }]);
+});
+
+it('clears an error as soon as the field is fixed, and leaves untouched fields alone', () => {
+  const { state } = run(AccountForm.spec, [
+    { _tag: 'Rejected', errors: rejected },
+    { _tag: 'Checked', field: 'email', error: '' },
+    { _tag: 'Checked', field: 'name', error: 'Enter your name.' },
+  ]);
+  expect(state.errors).toEqual({ ...rejected, email: '' });
+});
+
+it('welcomes the new user and forgets old errors', () => {
+  const { state } = run(AccountForm.spec, [
+    { _tag: 'Rejected', errors: rejected },
+    { _tag: 'SignedUp', name: 'Ada', email: 'ada@example.com' },
+  ]);
+  expect(state).toEqual({ errors: NO_ERRORS, welcome: 'Ada' });
+});

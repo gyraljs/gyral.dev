@@ -301,6 +301,11 @@ a small tuple or object is fine.
   created. To restart a CSS animation, a hook is lighter: see
   [Replaying a CSS animation](#replaying-a-css-animation).
 
+A whole list with add, delete and filters is in the
+[todo list recipe](/docs/recipes/#a-todo-list-with-filters). Rows carry their item's id
+(`value=${todo.id}`), never their position: with a filter on, a position points at the wrong
+item ([why](/docs/recipes/#toggling-an-item-in-a-filtered-list-changes-the-wrong-item)).
+
 ### .map or each?
 
 Plain arrays render too, by position: ``${s.tags.map((t) => html`<li>${t}</li>`)}``. Choose

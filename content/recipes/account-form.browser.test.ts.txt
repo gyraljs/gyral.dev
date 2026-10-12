@@ -1,0 +1,24 @@
+// src/account-form.browser.test.ts
+import { expect, it } from 'vitest';
+import { mount } from '@gyral/testing';
+import { AccountForm } from './account-form.js';
+
+it('reads the browser’s checks on submit and focuses the first invalid field', async () => {
+  const form = await mount(AccountForm);
+  await form.type('#email', 'ada');
+  await form.type('#password', 'short');
+  await form.click('button');
+
+  expect(form.$('#name-error')?.textContent).toBe('Enter your name.');
+  expect(form.$('#email-error')?.textContent).toBe('Enter an email address like ada@example.com.');
+  expect(form.$('#password-error')?.textContent).toBe('Use at least 8 characters.');
+  expect(form.el.shadowRoot?.activeElement?.id).toBe('name');
+
+  await form.type('#name', '  Ada  ');
+  expect(form.$('#name-error')?.textContent).toBe('');
+  await form.type('#email', 'ada@example.com');
+  await form.type('#password', 'correct horse');
+  await form.click('button');
+  expect(form.$('[role="status"]')?.textContent).toBe('Welcome, Ada!');
+  form.dispose();
+});

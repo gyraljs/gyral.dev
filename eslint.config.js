@@ -49,6 +49,7 @@ export default tseslint.config(
       'scripts/visual.mjs',
       'scripts/capture-showcase.mjs',
       'scripts/check-interop.mjs',
+      'scripts/check-recipes.mjs',
     ],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
