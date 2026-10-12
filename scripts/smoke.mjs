@@ -215,7 +215,13 @@ async function checkLinks(links) {
 }
 
 async function checkNonHtml() {
-  for (const path of ['/sitemap.xml', '/robots.txt', '/llms.txt', '/llms-full.txt']) {
+  for (const path of [
+    '/sitemap.xml',
+    '/robots.txt',
+    '/llms.txt',
+    '/llms-full.txt',
+    '/llms-small.txt',
+  ]) {
     const res = await fetch(base + path);
     if (res.status !== 200) fail('non-HTML', `${path} → ${String(res.status)}`);
     if (res.headers.has('content-security-policy')) fail('non-HTML', `${path} has a CSP`);

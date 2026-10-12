@@ -54,13 +54,13 @@ Status: **accepted** (2026-10-05)
 - HSTS (two years, subdomains), `nosniff`, strict referrer policy, a restrictive
   Permissions-Policy, COOP same-origin.
 - `/assets/*` is content-hashed: cached for a year, immutable.
-- `/llms.txt` and `/llms-full.txt` are `text/plain; charset=utf-8`, Markdown twins (`/*.md`)
+- `/llms.txt`, `/llms-small.txt` and `/llms-full.txt` are `text/plain; charset=utf-8`, Markdown twins (`/*.md`)
   `text/markdown; charset=utf-8` (ADR 0002, "content for agents"). They keep Cloudflare's
   default caching, like the HTML pages.
 - `/demos/*` (demo recordings and posters) has content-hashed names: cached for a year, immutable
   (gyral-7se.7).
 - **No CSP on files that aren't HTML** (site-4a1, 2026-10-07): `/sitemap.xml`, `/robots.txt`,
-  `/llms.txt`, `/llms-full.txt` and the Markdown twins detach it with Cloudflare's documented
+  `/llms.txt`, `/llms-small.txt`, `/llms-full.txt` and the Markdown twins detach it with Cloudflare's documented
   `! Content-Security-Policy` under their own rule (a detach removes a header a more general rule
   such as `/*` set). The policy protects nothing in them, and browsers show them with built-in
   viewers whose inline styles it blocked: Chrome's XML viewer showed the sitemap broken. The other

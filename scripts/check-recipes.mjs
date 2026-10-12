@@ -1,6 +1,7 @@
-// `pnpm recipes` (part of `pnpm check`): the recipes on /docs/recipes/ (content/recipes/) work,
-// with the published packages.
-// 1. Their own tests run, all of them in Chromium, the way a `basic` create-gyral app runs them.
+// `pnpm recipes` (part of `pnpm check`): the recipes on /docs/recipes/ (content/recipes/, also
+// included in the Forms page and llms-small.txt) work, with the published packages.
+// 1. Their own tests run, all of them in Chromium, the way a `basic` create-gyral app runs them
+//    (with the test of the complete component in content/llms-small.md).
 // 2. The components are built with the Gyral Vite preset (production template compiler) and
 //    driven in Chromium with a real keyboard and mouse: the cases a reader would try first.
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -19,6 +20,13 @@ for (const file of readdirSync('content/recipes').filter((f) => f.endsWith('.ts.
   if (named === null) throw new Error(`content/recipes/${file}: no // src/x.ts file comment`);
   mkdirSync(join(OUT, 'src'), { recursive: true });
   writeFileSync(join(OUT, named[1]), code);
+}
+// The complete component in llms-small.txt runs its test with them.
+for (const [, code] of readFileSync('content/llms-small.md', 'utf8').matchAll(
+  /```ts\n([\s\S]*?)```/g,
+)) {
+  const named = /^\/\/ (src\/[\w./-]+\.ts)\n/.exec(code);
+  if (named !== null && named[1] !== 'src/imports.ts') writeFileSync(join(OUT, named[1]), code);
 }
 writeFileSync(
   join(OUT, 'src/entry.ts'),

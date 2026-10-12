@@ -2,6 +2,9 @@
 // (scripts/build.ts; docs/design-docs/0002-content.md, "For agents"):
 // - `/llms.txt`: an index in the llmstxt.org format, linking each page's Markdown twin.
 // - `/llms-full.txt`: every docs page, the API reference and the examples in one file.
+// - `/llms-small.txt`: the small pack for coding agents, written in content/llms-small.md with
+//   the recipes included from their source files (src/content/includes.ts). At most 40 KB
+//   (llms-check.ts); its code blocks are typechecked (scripts/check-snippets.mjs).
 // - `<page>/index.md`: a Markdown twin of every docs, API, examples and blog page. Each HTML
 //   page links its twin with `<link rel="alternate" type="text/markdown">`.
 // Server-only (reads files).
@@ -10,6 +13,7 @@ import { SECTIONS, type DocPage } from './docs.js';
 import type { Post } from './blog.js';
 import { loadDemos, usualWay } from './demos.js';
 import { EXAMPLE_GROUPS, excerptPath } from './examples.js';
+import { expandIncludes } from './includes.js';
 import { absolute, DESCRIPTION, LINKS, ORIGIN } from '../site.js';
 
 /** One Markdown file written next to an HTML page. */
@@ -27,7 +31,11 @@ export interface LlmsFiles {
   readonly twins: readonly Twin[];
   readonly llmsTxt: string;
   readonly llmsFull: string;
+  readonly llmsSmall: string;
 }
+
+/** The size limit of llms-small.txt, in bytes: small enough to read in one go. */
+export const LLMS_SMALL_MAX = 40_000;
 
 /** The Markdown twin of an HTML page path. */
 export const twinPath = (page: string): string => `${page}index.md`;
@@ -180,10 +188,11 @@ export function llmsTxt(
 
 > ${DESCRIPTION} Components are standard custom elements rendered by Gyral's own view layer: messages come in from DOM events (intent), a pure \`update\` makes the next state and describes side effects as data (commands run by drivers), and a pure \`view\` renders it. Pages render on the server or prerender to static HTML and hydrate in place. The public API is plain TypeScript. Current version: ${version}.
 
-Start a project with \`npm create gyral@latest my-app -- --template ssr\` (or \`--template basic\`). In Claude Code, install the Gyral skill with \`/plugin marketplace add gyraljs/gyral\`, then \`/plugin install gyral@gyral\`. Every link below is a Markdown page; ${absolute('/llms-full.txt')} has the docs, API reference and examples in one file.
+Writing Gyral code? Read ${absolute('/llms-small.txt')} first: the rules, a complete component and tested recipes in one small file. Start a project with \`npm create gyral@latest my-app -- --template ssr\` (or \`--template basic\`). In Claude Code, install the Gyral skill with \`/plugin marketplace add gyraljs/gyral\`, then \`/plugin install gyral@gyral\`. Every link below is a Markdown page; ${absolute('/llms-full.txt')} has the docs, API reference and examples in one file.
 
 ## Docs
 
+- [Gyral for coding agents](${absolute('/llms-small.txt')}): Use when you are about to write or fix Gyral code; read it first. The mental model, MUST and DO NOT rules, a complete component, recipes with tests and an import map, in under 40 KB.
 ${docs.map(link).join('\n')}
 
 ## API reference
@@ -206,6 +215,18 @@ ${optional.map(link).join('\n')}
 export function llmsFull(version: string, twins: readonly Twin[]): string {
   const header = `# Gyral ${version}: complete documentation\n\n> ${DESCRIPTION}\n\nGenerated from ${ORIGIN}. Each section below is one page; its source URL follows its title.\n`;
   return [header, ...twins.map((t) => t.markdown)].join('\n---\n\n');
+}
+
+/**
+ * `/llms-small.txt`: content/llms-small.md with its includes expanded (the recipes come from
+ * the same files the docs pages show and the tests run), the version, and absolute links.
+ */
+export async function llmsSmall(version: string, root: URL): Promise<string> {
+  const content = new URL('content/', root);
+  const source = await readFile(new URL('llms-small.md', content), 'utf8');
+  const expanded = await expandIncludes(source, 'content/llms-small.md', content);
+  const header = `For Gyral ${version}. Generated from ${ORIGIN}; every complete code block compiles against the released packages. Index of all pages: ${absolute('/llms.txt')}.\n`;
+  return absoluteLinks(expanded.replace(/^(# [^\n]*\n)/, `$1\n${header}`)).trimEnd() + '\n';
 }
 
 /** Everything written for agents, from the same content the HTML pages use. */
@@ -233,5 +254,6 @@ export async function buildLlmsFiles(
     twins: [...docTwins, examples, demos, blog, ...postTwins],
     llmsTxt: llmsTxt(version, guides, api, [examples, demos], [...background, blog, ...postTwins]),
     llmsFull: llmsFull(version, [...guides, ...api, ...background, examples, demos]),
+    llmsSmall: await llmsSmall(version, root),
   };
 }

@@ -1,7 +1,7 @@
 // Checks on the files written for agents (src/content/llms.ts). The build fails on any problem
 // (scripts/build.ts), so a page can't silently drop out of llms-full.txt or lose its twin.
 import { ORIGIN } from '../site.js';
-import { twinPath, type LlmsFiles } from './llms.js';
+import { LLMS_SMALL_MAX, twinPath, type LlmsFiles } from './llms.js';
 
 /** Prose only: fenced code blocks and inline code spans removed. */
 export function prose(markdown: string): string {
@@ -63,6 +63,18 @@ export function llmsProblems(
   }
   problems.push(...markdownProblems('/llms.txt', files.llmsTxt));
   problems.push(...markdownProblems('/llms-full.txt', files.llmsFull));
+  problems.push(...markdownProblems('/llms-small.txt', files.llmsSmall));
+  const small = Buffer.byteLength(files.llmsSmall);
+  if (small > LLMS_SMALL_MAX)
+    problems.push(
+      `/llms-small.txt is ${String(small)} bytes, over the ${String(LLMS_SMALL_MAX)}-byte limit: shorten content/llms-small.md or what it includes`,
+    );
+  if (
+    !files.llmsTxt.includes(
+      '\n## Docs\n\n- [Gyral for coding agents](https://gyral.dev/llms-small.txt)',
+    )
+  )
+    problems.push('/llms.txt: llms-small.txt must be the first entry');
   for (const url of siteLinks(files.llmsTxt)) {
     const path = url.slice(ORIGIN.length);
     const file = path.endsWith('/') ? `${path}index.html` : path;

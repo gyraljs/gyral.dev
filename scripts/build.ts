@@ -1,6 +1,6 @@
 /// <reference types="node" />
 // `pnpm build`, after `vite build`: renders every page to dist/ as static HTML, plus 404.html,
-// sitemap.xml, the search index and the files for agents (llms.txt, llms-full.txt, a Markdown
+// sitemap.xml, the search index and the files for agents (llms.txt, llms-small.txt, llms-full.txt, a Markdown
 // twin per page). dist/ is then exactly what Cloudflare Pages serves
 // (docs/design-docs/0003-hosting.md).
 import { existsSync, readFileSync } from 'node:fs';
@@ -81,6 +81,7 @@ async function writeForAgents(
   for (const twin of files.twins) await write(twin.path, twin.markdown);
   await write('/llms.txt', files.llmsTxt);
   await write('/llms-full.txt', files.llmsFull);
+  await write('/llms-small.txt', files.llmsSmall);
   const problems = llmsProblems(
     files,
     docs.map((d) => d.path),
@@ -89,7 +90,7 @@ async function writeForAgents(
   if (problems.length > 0) throw new Error(`files for agents:\n${problems.join('\n')}`);
   const kb = (text: string) => `${(Buffer.byteLength(text) / 1024).toFixed(1)} KiB`;
   console.log(
-    `agents: llms.txt ${kb(files.llmsTxt)}, llms-full.txt ${kb(files.llmsFull)}, ${String(files.twins.length)} Markdown twins`,
+    `agents: llms.txt ${kb(files.llmsTxt)}, llms-small.txt ${kb(files.llmsSmall)}, llms-full.txt ${kb(files.llmsFull)}, ${String(files.twins.length)} Markdown twins`,
   );
 }
 

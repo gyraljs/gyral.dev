@@ -32,6 +32,9 @@
 /llms-full.txt
   Content-Type: text/plain; charset=utf-8
   ! Content-Security-Policy
+/llms-small.txt
+  Content-Type: text/plain; charset=utf-8
+  ! Content-Security-Policy
 /*.md
   Content-Type: text/markdown; charset=utf-8
   ! Content-Security-Policy

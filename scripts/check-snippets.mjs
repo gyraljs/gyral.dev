@@ -3,7 +3,8 @@
 // typechecked together with the other files from the same page, against the real Gyral
 // packages. Blocks without a file comment are fragments and are skipped. The home page's
 // samples (content/home/*.ts.txt) are checked the same way, as one more page, and so are the
-// recipes (content/recipes/*.ts.txt, included into pages by src/content/includes.ts).
+// recipes (content/recipes/*.ts.txt, included into pages by src/content/includes.ts) and the
+// code blocks of content/llms-small.md, the agent pack.
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -29,6 +30,7 @@ for (const file of readdirSync(DOCS).filter((f) => f.endsWith('.md'))) {
   if (/^draft:\s*true$/m.test(source)) continue;
   extract(file.replace(/\.md$/, ''), source);
 }
+extract('llms-small', readFileSync('content/llms-small.md', 'utf8'));
 
 // Recipes: each file starts with its own file comment, `// src/todo-app.ts`.
 for (const file of readdirSync('content/recipes').filter((f) => f.endsWith('.ts.txt'))) {

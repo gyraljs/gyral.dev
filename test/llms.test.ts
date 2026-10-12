@@ -3,7 +3,13 @@ import { loadApiPages } from '../src/content/api.js';
 import { loadErrorsPage } from '../src/content/errors.js';
 import { loadPosts } from '../src/content/blog.js';
 import { byReadingOrder, loadDocs } from '../src/content/docs.js';
-import { absoluteLinks, buildLlmsFiles, twinPath, type LlmsFiles } from '../src/content/llms.js';
+import {
+  absoluteLinks,
+  buildLlmsFiles,
+  LLMS_SMALL_MAX,
+  twinPath,
+  type LlmsFiles,
+} from '../src/content/llms.js';
 import { llmsProblems, markdownProblems, prose } from '../src/content/llms-check.js';
 
 describe('Markdown for agents', () => {
@@ -35,10 +41,16 @@ describe('Markdown for agents', () => {
           markdown: '# A\n',
         },
       ],
-      llmsTxt: '# Gyral\n\n- [A](https://gyral.dev/docs/a/index.md)\n- [B](https://gyral.dev/b/)\n',
+      llmsTxt: [
+        '# Gyral\n\n## Docs\n',
+        '- [Gyral for coding agents](https://gyral.dev/llms-small.txt): Use when coding.',
+        '- [A](https://gyral.dev/docs/a/index.md): Use when a.',
+        '- [B](https://gyral.dev/b/): Use when b.\n',
+      ].join('\n'),
       llmsFull: '# Gyral\n\nSource: https://gyral.dev/docs/a/\n',
+      llmsSmall: '# Small\n',
     };
-    const written = new Set(['/docs/a/index.md']);
+    const written = new Set(['/docs/a/index.md', '/llms-small.txt']);
     expect(llmsProblems(files, ['/docs/a/', '/docs/b/'], (p) => written.has(p))).toEqual([
       '/docs/b/ has no Markdown twin',
       '/docs/b/ is missing from llms-full.txt',
@@ -57,6 +69,7 @@ describe('Markdown for agents', () => {
       ...files.twins.map((t) => t.path),
       '/brand/index.html',
       '/llms-full.txt',
+      '/llms-small.txt',
     ]);
     expect(
       llmsProblems(
@@ -70,5 +83,29 @@ describe('Markdown for agents', () => {
     expect(files.llmsTxt).toContain('/plugin install gyral@gyral');
     expect(files.llmsFull).toContain('Source: https://gyral.dev/docs/api/core/');
     expect(files.llmsFull).toContain('#### `define`');
+    // The agent pack: first in llms.txt, small, and the recipes expanded from their files.
+    expect(files.llmsTxt).toMatch(
+      /## Docs\n\n- \[Gyral for coding agents\]\(https:\/\/gyral\.dev\/llms-small\.txt\)/,
+    );
+    expect(Buffer.byteLength(files.llmsSmall)).toBeLessThanOrEqual(LLMS_SMALL_MAX);
+    expect(files.llmsSmall).toContain('// src/todo-app.ts');
+    expect(files.llmsSmall).toContain('// src/account-form.ts');
+    expect(files.llmsSmall).toContain(
+      '### Toggling an item in a filtered list changes the wrong item',
+    );
+    expect(files.llmsSmall).not.toContain('<!-- include:');
+  });
+
+  it('flags an oversized pack and a pack that is not first', () => {
+    const files: LlmsFiles = {
+      twins: [],
+      llmsTxt: '# Gyral\n\n## Docs\n\n- [A](https://gyral.dev/a.md): no use case\n',
+      llmsFull: '# Gyral\n',
+      llmsSmall: `# Small\n\n${'x'.repeat(LLMS_SMALL_MAX)}\n`,
+    };
+    expect(llmsProblems(files, [], () => true)).toEqual([
+      `/llms-small.txt is ${String(LLMS_SMALL_MAX + 10)} bytes, over the ${String(LLMS_SMALL_MAX)}-byte limit: shorten content/llms-small.md or what it includes`,
+      '/llms.txt: llms-small.txt must be the first entry',
+    ]);
   });
 });
