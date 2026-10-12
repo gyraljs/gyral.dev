@@ -19,6 +19,10 @@ npm install @gyral/core@0.3.2 @gyral/testing@0.3.2
 Add every other `@gyral/*` package your app uses to that command, at the same version. Apps
 made with `create-gyral` 0.3.2 start on `^0.3.2`.
 
+0.3.3 followed with one fix: `npx -y @gyral/mcp` fails on 0.3.2 and needs 0.3.3, which also
+replaced the second binary, `gyral-mcp-http`, with `gyral-mcp http`. Install 0.3.3 instead;
+see [Upgrading from 0.3.2 to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/).
+
 ## What's new in 0.3.2
 
 - **`viewOf` in `@gyral/testing`**: call a component's view in Node, without mounting it or a
@@ -39,7 +43,8 @@ made with `create-gyral` 0.3.2 start on `^0.3.2`.
   [API reference](/docs/api/core/).
 - **Coverage**: the development template locator no longer adds branches to coverage reports,
   so the counts are your own code's. See [Testing](/docs/testing/#coverage).
-- **The MCP server**: `@gyral/mcp` gains `gyral-mcp-http`, a read-only Streamable HTTP server,
+- **The MCP server**: `@gyral/mcp` gains `gyral-mcp-http` (`gyral-mcp http` since 0.3.3), a
+  read-only Streamable HTTP server,
   and Gyral hosts one at `https://mcp.gyral.dev/mcp`, with no token. A new `start_here` tool
   gives an agent the rules and the workflow; `scaffold_component` imports only installed
   packages and has a dependency-free `form-native` kind; `check_snippet` suggests fixes;

@@ -40,8 +40,9 @@ Any other client that speaks Streamable HTTP: add a server with the URL
 `https://mcp.gyral.dev/mcp` and no authentication.
 
 The hosted server has every tool except `check_snippet`, which needs your project's
-TypeScript and packages. `https://mcp.gyral.dev/healthz` reports the `@gyral/mcp` version it
-serves; the tools marked 0.3.2 below appear there once it runs 0.3.2.
+TypeScript and packages. It can run an older `@gyral/mcp` than the latest release; its
+`initialize` response and `https://mcp.gyral.dev/healthz` report the version it serves. The
+tools marked 0.3.2 below need that version to be 0.3.2 or later.
 
 ## The local MCP server
 
@@ -69,6 +70,10 @@ That's Claude Code. Other clients:
   ```
 
 - **Any other client**: run `npx -y @gyral/mcp` as a stdio server.
+
+`npx -y @gyral/mcp` needs `@gyral/mcp` 0.3.3 or later; npx fetches the latest release unless
+your project has an older copy installed. On 0.3.2 it fails with "could not determine
+executable to run"; run `npx -y -p @gyral/mcp@0.3.2 gyral-mcp` there instead.
 
 The local server answers from the docs bundled with its own version, so it works offline and
 matches the Gyral you install. Set `GYRAL_DOCS_URL=https://gyral.dev/llms-full.txt` to load
@@ -104,11 +109,18 @@ The server also offers the resources `gyral://llms.txt`, `gyral://skill` and
 
 ### Host your own
 
-`@gyral/mcp` 0.3.2 includes `gyral-mcp-http`, the binary behind the hosted server: read-only,
-anonymous Streamable HTTP at `/mcp`, without `check_snippet`. It listens on `127.0.0.1:3000`
-by default, and needs `GYRAL_MCP_PUBLIC_ORIGIN` set to the origin it's served from. Put it
-behind TLS, and pin the package version you deploy. The
-[package README](https://github.com/gyraljs/gyral/blob/v0.3.2/packages/mcp/README.md#public-hosting)
+`gyral-mcp http` runs the server behind the hosted one: read-only, anonymous Streamable HTTP
+at `/mcp`, without `check_snippet`. It listens on `127.0.0.1:3000` by default, and needs
+`GYRAL_MCP_PUBLIC_ORIGIN` set to the origin it's served from:
+
+```sh
+GYRAL_MCP_PUBLIC_ORIGIN=http://127.0.0.1:3000 npx -y @gyral/mcp http
+```
+
+It is configured by environment variables only; `gyral-mcp http --help` lists them. Put it
+behind TLS, and pin the package version you deploy. 0.3.2 shipped this server as a second
+binary, `gyral-mcp-http`; since 0.3.3 it is `gyral-mcp http`. The
+[package README](https://github.com/gyraljs/gyral/blob/v0.3.3/packages/mcp/README.md#public-hosting)
 has the details.
 
 ## The agent skill
@@ -126,7 +138,7 @@ In Claude Code, add Gyral's repository as a plugin marketplace and install the p
 From a shell: `claude plugin marketplace add gyraljs/gyral && claude plugin install gyral@gyral`.
 
 Other agents: copy
-[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.2/skills/gyral) into the agent's
+[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.3/skills/gyral) into the agent's
 skills or rules folder, or point it at `SKILL.md`.
 
 ## Docs for agents

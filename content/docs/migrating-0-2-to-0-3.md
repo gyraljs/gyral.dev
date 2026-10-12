@@ -16,7 +16,7 @@ props, styles, server rendering and hydration.
 Most apps migrate in this order: dependencies, imports, the build checks (the compiler and the
 ESLint rules list every template that needs a change), props, lists, tests, server. This page
 follows that order and describes 0.3.0. The 0.2 snippets are plain text; every snippet with a
-file name compiles against the current release, 0.3.2, so it uses 0.3.1's spelling where 0.3.1
+file name compiles against the current release, 0.3.3, so it uses 0.3.1's spelling where 0.3.1
 changed one (the two-call `define<…>()(…)`, `intentsOf`, `extraHead`). Once your app runs on
 0.3.0, go on to [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
 

@@ -17,8 +17,9 @@ dependency update.
 Use documented public package entries. Entries containing `/internal` are for Gyral's own
 packages and have no stability promise. A symbol being technically exported does not make
 an internal entry an application API. The
-[export inventory](https://github.com/gyraljs/gyral/blob/v0.3.2/docs/references/public-api-0.3.1.md)
-records the public boundary: what 0.3.1 exports, and what 0.3.2 added.
+[export inventory](https://github.com/gyraljs/gyral/blob/v0.3.3/docs/references/public-api-0.3.1.md)
+records the public boundary: what 0.3.1 exports, and what 0.3.2 added. 0.3.3 exports the same
+as 0.3.2.
 
 The `@gyral/*` packages and `create-gyral` release together at a shared version. Keep core, router,
 HTTP, time, testing, devtools, SSR and MCP aligned; verify your lockfile when a package manager
@@ -26,7 +27,7 @@ resolves multiple versions. The [package guide](/docs/packages/) explains what e
 
 ## Releases
 
-These guides describe **0.3.2**, the `latest` version on npm. Every package is published
+These guides describe **0.3.3**, the `latest` version on npm. Every package is published
 from GitHub Actions with npm provenance; install from the registry. Today npm has releases
 only, under the `latest` tag.
 
@@ -35,14 +36,15 @@ Deploy server output and client assets from the same build: stale HTML with new 
 templates can cause hydration mismatches. Versioned hashed assets help keep that agreement.
 
 Since 0.3.1, breaking changes wait for a new minor version, with a migration guide. 0.3.2
-changed or removed nothing that 0.3.1 exports, so moving from 0.3.1 to 0.3.2 needs no code
-changes.
+changed or removed nothing that 0.3.1 exports, and 0.3.3 only fixes how `@gyral/mcp` starts,
+so moving from 0.3.1 or 0.3.2 to 0.3.3 needs no code changes.
 
 ## Upgrade with evidence
 
 1. Read the relevant guide: [0.2 to 0.3](/docs/migrating-0-2-to-0-3/),
-   [0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/) or
-   [0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/) (no code changes).
+   [0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/),
+   [0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/) (no code changes) or
+   [0.3.2 to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/) (no code changes).
 2. Update packages together and install from the lockfile.
 3. Run typechecking, component/browser tests and the production build.
 4. Test server/client hydration, edited forms, routing and the production CSP if your app

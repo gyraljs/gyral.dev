@@ -10,7 +10,7 @@ order: 1
 
 Gyral is a set of small packages under the `@gyral` scope on npm, plus `create-gyral`, which
 sets up a new app. Every app needs `@gyral/core`; add the others when you need them. All nine
-packages are released together with the same version number (0.3.2), are ES modules with
+packages are released together with the same version number (0.3.3), are ES modules with
 TypeScript types, and are published from GitHub Actions with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
@@ -52,8 +52,9 @@ The fetch entry does not include those transports.
 
 `@gyral/mcp` is a stdio server your agent starts with `npx -y @gyral/mcp`, from your project
 directory. It answers from the docs, API and examples of its own version, bundled at build time,
-so it works offline. Since 0.3.2 it also has `gyral-mcp-http`, a read-only Streamable HTTP
-server; Gyral hosts one at `https://mcp.gyral.dev/mcp`, with no token. Setup for Claude Code,
+so it works offline. `gyral-mcp http` runs a read-only Streamable HTTP server instead (since
+0.3.3; 0.3.2 had it as a second binary, `gyral-mcp-http`); Gyral hosts one at
+`https://mcp.gyral.dev/mcp`, with no token. Setup for Claude Code,
 VS Code, Cursor, Codex and other clients is in
 [Use Gyral with coding agents](/docs/coding-agents/).
 
@@ -82,8 +83,9 @@ Gyral 0.2 rendered with Lit and asked your app to install it. 0.3 has its own vi
 Lit is gone from the dependency tree. Any custom element still works next to Gyral components,
 including ones built with Lit; install that library yourself if you use it. Upgrading? See
 [Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/),
-[from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/) and
-[from 0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/) (no code changes).
+[from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/),
+[from 0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/) and
+[from 0.3.2 to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/) (no code changes in either).
 
 ## The Vite preset
 
