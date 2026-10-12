@@ -38,7 +38,7 @@ or workers, such as the absence of animation frames, remain even as browser supp
 ## Removal dates
 
 These dates follow the `web-features` 3.35.0 snapshot in
-[ADR 0003](https://github.com/gyraljs/gyral/blob/next/docs/design-docs/0003-browser-baseline.md),
+[ADR 0003](https://github.com/gyraljs/gyral/blob/v0.3.1/docs/design-docs/0003-browser-baseline.md),
 adding 30 months to newly available. They are scheduled review points, not claims that the
 fallback has already been removed:
 
@@ -56,7 +56,7 @@ fallback has already been removed:
 | Trusted Types             | 2028-08-24            |
 
 `moveBefore()` and `requestIdleCallback()` have no Baseline removal date in that snapshot.
-The [native-first audit](https://github.com/gyraljs/gyral/blob/next/docs/references/native-first-audit-2026-10-11.md)
+The [native-first audit](https://github.com/gyraljs/gyral/blob/v0.3.1/docs/references/native-first-audit-2026-10-11.md)
 records why cancellable and virtual-time timers remain useful even when native timeout
 signals become widely available.
 

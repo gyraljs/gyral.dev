@@ -844,7 +844,7 @@ export const ResultSearch = define<State, Msg>()('my-result-search', {
   },
   view: (s, i) => html`
     <form data-intent=${i.Search}>
-      <input name="q" aria-label="Search" .value=${s.query} />
+      <input name="q" aria-label="Search" value=${s.query} />
       <button>Search</button>
     </form>
     <ul id="results">

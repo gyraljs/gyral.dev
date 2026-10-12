@@ -65,8 +65,8 @@ export const UserCard = define<State, Msg>()('my-user-card', {
   validated data. A response that doesn't match becomes an `HttpDecodeError`.
 - **`onSuccess`** turns the decoded body into a message.
 - **`onFailure`** turns an error into a message. Errors are tagged data (`HttpStatusError`,
-  `HttpNetworkError`, `HttpDecodeError`); nothing is ever thrown into the view. Leave it out and
-  failures are logged and dropped.
+  `HttpNetworkError`, `HttpDecodeError`); nothing is ever thrown into the view. Leave it out and a
+  failure goes to the [error channel](/docs/error-handling/).
 
 The request and its answer sit next to each other in one reducer, typed end to end, with no
 "response category" strings to match up.
@@ -99,8 +99,8 @@ export const search = <M>(query: string, toMsg: (body: unknown) => M): Command<M
 ```
 
 A cancelled command's `AbortSignal` aborts (so `fetch` stops), and its result is never
-delivered. When a component disconnects, all its commands are cancelled the same way, before
-`remove()` returns.
+delivered. When a component is removed from the page, all its commands are cancelled the same
+way, one microtask later; moving it cancels nothing.
 
 ## Built-in drivers
 
@@ -138,8 +138,8 @@ failure still reaches the [error channel](/docs/error-handling/). With handlers,
 comes from what `onSuccess` and `onFailure` return, so explicit type arguments are rarely needed.
 
 Debounce is a delay under `switch`: each keystroke's `debounce(300, msg)` cancels the pending
-one. An app that uses only `delay` and `debounce` stays as small as before; `every` adds its own
-code only where it's used. Randomness is a command too, so models stay pure and tests can fix
+one. `delay` and `debounce` run on a delay-only driver, so an app that uses only them doesn't
+bundle the code for `every`. Randomness is a command too, so models stay pure and tests can fix
 the numbers: it's a six-line driver of your own (below).
 
 ## Writing a driver
@@ -229,7 +229,7 @@ same driver, under the same name, with failures tried again after the delay (`'f
 don't retry in step. `retryIf(error)` decides which failures to retry; it receives the
 driver's typed error (its `toError`, else the thrown value), and by default every failure is
 retried. A cancellation (the command switched away, the component removed) ends it at once and
-is never retried. Wrap the driver where you choose it, at app setup, in a component's `drivers`
+is never retried. Wrap the driver where you choose it, at app setup, in an element's `drivers`
 or in a test, and apps that never retry don't bundle the code.
 
 For `@gyral/http`, `makeHttpDriver({ timeoutMs })` gives each attempt a deadline: a slower

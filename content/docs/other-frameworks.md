@@ -83,11 +83,12 @@ objects and anything else that doesn't fit in a string. Props never write attrib
 
 ## Outputs: the gyral-output event
 
-A component's outputs (whatever it passes to `emit()`) are dispatched from its element as a
-`gyral-output` event, with the output in `event.detail`. `@gyral/core` exports the name as
-`OUTPUT_EVENT`, and the types `OutputEvent<O>` and `OutputsOf<typeof Component>` to read it. The
-event **bubbles but isn't composed**: it travels up the tree the element is in, and stops at the
-edge of a shadow root.
+A component's outputs (what its reducers return through `outputs<Out>()`, `emit` above) are
+dispatched from its element as a `gyral-output` event, with the output in `event.detail`.
+`@gyral/core` exports the name as `OUTPUT_EVENT`, and the types `OutputEvent<O>` and
+`OutputsOf<typeof Component>` to read it. The event **bubbles but isn't composed**: it travels up
+the tree the element is in, and stops at the edge of a shadow root. Inside a Gyral app it also stops
+at the direct parent whose intent takes it, so a grandparent never hears a grandchild's output.
 
 So listen on the element itself, or on any ancestor in the same tree:
 
@@ -197,11 +198,11 @@ component's module before the markup renders. For outputs, listen on the element
 `addEventListener` in an effect, as in the React example. The client spike verifies Svelte
 5.57.2 assigning and updating array properties and hearing outputs with an effect listener.
 
-These checks run in real Chromium against Gyral's `next` implementation with
-`pnpm verify:platforms` in the framework repository. They install pinned host packages in a
-temporary directory, leaving Gyral's runtime dependency graph unchanged. They cover client
-mounts, not each host's SSR/hydration integration. The
-[spike report](https://github.com/gyraljs/gyral/blob/next/docs/references/platform-spikes-2026-10-11.md)
+These checks run in real Chromium with `pnpm verify:platforms` in the framework repository; the
+recorded results are from a build shortly before the 0.3.1 release. They install pinned host
+packages in a temporary directory, leaving Gyral's runtime dependency graph unchanged. They cover
+client mounts, not each host's SSR/hydration integration. The [spike
+report](https://github.com/gyraljs/gyral/blob/v0.3.1/docs/references/platform-spikes-2026-10-11.md)
 records the fixtures and limits.
 
 ## Server rendering in another framework

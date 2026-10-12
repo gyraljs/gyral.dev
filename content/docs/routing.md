@@ -164,14 +164,16 @@ both behave the same. Browsers with the Navigation API never download the Histor
 After a navigation, the router does what the browser does for a page load, once the new page
 has rendered:
 
-- **Scroll**: to the `#fragment` target, or to the top, after a push or a replace. Back and
-  forward restore the position the page was left at.
+- **Scroll**: to the `#fragment` target, or to the top, after a push. Back and forward restore
+  the position the page was left at.
 - **Focus**: to the first `[autofocus]` element, or back to the start of the page, so the next
   Tab starts at the top of the new page instead of on a link that's gone.
 
-Both happen with or without the Navigation API. The browser looks for a fragment's target in
-the document only, so render targets in light DOM: page-level components with `shadow: false`,
-like the shell above.
+A replace leaves both alone, because apps replace the entry to keep the URL in step with what
+the user is doing ([Updating the query](#updating-the-query)); pass `scroll: true` or
+`focusReset: true` to opt in. Both happen with or without the Navigation API. The browser looks
+for a fragment's target in the document only, so render targets in light DOM: page-level
+components with `shadow: false`, like the shell above.
 
 Focus at the start of the page tells a screen reader user little about where they landed. Move it to
 the new page's heading instead, as the shell does: `focus('main h1')` from the `Routed` reducer,
@@ -190,8 +192,8 @@ starts, link clicks and back and forward included, with
 A search box or a set of filters often keeps its state in the query string, so the URL can be
 shared and survives a reload. Update the query with `navigate` too, not with
 `history.replaceState`, which the router never sees: its location, and every `listen()`, would
-be one step behind. Replace the entry, so each keystroke doesn't add one, and leave scroll and
-focus where they are:
+be one step behind. Replace the entry, so each keystroke doesn't add one. A replace leaves
+scroll and focus where they are:
 
 ```ts
 // src/product-filters.ts
@@ -214,13 +216,7 @@ export const ProductFilters = define<State, Msg>()('my-product-filters', {
     Routed: (_s, m) => ({ query: new URLSearchParams(m.location.search).get('q') ?? '' }),
     Typed: (_s, m) => [
       { query: m.query },
-      [
-        navigate(`?q=${encodeURIComponent(m.query)}`, {
-          replace: true,
-          scroll: false,
-          focusReset: false,
-        }),
-      ],
+      [navigate(`?q=${encodeURIComponent(m.query)}`, { replace: true })],
     ],
   },
   view: (s, i) => html`
@@ -327,4 +323,5 @@ the same URL and nothing changes.
 
 `makeRouter({ history: 'memory', initial: '/settings' })` keeps history in memory: push, replace,
 back and forward work, and the real URL and title are never touched. Use it in tests, and on
-servers. `driver.snapshot()` returns the router's `{ href, title, length }` for assertions.
+servers. `driver.snapshot()` returns the router's `{ href, head, length }` for assertions, `head`
+being the last `setHead()` value.

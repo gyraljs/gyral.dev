@@ -12,30 +12,6 @@ browser: feed messages to `update`, look at the state and the commands. What's l
 and the platform, you test in a real browser. `@gyral/testing` covers both, and works with any
 test runner.
 
-## Accessibility checks for your app
-
-Use a browser accessibility scanner alongside component behavior tests. An app-level helper
-can use Playwright and axe directly; `@gyral/testing` does not need to wrap their APIs:
-
-```ts
-// test/accessibility.ts
-import assert from 'node:assert/strict';
-import { AxeBuilder } from '@axe-core/playwright';
-import type { Page } from 'playwright';
-
-export async function expectAccessible(page: Page): Promise<void> {
-  const result = await new AxeBuilder({ page }).analyze();
-  assert.deepEqual(result.violations, []);
-}
-```
-
-Install `@axe-core/playwright` and `playwright` as development dependencies. Navigate to a
-built page, wait for its application-ready condition, then call the helper. Scan meaningful
-states such as invalid forms and open dialogs in both color schemes. Axe traverses open
-shadow roots; keep those components mounted during the scan. The platform spike checks that
-its shadow-root button is actually scanned. See [Accessibility](/docs/accessibility/) for
-keyboard, focus and screen-reader checks that an automated scan cannot replace.
-
 ```sh
 npm install -D @gyral/testing vitest
 ```
@@ -136,13 +112,14 @@ it('ignores answers to an older query', () => {
 
 - `inputsFor(commands, driver)` lists the inputs of the commands for one driver, matched by
   name, so the test reads the request that would be sent.
-- `outputsIn(commands, Component)` lists what a reducer sent to the parent with `emit`, typed
+- `outputsIn(commands, Component)` lists what a reducer sent to the parent through
+  `outputs<Out>()`, typed
   by the component's output union, and `focusTargetsIn(commands)` lists where it asked focus to
   go (below).
 - `resolve(command, output)` and `reject(command, error)` run a command's own mappers, so the
   test checks the exact message the component would receive.
 - Framework messages step like any other: `{ _tag: 'PropsChanged', props, prev }`,
-  `IntentRejected`, `StoreChanged`.
+  `IntentRejected`, `StoreChanged`, `Hydrated`, `Errored`.
 - `step(…, props, stores)` and `run(…, { props, stores, state })` give reducers their context.
 
 These tests run in Node, in milliseconds, and cover most of the behaviour.
@@ -414,7 +391,7 @@ have run, and no later result is dispatched. Cleanup a driver runs after an `awa
 `finally` once its promise settles) happens later still; yield again (or
 `await clock.advance(0)` under `virtualTime()`) to observe it. To test a component that is
 attached again after a real removal, check its subscriptions for that state:
-`subscriptionsFor(Component, state, props)` returns the commands it would start.
+`subscriptionsFor(Component.spec, state, props)` returns the commands it would start.
 
 ## Virtual time
 
@@ -588,3 +565,28 @@ it('hydrates the server page in place', async () => {
 `stepStore(store, state, msg)` runs a store reducer, `store.instance(initial)` gives a test its
 own instance (`mount(Cart, { stores: { cart: instance } })`), and `inputsFor(commands, store)`
 lists the messages a reducer sent to a store.
+
+## Accessibility checks for your app
+
+Use a browser accessibility scanner alongside component behavior tests. An app-level helper
+can use Playwright and axe directly; `@gyral/testing` does not need to wrap their APIs:
+
+```ts
+// test/accessibility.ts
+import assert from 'node:assert/strict';
+import { AxeBuilder } from '@axe-core/playwright';
+import type { Page } from 'playwright';
+
+export async function expectAccessible(page: Page): Promise<void> {
+  const result = await new AxeBuilder({ page }).analyze();
+  assert.deepEqual(result.violations, []);
+}
+```
+
+Install `@axe-core/playwright` and `playwright` as development dependencies. Navigate to a
+built page, wait for its application-ready condition, then call the helper. Scan meaningful
+states such as invalid forms and open dialogs in both color schemes. Axe traverses open
+shadow roots; keep those components mounted during the scan, and check that a rule actually ran
+on an element inside a shadow root, so a scan of the wrong root can't pass silently. See
+[Accessibility](/docs/accessibility/) for keyboard, focus and screen-reader checks that an
+automated scan cannot replace.

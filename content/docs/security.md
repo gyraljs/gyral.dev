@@ -100,7 +100,9 @@ policy accepts trusted author markup; it is not a sanitizer. Allow its name in y
 the page refuses the policy, development warns; an enforced HTML sink still rejects the
 operation. Support varies by browser; keep CSP's other protections in place.
 
-Static hosting must deliver CSP as an HTTP response header. Review the
+On a static host, deliver CSP as an HTTP response header where the host allows it. A
+`<meta http-equiv>` policy is the fallback for hosts that can't set headers, and it can't set
+`frame-ancestors` ([Deploying](/docs/deploying/#content-security-policy)). Review the
 [SSR CSP options](/docs/server-rendering/#content-security-policy) and
 [style-attribute policy](/docs/styling/#inline-styles-under-a-strict-csp). Test the production
 page under its actual headers rather than relying on the development server.

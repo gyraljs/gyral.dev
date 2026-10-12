@@ -22,6 +22,13 @@ can be "later, and only if it's on this page". There are three tools, from coars
 Custom elements make this simple: the page's HTML says which components it uses. Import the
 components every page has in the client entry, and load the rest when their tag appears.
 
+A server-rendered app can let Gyral do this: with `gyralVitePreset({ components: true })` and
+`renderPage({ components })`, each page loads exactly the components it rendered, with no client
+entry to write (see
+[Server rendering](/docs/server-rendering/#loading-components-in-the-browser)). The loader
+below is the hand-written version, for pages rendered in the browser or when you want to choose
+the chunks yourself.
+
 ```ts
 // src/widgets.ts
 import { define, html } from '@gyral/core';

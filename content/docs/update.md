@@ -190,7 +190,7 @@ changes, put what it depends on in the key, for example one that includes the ro
 Moving the element keeps subscriptions running, removing it stops them, and attaching it again
 starts them from the current state. So there is no start in `init`, no restart on
 `PropsChanged` and no reconnect handling. `every(ms, (now) => msg)` sends the time at once and
-then every `ms`. In model tests, `subscriptionsFor(Component, state, props)` returns the list.
+then every `ms`. In model tests, `subscriptionsFor(Clock.spec, state, props)` returns the list.
 
 ## Framework messages
 

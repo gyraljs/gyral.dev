@@ -55,7 +55,7 @@ the [0.3.1 migration guide](/docs/migrating-0-3-0-to-0-3-1/) covers that change.
 | `ref()` / element work              | An explicit element hook, with a server half where markup is needed                                      |
 | Reactive controller / observer      | A subscription driver for outside sources, or a lifecycle hook with `dispose` for element-owned work     |
 | `@lit/task`                         | Commands, a driver, and loading/success/failure messages in the model                                    |
-| `@lit/context`                      | Declared Gyral stores through `ctx.stores`, or props for parent-owned inputs                             |
+| `@lit/context`                      | Gyral stores listed in `stores` and read with `ctx.read(store)`, or props for parent-owned inputs        |
 | `requestUpdate()`                   | Send a typed message or change a declared prop/store; no general manual update API                       |
 | `updateComplete`                    | `await settled()` for the page's pending Gyral rendering                                                 |
 | Lit SSR / hydration                 | `renderPage` or `renderToString` from `@gyral/ssr`, with Gyral seeds and native declarative shadow roots |
@@ -91,8 +91,8 @@ one-off work; use `subscriptions(state, props)` for sources that should keep run
 their inputs remain active. Gyral cancels their lanes on replacement or disconnect. The
 [effects guide](/docs/effects/) shows expected failures and concurrency policies.
 
-Move component styles into `styles: css\`...\``or trusted CSS strings. Gyral shares native
-constructable stylesheets; expose`part` names and custom properties as your public theme
+Move component styles into ``styles: css`...` `` or trusted CSS strings. Gyral shares native
+constructable stylesheets; expose `part` names and custom properties as your public theme
 contract. Existing third-party components keep their own style system.
 
 On the server, register component definitions before rendering or use the component manifest.

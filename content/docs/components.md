@@ -61,8 +61,10 @@ optional:
 A few more optional fields cover rarer needs: `error` (a fallback view, see
 [Error handling](/docs/error-handling/)), `states`
 (custom states for CSS, see [Styling](/docs/styling/#custom-states)), `viewTransition` (render a
-change inside a View Transition, see [Views](/docs/views/#view-transitions)) and `renderOnFrame`
-(message tags from bursty sources, such as pointer moves, that render once per animation frame).
+change inside a View Transition, see [Views](/docs/views/#view-transitions)), `renderOnFrame`
+(message tags from bursty sources, such as a socket feed or a sensor, that render once per
+animation frame), and `formAssociated` (a component that takes part in a native form, see
+[Custom form controls](/docs/form-associated/)).
 
 The type parameters are the contract. `State` is a plain data record (JSON, when the component
 is [server-rendered](/docs/server-rendering/#loading-components-in-the-browser)), `Msg` a union of tagged objects, and TypeScript checks that `update` has a reducer for every tag and that the view

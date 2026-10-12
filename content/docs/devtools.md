@@ -69,6 +69,8 @@ Without it you get the safe default: no events.
 
 The panel listens through a small hook. A development build of `@gyral/core` emits each event to
 `globalThis.__GYRAL_DEVTOOLS__.emit(event)` when that object exists (`DEVTOOLS_GLOBAL` names
-the property, and the `DevEvent` type describes the events). Without a listener, Gyral returns
+the property, and the `DevEvent` type describes the events). Both come from
+`@gyral/core/internal`, which has no stability promise: the event shapes may change in any
+release. Without a listener, Gyral returns
 before building an event. Event payloads hold live references to elements and state: read them,
 never change them.

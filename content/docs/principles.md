@@ -9,7 +9,7 @@ order: 2
 
 These are the beliefs Gyral is built on. Each one explains a decision you'll meet in the API.
 The full reasoning lives in the decision records in
-[Gyral's repository](https://github.com/gyraljs/gyral/tree/main/docs/design-docs).
+[Gyral's repository](https://github.com/gyraljs/gyral/tree/v0.3.1/docs/design-docs).
 
 ## The platform is the framework
 
@@ -69,7 +69,7 @@ hydration of real server output against production builds.
 Rules that matter become checks with error messages that explain the fix. In Gyral's own repo,
 `@gyral/core` is checked to have no runtime dependencies, views can't bind event handlers (the
 template compiler and the ESLint rules reject `@event` bindings), and every decision record is
-indexed. This site follows the same rule: every code sample on it compiles
+indexed. This site follows the same rule: every TypeScript sample that names its file compiles
 against the real packages, and every page passes accessibility checks in light and dark mode.
 
 ## Measure, then budget

@@ -51,7 +51,7 @@ export const staticPaths = (): string[] =>
 
 `RenderMode` names them the way the rest of the ecosystem does: `ssg` (static), `ssr` (per
 request) and `csr` (client). Gyral's
-[isomorphic example](https://github.com/gyraljs/gyral/tree/main/examples/isomorphic) uses
+[isomorphic example](https://github.com/gyraljs/gyral/tree/v0.3.1/examples/isomorphic) uses
 exactly this table.
 
 ## Client-only builds
@@ -77,7 +77,7 @@ Measured on Gyral's examples (gzip, 0.3.1):
 
 | App         | Default: first load | Default: all chunks | `clientOnly: true` |
 | ----------- | ------------------- | ------------------- | ------------------ |
-| hello-world | 9.27 KiB            | 11.71 KiB           | 8.21 KiB           |
+| hello-world | 9.54 KiB            | 11.99 KiB           | 8.49 KiB           |
 
 "First load" is what a page downloads before any lazy `import()`; in these examples a
 client-only build has nothing lazy left, so its first load is all of it.
@@ -119,13 +119,14 @@ your whole dependency tree:
   through a module that re-exports it), whose markup is only known at run time. A function of
   another package that happens to be called `raw` doesn't count.
 
-Every build with the preset, client-only or not, uses the same scan for three opt-in features:
-view transitions, the frame lane and custom states are bundled only when a module names
-`viewTransition`, `renderOnFrame` or `states` in code. Write these field names literally: a name
-built at run time isn't seen, and the feature then degrades as on a browser without it
-(development builds warn). A package that writes these fields for your components must depend
-on Gyral to be read: if it doesn't, declare `@gyral/core` as a peer dependency in its
-`package.json`.
+Every build with the preset, client-only or not, uses the same scan for the features a spec
+field turns on: view transitions, the frame lane, custom states, form association,
+subscriptions and the error fallback are bundled only when a module names `viewTransition`,
+`renderOnFrame`, `states`, `formAssociated`, `subscriptions`, `error` or `Errored` in code.
+Write these field names literally: a name built at run time isn't seen, and the component then
+renders without that feature (development builds warn). A package that writes these fields for
+your components must depend on Gyral to be read: if it doesn't, declare `@gyral/core` as a peer
+dependency in its `package.json`.
 
 This site server-renders its pages and hydrates two islands, so it builds without the option.
 

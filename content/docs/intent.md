@@ -469,7 +469,7 @@ export const parseSearch = ({
 
 `_tag: 'Search' as const` in the returned object works too. The same holds for the mappers of
 `child()`, `form()` and `field()`. To type a parser that reads the context, use
-`IntentParser<Variant, Props>`.
+`IntentParser<Variant, Props>`, or `IntentParser<Variant, Props, State>` when it reads `state`.
 
 ## Buttons carry their own data
 

@@ -214,8 +214,10 @@ The server and the browser share one template normalizer, so they agree on every
 structure. A mismatch means the view rendered something different for the same state: it read
 the clock or a random number, or a browser extension edited the page before scripts ran.
 
-- **In development**, hydration throws `HydrationMismatch` with the tag, the template's file and
-  line, the DOM path, and what it expected and found. The component keeps the server's DOM.
+- **In development**, hydration fails with a `HydrationMismatch` that names the tag, the
+  template's file and line, the DOM path, and what it expected and found. It is reported as a
+  `view` failure through the [error channel](/docs/error-handling/#one-channel), and the
+  component keeps the server's DOM (or shows its `error` view).
   Development output carries `<!--gyral:ID-->` markers, so the browser also checks that each
   template is the one it expects.
 - **In production**, the component logs a warning that describes the mismatch and links to

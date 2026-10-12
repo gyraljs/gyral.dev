@@ -177,12 +177,12 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   52: {
     explanation:
       'The store seed on the page, or on a `<gyral-stores>` provider, isn’t valid JSON, so every store in it starts from `init`.',
-    fix: 'Let `@gyral/ssr` write the seed (`page({ stores })`, or the provider’s `.instances`) instead of writing it by hand, and check that nothing rewrites or truncates the HTML on its way.',
+    fix: 'Let `@gyral/ssr` write the seed (`renderPage({ stores })`, or the provider’s `.instances`) instead of writing it by hand, and check that nothing rewrites or truncates the HTML on its way.',
   },
   53: {
     explanation:
       'A component read a store during a server render without a store scope. On the server each request needs its own store instances, and without a scope Gyral can’t tell whose state to read.',
-    fix: 'Render through `@gyral/ssr` and pass the request’s instances: `page({ stores })` or `renderToString(value, { stores })`.',
+    fix: 'Render through `@gyral/ssr` and pass the request’s instances: `renderPage({ stores })` or `renderToString(value, { stores })`.',
   },
   54: {
     explanation:
