@@ -76,3 +76,11 @@ byte for byte the same. The examples sync reads `v0.3.2`, which adds the workloa
 to the gallery. The docs cover `viewOf`, the build-time style manifest, `chunkModules`, the
 helper types, the coverage fix and the MCP server (/docs/coding-agents/, hosted at
 `https://mcp.gyral.dev/mcp`), and /docs/upgrading-0-3-1-to-0-3-2/ announces the release.
+
+## Addendum: Gyral 0.3.3 release (2026-10-12)
+
+The site pins every `@gyral/*` dependency to exactly `0.3.3`. 0.3.3 changes only `@gyral/mcp`
+(one bin again, so `npx -y @gyral/mcp` works; the HTTP server is `gyral-mcp http` instead of
+0.3.2's `gyral-mcp-http`), so no site code changed. The examples and demos sync read `v0.3.3`
+with no drift. /docs/upgrading-0-3-2-to-0-3-3/ announces the release, and the coding-agents and
+packages pages describe `gyral-mcp http`.

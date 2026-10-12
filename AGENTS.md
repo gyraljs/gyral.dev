@@ -15,7 +15,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 
 | Command              | What it does                                                                                         |
 | -------------------- | ---------------------------------------------------------------------------------------------------- |
-| `pnpm install`       | Install. `@gyral/*` comes from npm (pinned to `0.3.2`)                                               |
+| `pnpm install`       | Install. `@gyral/*` comes from npm (pinned to `0.3.3`)                                               |
 | `pnpm check`         | **The gate.** typecheck (+ docs code) · lint · format · invariants · tests · build · smoke · visual  |
 | `pnpm dev`           | Dev server on http://localhost:5400 (renders per request, Vite for assets)                           |
 | `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                    |
@@ -92,4 +92,4 @@ First run needs `pnpm exec playwright install chromium`.
 - Workflows trigger on `workflow_dispatch` only (`scripts/check-workflows.mjs`).
 - Brand files in `public/` are copies; change them in gyraljs/brand and re-sync.
 - Example excerpts match the Gyral examples (`sync-examples.mjs --check`), synced from the
-  Gyral release tag for the installed version (`v0.3.2` in `../gyral` by default), never `main`.
+  Gyral release tag for the installed version (`v0.3.3` in `../gyral` by default), never `main`.
