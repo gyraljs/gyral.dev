@@ -217,5 +217,8 @@ rendering, hydration and virtual time. See [Testing](/docs/testing/).
 - See a whole application in [gyral-shop](https://github.com/gyraljs/gyral-shop).
 - Before you ship, read [Deploying](/docs/deploying/) and the
   [known issues](/docs/packages/#known-issues).
+- Working with a coding agent? Connect it to Gyral's MCP server and skill:
+  [Use Gyral with coding agents](/docs/coding-agents/).
 - Coming from Gyral 0.2? Read [Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/). From
-  0.3.0? Read [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
+  0.3.0? Read [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/). From 0.3.1,
+  [upgrading to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/) needs no code changes.

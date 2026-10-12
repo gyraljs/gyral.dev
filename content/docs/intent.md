@@ -471,6 +471,10 @@ export const parseSearch = ({
 `_tag: 'Search' as const` in the returned object works too. The same holds for the mappers of
 `child()`, `form()` and `field()`. To type a parser that reads the context, use
 `IntentParser<Variant, Props>`, or `IntentParser<Variant, Props, State>` when it reads `state`.
+Since 0.3.2, `Variant<Msg, 'Search'>` from `@gyral/core` names the variant without `Extract`,
+and `ParseResult<M>` is what a parser may return: a message, `IntentRejected` or `undefined`.
+`StandardSchemaV1` is exported too, for helpers that take a schema the way `field()` and
+`defineForm()` do.
 
 ## Buttons carry their own data
 

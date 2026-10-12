@@ -134,6 +134,29 @@ server-rendered components fetch. Preload it with the entry: `clientAssetsFromMa
 `@gyral/ssr/static` lists it, and `renderPage({ modulepreload })` writes the hints (see
 [Static sites](/docs/static-sites/#a-static-build)).
 
+## Which chunk holds a module
+
+With `gyralVitePreset({ components: true })`, the client build writes
+`.vite/gyral-components.json` next to Vite's manifest. Its `chunks` maps each tag to the chunk
+that defines it. Since 0.3.2, `chunkModules` maps every emitted JavaScript chunk to the source
+modules in it, as paths relative to the project root:
+
+```json
+{
+  "chunks": { "my-gallery": "assets/widgets-CQ3fA1x2.js" },
+  "chunkModules": {
+    "assets/widgets-CQ3fA1x2.js": ["src/gallery-photo.ts", "src/widgets.ts"]
+  }
+}
+```
+
+Vite's manifest only lists modules that start a chunk. When the bundler merges a module into a
+shared chunk, `chunkModules` is where to find it. A service worker or offline cache can use it
+to decide which chunks a feature needs: walk the static imports for shared code and CSS, and
+keep chunks that two features share for both. Paths outside the project root start with
+`../`; treat them as names, not as files to open. Worker builds are separate graphs and
+aren't listed.
+
 ## Measure
 
 Check what each page actually loads, in the browser's network panel, and the chunk sizes

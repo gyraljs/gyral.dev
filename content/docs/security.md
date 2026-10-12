@@ -101,6 +101,51 @@ policy accepts trusted author markup; it is not a sanitizer. Allow its name in y
 the page refuses the policy, development warns; an enforced HTML sink still rejects the
 operation. Support varies by browser; keep CSP's other protections in place.
 
+### Style hashes from the build
+
+`renderPage({ csp })` hashes the styles of the components imported by the server. A server or
+proxy that only builds the header, without importing your components, can take the hashes
+from the build instead. After the client build (`gyralVitePreset({ components: true })`), and
+before `.vite` is deleted, `writeComponentStyleManifest` from `@gyral/ssr/static` imports the
+app's component modules in a separate Node process and writes their real `<style>` hashes to a
+JSON file:
+
+```ts
+// scripts/style-manifest.ts
+import { writeComponentStyleManifest } from '@gyral/ssr/static';
+
+await writeComponentStyleManifest({
+  root: '.',
+  clientDir: 'dist/client',
+  outFile: 'dist/server/component-styles.json',
+});
+```
+
+The file is `{ "schema": 1, "hashes": ["'sha256-…'"] }`. The server passes the hashes as
+`componentStyleHashes`, to `contentSecurityPolicy()` or `renderPage({ csp })`:
+
+```ts
+// server/csp.ts
+import { readFileSync } from 'node:fs';
+import { contentSecurityPolicy } from '@gyral/ssr';
+
+const manifest = JSON.parse(readFileSync('dist/server/component-styles.json', 'utf8')) as {
+  readonly schema: 1;
+  readonly hashes: readonly string[];
+};
+
+export const csp = await contentSecurityPolicy({
+  componentStyleHashes: manifest.hashes,
+  directives: { 'default-src': "'self'", 'script-src': "'self'", 'object-src': "'none'" },
+});
+```
+
+The build runs your component modules, so they must be safe to import in Node; split a
+browser-only module from its component definition first. Pass `vite` with aliases or plugins
+the modules need. Ship the JSON with the HTML and assets of the same build, and regenerate it
+with every release: an old hash blocks new styles. On 0.3.1, which lacks both, import the
+components at build time and call `styleHashes()`. Both are new in 0.3.2.
+
 On a static host, deliver CSP as an HTTP response header where the host allows it. A
 `<meta http-equiv>` policy is the fallback for hosts that can't set headers, and it can't set
 `frame-ancestors` ([Deploying](/docs/deploying/#content-security-policy)). Review the

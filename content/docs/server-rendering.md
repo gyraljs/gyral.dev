@@ -325,8 +325,11 @@ still never takes user input.
 `contentSecurityPolicy({ directives, styles? })` builds the same value ahead of time, for the
 components imported before the call. Use it where no page renders per request: a static site
 writes it into the host's headers file at build time (see
-[Static sites](/docs/static-sites/#headers-and-csp)), as this site does. In development,
-`renderPage` warns when a header string it is given lacks a registered component's hash.
+[Static sites](/docs/static-sites/#headers-and-csp)), as this site does. A server that
+shouldn't import every component can read the hashes from a file the build writes, with
+`writeComponentStyleManifest` and `componentStyleHashes` (0.3.2; see
+[Security](/docs/security/#style-hashes-from-the-build)). In development, `renderPage` warns
+when a header string it is given lacks a registered component's hash.
 
 ## Static generation
 

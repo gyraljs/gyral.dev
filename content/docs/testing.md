@@ -1,7 +1,7 @@
 ---
 title: Testing
 description: Test models without a DOM, components in a real browser with fake drivers and virtual time, and server-rendered pages through hydration.
-useWhen: testing a model without a browser, a component in a browser, fake drivers, virtual time or SSR and hydration
+useWhen: testing a model or a view without a browser, a component in a browser, fake drivers, virtual time, SSR and hydration, or coverage
 section: Guides
 order: 16
 ---
@@ -177,6 +177,32 @@ Passing the class types the result by its outputs, so a test that expects an out
 component can't send doesn't compile. Without a class, `outputsIn<TagEditorOutput>(commands)`
 names the union itself. Read outputs and focus requests through these helpers, not by
 filtering on driver names: those are Gyral's internals and may change.
+
+## Views in Node
+
+A view is a pure function of state, so its markup can be tested in Node too. `viewOf(Component,
+state, { props, stores })` calls the component's view with the named intents and context it
+would get on the page, without mounting it or a DOM shim. Render the result with
+`renderToString` from `@gyral/ssr`, passing `{ dev: false }` so the HTML carries no
+development markers:
+
+```ts
+// src/lookup.view.test.ts
+import { expect, it } from 'vitest';
+import { renderToString } from '@gyral/ssr';
+import { viewOf } from '@gyral/testing';
+import { Lookup } from './lookup.js';
+
+it('shows the name it found', async () => {
+  const markup = await renderToString(viewOf(Lookup, { query: 'ada', found: 'Ada Lovelace' }), {
+    dev: false,
+  });
+  expect(markup).toContain('<output for="q">Ada Lovelace</output>');
+});
+```
+
+This tests what the view renders for a state, nothing more. Hooks, focus, native validity and
+hydration need the browser tests below. `viewOf` is new in 0.3.2.
 
 ## Browser tests
 
@@ -566,6 +592,17 @@ it('hydrates the server page in place', async () => {
 `stepStore(store, state, msg)` runs a store reducer, `store.instance(initial)` gives a test its
 own instance (`mount(Cart, { stores: { cart: instance } })`), and `inputsFor(commands, store)`
 lists the messages a reducer sent to a store.
+
+## Coverage
+
+Keep `gyralVitePreset()` in the tested project and name your sources in Vitest's coverage
+settings: `test: { coverage: { provider: 'v8', include: ['src/**/*.ts'] } }`. Install
+`@vitest/coverage-v8` at the same version as Vitest.
+
+In development and tests, the preset records where each `html` and `svg` template was written,
+so errors can name the file and line. Since 0.3.2 that adds no branches to your coverage
+report: the counts are your own code's. On 0.3.1 each template call site added branches of its
+own, so keep any workaround (a lower branch threshold, say) until you upgrade.
 
 ## Accessibility checks for your app
 

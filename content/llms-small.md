@@ -29,6 +29,11 @@ A new app starts from `npm create gyral@latest my-app -- --template basic` (brow
 `--template ssr` (prerendered and hydrated). The `basic` app has `@gyral/core`,
 `@gyral/testing`, Vitest in browser mode, and nothing else: the recipes below need nothing more.
 
+With Gyral's MCP server connected (hosted at `https://mcp.gyral.dev/mcp`, or locally with
+`npx -y @gyral/mcp`), call `start_here` once, start from `get_example` or `scaffold_component`,
+and run `check_snippet` (local server only) on each module, applying its suggested fixes until
+it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-agents/).
+
 ## MUST
 
 - **MUST define components in two calls**: `define<State, Msg>()('my-tag', { … })`. The first
@@ -259,6 +264,9 @@ export type {
   IntentInput, // what a parser receives: value, checked, formData, key, target, event…
   IntentRejected, // the framework message for failed schema checks
   Stateless, // the State of a component with no state
+  Reducer, // Reducer<State, Msg, Variant<Msg, 'Add'>>: a reducer written outside the spec
+  Variant, // Variant<Msg, 'Add'>: one member of the message union
+  ParseResult, // what a parser returns: a message, IntentRejected or undefined
 } from '@gyral/core';
 export { gyralVitePreset } from '@gyral/core/vite'; // vite.config.ts: { ...gyralVitePreset() }
 
@@ -272,6 +280,7 @@ export {
   inputsFor, // inputsFor(commands, driver): the inputs of one driver's commands
   resolve, // resolve(command, output): the message a command would send back
   subscriptionsFor, // subscriptionsFor(C.spec, state): what should be running
+  viewOf, // viewOf(C, state): the view, no DOM; renderToString from @gyral/ssr makes HTML
   mount, // await mount(C, { drivers }): $, type, click, settled, dispose
   virtualTime, // fake timers for delay, debounce and every
 } from '@gyral/testing';

@@ -110,6 +110,35 @@ context, `{ props, read }`: the component's [props](/docs/components/#props) and
 [shared stores](/docs/stores/). Reducers are pure: no `fetch`, no `Date.now()`, no
 `Math.random()`, no DOM.
 
+A reducer written outside the spec, to share it or test it alone, is typed with `Reducer` and
+`Variant` from `@gyral/core` (type-only exports, new in 0.3.2). `Variant<Msg, 'Add'>` is the
+member of `Msg` tagged `'Add'`:
+
+```ts
+// src/shelf.ts
+import { define, html, type Reducer, type Variant } from '@gyral/core';
+
+interface State {
+  readonly books: readonly string[];
+}
+type Msg = { readonly _tag: 'Add'; readonly title: string } | { readonly _tag: 'Clear' };
+
+export const add: Reducer<State, Msg, Variant<Msg, 'Add'>> = (s, m) => ({
+  books: [...s.books, m.title],
+});
+
+export const Shelf = define<State, Msg>()('my-shelf', {
+  init: () => ({ books: [] }),
+  intent: { Add: ({ value }) => ({ _tag: 'Add', title: value ?? '' }), Clear: true },
+  update: { Add: add, Clear: () => ({ books: [] }) },
+  view: (s, i) => html`
+    <button type="button" value="Middlemarch" data-intent=${i.Add}>Add Middlemarch</button>
+    <button type="button" data-intent=${i.Clear}>Clear</button>
+    <output>${s.books.join(', ')}</output>
+  `,
+});
+```
+
 ## Returning commands
 
 To do anything outside the model, a reducer returns a tuple: the next state and a list of
