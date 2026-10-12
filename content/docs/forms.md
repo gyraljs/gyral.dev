@@ -1,16 +1,74 @@
 ---
 title: Forms
-description: Real forms with native validation, one Standard Schema for client and server, errors kept in the model, and the same behaviour with or without JavaScript.
+description: Validate with the browser's own checks and your messages, or with one Standard Schema for client and server. Forms work with or without JavaScript.
 section: Guides
 order: 6
 ---
 
 # Forms
 
-Gyral forms are real `<form>` elements. They post to a real URL, so they work before
-JavaScript loads. With JavaScript, the same form is validated in the browser by the same schema
-the server uses, and the server's answer comes back as a message. Each layer is optional; use
-as many as a form needs.
+Gyral forms are real `<form>` elements, and a submit is an intent like any other. There are two
+ways to validate one. Start with the first; add the second when a server needs the same rules.
+
+- **[Native validation](#native-validation)**, with no extra packages. The browser's
+  constraints (`required`, `type="email"`, `minlength`) find what is wrong, and the submit
+  parser reads each field's `validity` and returns your messages. It works in any app,
+  including a new `basic` one.
+- **[One schema for both sides](#one-schema-for-both-sides).** A
+  [Standard Schema](https://standardschema.dev) library validates in the browser and on the
+  server, the form posts with `@gyral/http`, and the same errors render without JavaScript.
+
+## Native validation
+
+**`required` without `novalidate` hides your errors.** The browser checks constraints before
+it fires `submit`. When one fails, it shows its own bubble and fires no `submit` event, so your
+parser never runs and your messages never appear. Put `novalidate` on any form that shows its
+own errors, and keep the constraints on the fields: they still set `validity`, which the parser
+reads.
+
+Here is a whole signup form built that way. The submit parser turns each field's `validity`
+into a message in state:
+
+<!-- include: recipes/account-form.ts.txt -->
+
+- **Reading the fields is parsing.** `target` is the `<form>`, so
+  `target.elements.namedItem('email')` is the email input. The parser returns `Rejected` with
+  every field's error, or `SignedUp` with clean values.
+- **Errors are state.** The view writes each message next to its field, links it with
+  `aria-describedby` and sets `aria-invalid`.
+- **Focus moves to the first invalid field** with a `focus()` command from the `Rejected`
+  reducer.
+- **Fixing a field clears its error.** Each input sends `Checked`, which updates only a field
+  that already shows an error.
+- **Enter submits**, because the form has a submit button.
+
+Each constraint sets one `validity` flag, so the parser can say exactly what is wrong:
+
+| Constraint                       | Flag                                              | Notes                               |
+| -------------------------------- | ------------------------------------------------- | ----------------------------------- |
+| `required`                       | `valueMissing`                                    | A value of spaces passes: trim it   |
+| `type="email"`, `type="url"`     | `typeMismatch`                                    | Only for a value that isn't empty   |
+| `minlength`, `maxlength`         | `tooShort`, `tooLong`                             | Only after the user edits the value |
+| `pattern`                        | `patternMismatch`                                 |                                     |
+| `min`, `max`, `step`             | `rangeUnderflow`, `rangeOverflow`, `stepMismatch` | Numbers, dates and times            |
+| `type="number"`, unparsable text | `badInput`                                        | The `value` reads as `''`           |
+
+`validity.valid` is `true` when no flag is set, and `form.checkValidity()` asks every field at
+once. A message set with `setCustomValidity()`, as the [`invalid()`](#form-and-invalid) hook
+does, sets `customError`, so read the specific flags rather than `valid` when you combine them.
+
+The [signup form recipe](/docs/recipes/#a-signup-form-with-native-validation) has the tests:
+the reducers without a browser, and the parser with `mount()`.
+
+`novalidate` in server-rendered markup turns validation off for visitors without JavaScript
+too. If your form also posts to a server, render `?novalidate=${s.live}` and set `live` in the
+`Hydrated` reducer, as in [Schema messages for everything](#schema-messages-for-everything),
+and validate again on the server.
+
+## One schema for both sides
+
+When a server handles the form too, validate it with one schema on both sides. Each layer is
+optional; use as many as a form needs:
 
 1. **Native constraints**: `required`, `type="email"`, `minlength`, `pattern`.
 2. **A schema-parsed intent**: `form(schema, toMsg)` validates the submission.
@@ -19,9 +77,8 @@ as many as a form needs.
 5. **No-JavaScript parity**: the server's `formAction()` validates with the same schema and
    renders the same errors.
 
-## One schema for both sides
-
-Define the form once with any [Standard Schema](https://standardschema.dev) library, such as
+This path needs `@gyral/http` for the post, `@gyral/ssr` for the server half and a schema
+library. Define the form once with any [Standard Schema](https://standardschema.dev) library, such as
 Zod, Valibot, ArkType or Effect Schema. Form values arrive as strings; the schema coerces them.
 
 ```ts
@@ -134,8 +191,9 @@ export const Signup = define<State, Msg>()('my-signup', {
 What happens on submit:
 
 - **The browser checks native constraints first.** If `required` or `type="email"` fails, the
-  browser shows its own message and no `submit` event fires. Keep them: they work without
-  JavaScript and are accessible.
+  browser shows its own message and no `submit` event fires, so `form()` doesn't run. Keep
+  them: they work without JavaScript and are accessible. To show the schema's messages instead,
+  see [Schema messages for everything](#schema-messages-for-everything).
 - **`form(schema, toMsg)`** turns the `FormData` into a plain object (repeated names become
   arrays) and validates it. Valid data goes to `toMsg`, which also gets the raw `FormData`.
   Invalid data becomes `IntentRejected`, with one issue per field: `path` matches the field's
