@@ -72,7 +72,7 @@ First run needs `pnpm exec playwright install chromium`.
 ## Hard rules (enforced by `pnpm check`)
 
 - Islands (`src/islands`) never import `src/render`, `src/content`, Node built-ins, Markdown,
-  Shiki, `@gyral/ssr` or `@gyral/core/server` (eslint).
+  Shiki, `@gyral/ssr` (any entry) or `@gyral/core/internal/server` (eslint).
 - Templates follow Gyral's template rules and `each` rows are pure (`@gyral/core/eslint`;
   `vite build` compiles them). Pages have no inline `style` attributes: the CSP has no
   `'unsafe-inline'` (test/site.test.ts).

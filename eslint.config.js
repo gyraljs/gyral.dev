@@ -7,7 +7,7 @@ import globals from 'globals';
 import gyral from '@gyral/core/eslint';
 
 const SERVER_ONLY =
-  'Islands run in the browser: server rendering (@gyral/core/server, @gyral/ssr) stays in src/render. Hydration is built into @gyral/core.';
+  'Islands run in the browser: server rendering (@gyral/ssr) stays in src/render. Hydration is built into @gyral/core.';
 
 export default tseslint.config(
   {
@@ -18,6 +18,7 @@ export default tseslint.config(
       '.claude/',
       '.beads/',
       '.pnpm-store/',
+      '.gyral/',
       'node_modules/',
     ],
   },
@@ -62,8 +63,10 @@ export default tseslint.config(
         'error',
         {
           paths: [
-            { name: '@gyral/core/server', message: SERVER_ONLY },
             { name: '@gyral/ssr', message: SERVER_ONLY },
+            { name: '@gyral/ssr/static', message: SERVER_ONLY },
+            { name: '@gyral/ssr/node', message: SERVER_ONLY },
+            { name: '@gyral/core/internal/server', message: SERVER_ONLY },
             {
               name: 'marked',
               message: 'Markdown renders at build time (src/content), never in the browser.',
