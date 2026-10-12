@@ -59,3 +59,11 @@ All nine Gyral packages are published on npm as 0.3.1. Registry-only installs of
 `create-gyral` templates typecheck, build and pass their tests. The site uses `^0.3.1`
 registry dependencies, with no vendored packages or overrides. The sync default is
 `../gyral`, matching the framework's `main` branch and the published API.
+
+## Addendum: examples pinned to the release tag (2026-10-12)
+
+Gyral's `main` moves past a release with unreleased work, and the site documents only what is on
+npm. `sync:examples` and `sync:demos` therefore read `examples/` from the checkout's tag for the
+installed `@gyral/core` (`v0.3.1`), extracted with `git archive` (`scripts/lib/gyral-source.mjs`;
+`GYRAL_REF` overrides it). Recordings still come from the checkout's untracked `.demos/`, so
+`--record` warns when the checkout is not on that tag.

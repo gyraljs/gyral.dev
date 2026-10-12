@@ -1,5 +1,7 @@
 // `pnpm sync:demos` copies the demo recordings and their text from a Gyral checkout
-// (../gyral on its main branch, or GYRAL_DIR) into the site:
+// (GYRAL_DIR, else ../gyral) into the site. The text is read at the release the site is built
+// with (tag v<installed @gyral/core version>, scripts/lib/gyral-source.mjs); the recordings are
+// the checkout's untracked .demos/, so record with the checkout on that tag:
 // - the pitch and "usual way" lines from examples/<slug>/demo.mjs into content/demos.json;
 // - each scene's recording (.demos/<stem>.webm and .png, made by `pnpm demos:record` there)
 //   encoded for the web into public/demos/<stem>.<hash>.{webm,mp4,webp}: AV1 in WebM, H.264 in
@@ -23,13 +25,16 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { tsImport } from 'tsx/esm/api';
+import { gyralExamplesRoot } from './lib/gyral-source.mjs';
 
 const { DEMOS } = await tsImport('../src/content/demos.ts', import.meta.url);
-// The Gyral checkout: GYRAL_DIR, else a sibling main checkout, relative to the repo root.
-const gyral = resolve(process.env.GYRAL_DIR ?? '../gyral');
+const source = gyralExamplesRoot();
+// The checkout (recordings, `demos:record`) and the release's files (demo.mjs text).
+const gyral = source?.checkout;
+const released = source?.root;
 const check = process.argv.includes('--check');
 const record = process.argv.includes('--record');
 const JSON_PATH = 'content/demos.json';
@@ -41,8 +46,8 @@ const stem = (demo, scene) => (demo.scenes.length === 1 ? demo.slug : `${demo.sl
 const problems = [];
 const synced = existsSync(JSON_PATH) ? JSON.parse(readFileSync(JSON_PATH, 'utf8')) : {};
 
-if (!existsSync(join(gyral, 'examples'))) {
-  const message = `sync-demos: no Gyral checkout at ${gyral} (set GYRAL_DIR).`;
+if (gyral === undefined || released === undefined || !existsSync(join(released, 'examples'))) {
+  const message = `sync-demos: no Gyral checkout at ${process.env.GYRAL_DIR ?? '../gyral'} (set GYRAL_DIR).`;
   if (check) {
     console.log(`${message} Skipping the drift check.`);
     process.exit(0);
@@ -53,9 +58,9 @@ if (!existsSync(join(gyral, 'examples'))) {
 
 /** The text from each example's demo.mjs, checked against the scenes the site lists. */
 async function readDemoText(demo) {
-  const file = join(gyral, 'examples', demo.slug, 'demo.mjs');
+  const file = join(released, 'examples', demo.slug, 'demo.mjs');
   if (!existsSync(file)) {
-    problems.push(`${demo.slug}: examples/${demo.slug}/demo.mjs does not exist in ${gyral}`);
+    problems.push(`${demo.slug}: examples/${demo.slug}/demo.mjs does not exist at ${source.ref}`);
     return undefined;
   }
   const { default: source } = await import(pathToFileURL(file).href);
@@ -145,6 +150,11 @@ function encode(name, crop) {
 }
 
 if (record && !check) {
+  const at = spawnSync('git', ['-C', gyral, 'tag', '--points-at', 'HEAD'], { encoding: 'utf8' });
+  if (!(at.stdout ?? '').split('\n').includes(source.ref))
+    console.warn(
+      `sync-demos: ${gyral} is not checked out at ${source.ref}; recording its working tree.`,
+    );
   const slugs = DEMOS.map((d) => d.slug);
   const result = spawnSync('pnpm', ['demos:record', ...slugs], { cwd: gyral, stdio: 'inherit' });
   if (result.status !== 0) process.exit(result.status ?? 1);

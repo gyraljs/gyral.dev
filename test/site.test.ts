@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
+import { GYRAL_TAG } from '../src/content/release.js';
 import { siteCsp } from '../src/render/csp.js';
 import { createSite, sitemap } from '../src/render/site.js';
 import { headersFor, parseHeaders, withCsp } from '../scripts/lib/headers.js';
@@ -132,7 +133,9 @@ describe('what you can build', () => {
     }
     expect(html.match(/<source src="\/demos\/[^"]+\.(?:webm|mp4)" type="video\//g)).toHaveLength(8);
     expect(html).toContain('The usual way:');
-    expect(html).toContain('https://github.com/gyraljs/gyral/tree/main/examples/typeahead-race');
+    expect(html).toContain(
+      `https://github.com/gyraljs/gyral/tree/${GYRAL_TAG}/examples/typeahead-race`,
+    );
     expect(html).toContain('<script type="module" src="/assets/demo-videos.js">');
     expect(html).toContain('href="/what-you-can-build/index.md"');
   });

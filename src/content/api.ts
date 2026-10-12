@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import type { DocPage } from './docs.js';
 import { renderMarkdown, slugify } from './markdown.js';
+import { GYRAL_TAG } from './release.js';
 
 /**
  * Every published package and its public entry points, in reading order. Left out:
@@ -24,8 +25,8 @@ export const API_PACKAGES = [
   { name: 'devtools', entries: ['.'] },
 ] as const;
 
-const SOURCE = 'https://github.com/gyraljs/gyral/tree/main/packages';
 const NODE_MODULES = fileURLToPath(new URL('../../node_modules/', import.meta.url));
+const SOURCE = `https://github.com/gyraljs/gyral/tree/${GYRAL_TAG}/packages`;
 
 interface PackageJson {
   readonly name: string;
@@ -147,7 +148,7 @@ function describeExports(program: ts.Program, file: string): ApiSymbol[] {
   });
 }
 
-const DESIGN_DOCS = 'https://github.com/gyraljs/gyral/blob/main/docs/design-docs';
+const DESIGN_DOCS = `https://github.com/gyraljs/gyral/blob/${GYRAL_TAG}/docs/design-docs`;
 
 /**
  * A doc comment as Markdown. Gyral's comments indent code examples by two spaces, after a line

@@ -5,11 +5,12 @@
 // motion.
 import { html, nothing, type ChildValue } from '@gyral/core';
 import { loadDemos, usualWay, type LoadedDemo, type LoadedScene } from '../content/demos.js';
+import { GYRAL_TAG } from '../content/release.js';
 import { absolute, LINKS } from '../site.js';
 import type { PageMeta } from './layout.js';
 
 export const DEMOS_PATH = '/what-you-can-build/';
-const EXAMPLES_SOURCE = `${LINKS.github}/tree/main/examples`;
+const EXAMPLES_SOURCE = `${LINKS.github}/tree/${GYRAL_TAG}/examples`;
 
 export const DEMOS_INTRO =
   'Gyral treats every interaction as data. That makes these easy. Each one is a short recording of an example in the Gyral repository: no code here, just what the interface does.';

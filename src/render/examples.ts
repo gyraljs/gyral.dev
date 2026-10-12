@@ -3,10 +3,11 @@
 // are server-rendered inside <details>.
 import { html, nothing, raw, type ChildValue } from '@gyral/core';
 import { EXAMPLE_GROUPS, loadExcerpts, type Example } from '../content/examples.js';
+import { GYRAL_TAG } from '../content/release.js';
 import { absolute, LINKS } from '../site.js';
 import type { PageMeta } from './layout.js';
 
-const EXAMPLES_SOURCE = `${LINKS.github}/tree/main/examples`;
+const EXAMPLES_SOURCE = `${LINKS.github}/tree/${GYRAL_TAG}/examples`;
 
 export const examplesMeta: PageMeta = {
   path: '/examples/',
