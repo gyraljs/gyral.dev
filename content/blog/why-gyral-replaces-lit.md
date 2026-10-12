@@ -1,6 +1,7 @@
 ---
 title: Why Gyral 0.3 replaces Lit with its own view layer
 description: Gyral 0.3 renders with a view layer built only for Model-View-Intent. Why I moved off Lit, how the new design works, and what the benchmarks measured.
+useWhen: you want to know why 0.3 dropped Lit for its own view layer, and what the benchmarks measured
 date: 2026-10-10
 author: Mike Zupper
 ---

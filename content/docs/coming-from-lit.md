@@ -1,6 +1,7 @@
 ---
 title: Coming from Lit
 description: Move a Lit component to Gyral's Model-View-Intent loop: explicit props, pure views, typed messages, keyed rows, drivers, stores and native hydration.
+useWhen: porting a Lit component or app to Gyral, or comparing the two
 section: Background
 order: 3
 ---

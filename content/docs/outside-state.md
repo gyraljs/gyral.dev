@@ -1,6 +1,7 @@
 ---
 title: State Gyral doesn't own
 description: Read signals, Redux-style stores, XState actors and WebSocket feeds with subscription(), write to them with plain drivers, and test both.
+useWhen: reading state Gyral does not own (signals, Redux, XState, a socket) with subscription(), or running long-lived work
 section: Guides
 order: 9
 ---

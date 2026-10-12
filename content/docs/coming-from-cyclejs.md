@@ -1,6 +1,7 @@
 ---
 title: Coming from Cycle.js
 description: What Gyral keeps from Cycle.js, what it changes and why, the counter side by side, and how Cycle.js concepts map to Gyral.
+useWhen: you know Cycle.js and want to map its streams, drivers and sources onto Gyral
 section: Background
 order: 1
 ---

@@ -18,6 +18,11 @@ export interface DocPage {
   readonly title: string;
   /** The meta description and the summary on the docs home. */
   readonly description: string;
+  /**
+   * When an agent should read the page, for its llms.txt entry: `building a form with
+   * validation`. Front matter `useWhen`; every page in llms.txt needs one (llms-check.ts).
+   */
+  readonly useWhen?: string;
   readonly section: Section;
   readonly order: number;
   readonly draft: boolean;
@@ -41,12 +46,14 @@ export async function loadDoc(file: string, source: string): Promise<DocPage> {
   const fail = (why: string): never => {
     throw new Error(`content/docs/${file}: ${why}`);
   };
-  const { title, description, section, order, draft = false } = data;
+  const { title, description, section, order, draft = false, useWhen } = data;
   if (typeof title !== 'string' || title === '') fail('front matter needs a title');
   if (typeof description !== 'string' || description === '') fail('needs a description');
   if (!isSection(section)) fail(`section must be one of: ${SECTIONS.join(', ')}`);
   if (typeof order !== 'number') fail('order must be a number');
   if (typeof draft !== 'boolean') fail('draft must be true or false');
+  if (useWhen !== undefined && (typeof useWhen !== 'string' || useWhen === ''))
+    fail('useWhen must be a phrase, such as "building a form with validation"');
   // Shared recipes and sections are expanded first, so the HTML and the Markdown twin match.
   const body = await expandIncludes(written, `content/docs/${file}`);
   const { html, headings } = await renderMarkdown(body);
@@ -58,6 +65,7 @@ export async function loadDoc(file: string, source: string): Promise<DocPage> {
     section: section as Section,
     order: order as number,
     draft: draft as boolean,
+    ...(typeof useWhen === 'string' ? { useWhen } : {}),
     html,
     markdown: body,
     headings,

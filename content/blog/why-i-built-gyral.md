@@ -1,6 +1,7 @@
 ---
 title: Why I built Gyral
 description: The ideas behind Gyral, what made them hard to adopt before, and the decisions behind a web-native framework built on custom elements and plain messages.
+useWhen: you want the ideas behind Gyral and the problems it set out to solve
 date: 2026-10-05
 author: Mike Zupper
 ---

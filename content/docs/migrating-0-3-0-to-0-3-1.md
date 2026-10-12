@@ -1,6 +1,7 @@
 ---
 title: Migrating from 0.3.0 to 0.3.1
 description: Move a Gyral 0.3.0 app to 0.3.1 - the two-call define, subscriptions, drivers, the head model, server rendering, forms, errors, a smaller API - and what's new.
+useWhen: upgrading an app from Gyral 0.3.0 to 0.3.1
 section: Reference
 order: 3
 ---

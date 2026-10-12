@@ -1,6 +1,7 @@
 ---
 title: Shared state
 description: Share state between distant components with stores, read like props from the side and written with messages, on the client and per request on the server.
+useWhen: sharing state between components, such as a cart or a session
 section: Guides
 order: 8
 ---

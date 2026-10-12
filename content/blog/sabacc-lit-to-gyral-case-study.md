@@ -1,6 +1,7 @@
 ---
 title: 'Case study: moving sabacc.starwars.run from Lit to Gyral'
 description: How a Three.js card game moved from Lit 3 to Gyral 0.3, what worked, the rough edges 0.3.1 fixed, and what it costs in bytes per page on Gyral 0.3.1.
+useWhen: you want a worked example of moving a real app from Lit to Gyral, with byte costs
 date: 2026-10-12
 author: Mike Zupper
 ---

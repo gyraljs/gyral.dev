@@ -1,6 +1,7 @@
 ---
 title: Browser storage
 description: Typed localStorage and IndexedDB drivers: persist values, watch settings, query records and run atomic transactions.
+useWhen: saving state in localStorage or IndexedDB, with typed decoding, watches and migrations
 section: Guides
 order: 7.6
 ---

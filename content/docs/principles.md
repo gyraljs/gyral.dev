@@ -1,6 +1,7 @@
 ---
 title: Design principles
 description: The beliefs behind Gyral, from "the platform is the framework" to "parse at boundaries", and what each one means for your code.
+useWhen: you want the reasons behind Gyral's design
 section: Background
 order: 2
 ---

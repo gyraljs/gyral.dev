@@ -1,6 +1,7 @@
 ---
 title: Getting started
 description: Install Gyral, write your first Model-View-Intent component, use it in a page, and test it without a browser.
+useWhen: creating a new Gyral app, or writing and testing your first component
 section: Start here
 order: 1
 ---

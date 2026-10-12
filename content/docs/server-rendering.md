@@ -1,6 +1,7 @@
 ---
 title: Server rendering
 description: Render pages on the server with Declarative Shadow DOM, hydrate them in place, keep a strict CSP, and ship a production build.
+useWhen: rendering pages on a server and hydrating them in the browser
 section: Guides
 order: 12
 ---

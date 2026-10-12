@@ -1,6 +1,7 @@
 ---
 title: Rendering modes
 description: Choose how each page renders - in the browser only, once at build time, or on every request - and mix all three in one app.
+useWhen: choosing between client-only, prerendered and server-rendered pages, or mixing them in one app
 section: Guides
 order: 11
 ---

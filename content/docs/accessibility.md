@@ -1,6 +1,7 @@
 ---
 title: Accessibility
 description: Build Gyral views with native controls, useful labels, announced errors, predictable focus, and browser tests that cover keyboard interaction.
+useWhen: checking labels, form errors, focus, announcements and motion in a component, or testing the real interface
 section: Guides
 order: 22
 ---

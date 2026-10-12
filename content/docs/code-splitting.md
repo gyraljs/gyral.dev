@@ -1,6 +1,7 @@
 ---
 title: Code-splitting and lazy loading
 description: Load each component's code only on the pages that use it, delay hydration until it's needed, and see what each page downloads.
+useWhen: loading each component's code only on pages that use it, or delaying hydration until it is needed
 section: Guides
 order: 14
 ---

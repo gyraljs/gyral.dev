@@ -13,6 +13,8 @@ export interface Post {
   /** `YYYY-MM-DD`. */
   readonly date: string;
   readonly author: string;
+  /** When to read the post, for its llms.txt entry. Front matter `useWhen`. */
+  readonly useWhen?: string;
   readonly html: string;
   /** The post as Markdown, for its `index.md` twin (src/content/llms.ts). */
   readonly markdown: string;
@@ -26,13 +28,15 @@ export async function loadPost(file: string, source: string): Promise<Post> {
   const fail = (why: string): never => {
     throw new Error(`content/blog/${file}: ${why}`);
   };
-  const { title, description, date, author } = data;
+  const { title, description, date, author, useWhen } = data;
   if (typeof title !== 'string' || title === '') fail('front matter needs a title');
   if (typeof description !== 'string' || description.length < 50 || description.length > 160)
     fail('description must be 50–160 characters');
   if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date))
     fail('date must be YYYY-MM-DD');
   if (typeof author !== 'string' || author === '') fail('front matter needs an author');
+  if (useWhen !== undefined && (typeof useWhen !== 'string' || useWhen === ''))
+    fail('useWhen must be a phrase');
   const slug = file.replace(/\.md$/, '');
   const { html } = await renderMarkdown(body);
   return {
@@ -42,6 +46,7 @@ export async function loadPost(file: string, source: string): Promise<Post> {
     description: description as string,
     date: date as string,
     author: author as string,
+    ...(typeof useWhen === 'string' ? { useWhen } : {}),
     html,
     markdown: body,
   };

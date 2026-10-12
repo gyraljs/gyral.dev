@@ -1,6 +1,7 @@
 ---
 title: Introducing Gyral
 description: Gyral 0.1 is out. Model-View-Intent web components on the modern web platform, with server rendering, forms, routing and testing built in.
+useWhen: you want an overview of what Gyral is and what its first release included
 date: 2026-10-05
 author: Mike Zupper
 ---

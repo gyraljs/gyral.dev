@@ -1,6 +1,7 @@
 ---
 title: Styling and themes
 description: Style Gyral components with Shadow DOM, cascade layers, custom properties and custom states, and make a whole site themeable from CSS alone.
+useWhen: styling a component with css, themes, custom properties, custom states or document CSS
 section: Guides
 order: 5
 ---

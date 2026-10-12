@@ -1,6 +1,7 @@
 ---
 title: Intent
 description: How Gyral turns clicks, input, form submissions and keys into typed messages, and why the view never holds event handlers.
+useWhen: turning clicks, keys, input, form submits or third-party events into messages; parsers, declining and preventDefault
 section: Guides
 order: 2
 ---

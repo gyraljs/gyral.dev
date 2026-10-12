@@ -1,6 +1,7 @@
 ---
 title: Network streams
 description: Native EventSource and WebSocket drivers: receive validated streams, send messages and handle connection lifecycles.
+useWhen: reading a WebSocket or EventSource stream as messages
 section: Guides
 order: 7.7
 ---

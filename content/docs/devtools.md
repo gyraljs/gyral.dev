@@ -1,6 +1,7 @@
 ---
 title: Devtools
 description: Watch every message, state change and command in your app with an in-page panel that costs nothing in production builds.
+useWhen: debugging which messages, states and commands a component went through
 section: Guides
 order: 17
 ---

@@ -1,6 +1,7 @@
 ---
 title: Security
 description: Escape template data, protect form requests, keep secrets out of hydration seeds, and serve Gyral with a strict Content Security Policy.
+useWhen: handling user input, CSRF, uploaded files, trusted markup or a Content Security Policy
 section: Guides
 order: 21
 ---

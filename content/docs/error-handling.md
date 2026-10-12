@@ -1,6 +1,7 @@
 ---
 title: Error handling
 description: How Gyral reports each failure once, lets a parent catch a child's failure, shows a component's fallback and keeps a server-rendered page going.
+useWhen: handling a reducer, parser, view or command that throws, or reporting errors to monitoring
 section: Guides
 order: 7.5
 ---

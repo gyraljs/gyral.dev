@@ -21,6 +21,7 @@ on Cloudflare Pages. This file is a **map**; the linked docs are the system of r
 | `pnpm build`         | `vite build`, then prerender every page to `dist/` (what Cloudflare Pages serves)                    |
 | `pnpm preview`       | Serve `dist/` like Cloudflare Pages, with `_headers` and `_redirects`, on http://localhost:5401      |
 | `pnpm interop`       | Docs interop claims in Chromium: props, `gyral-output`, third-party events (test/interop/)           |
+| `pnpm recipes`       | The recipes (content/recipes/): their tests in Chromium, then driven with a real keyboard            |
 | `pnpm smoke`         | Built site in Chromium: status, console/CSP, axe light+dark, overflow, links, islands, search        |
 | `pnpm visual`        | Screenshot review vs `test/visual/` baselines (`:update` after an intended change; `--all` locally)  |
 | `pnpm showcase`      | Re-capture the gyral-shop theme screenshots (start the shop first)                                   |
@@ -38,11 +39,13 @@ First run needs `pnpm exec playwright install chromium`.
 | Path                                           | Contents                                                              |
 | ---------------------------------------------- | --------------------------------------------------------------------- |
 | [ARCHITECTURE.md](ARCHITECTURE.md)             | Modules, layers, what runs where                                      |
-| `content/docs/*.md`                            | Docs pages (front matter: title, description, section, order, draft)  |
+| `content/docs/*.md`                            | Docs pages (front matter: title, description, useWhen, section, …)    |
+| `content/recipes/`                             | Recipe code, included into pages with `<!-- include: … -->`           |
+| `content/llms-small.md`                        | The agent pack, /llms-small.txt (≤ 40 KB; includes recipes)           |
 | `content/blog/*.md`                            | Blog posts (front matter: title, description, date, author)           |
 | `content/examples/`                            | Example excerpts, synced from Gyral (never edit by hand)              |
 | `src/content/api.ts`                           | The API reference, generated from the packages' types at build time   |
-| `src/content/llms.ts`                          | llms.txt, llms-full.txt and Markdown twins for agents (checked)       |
+| `src/content/llms.ts`                          | llms.txt, llms-small.txt, llms-full.txt and Markdown twins (checked)  |
 | `src/render/`                                  | Server-only page templates: layout, home, docs, route table           |
 | `src/content/`                                 | Build-time Markdown, front matter, Shiki highlighting                 |
 | `src/islands/`                                 | Browser code: Gyral components hydrated on a page (counter, search)   |
@@ -77,7 +80,10 @@ First run needs `pnpm exec playwright install chromium`.
   `vite build` compiles them). Pages have no inline `style` attributes: the CSP has no
   `'unsafe-inline'` (test/site.test.ts).
 - Docs code blocks that start with a file comment (`// src/x.ts`) must typecheck against the
-  real Gyral packages (`scripts/check-snippets.mjs`).
+  real Gyral packages (`scripts/check-snippets.mjs`), and so must the recipes and the code in
+  `content/llms-small.md`. The recipes' tests and behaviour run in Chromium (`pnpm recipes`).
+- Every llms.txt entry says when to read it (`useWhen` front matter); llms-small.txt is its first
+  entry and stays under 40 KB (the build fails otherwise).
 - Pages pass axe in light and dark, have no console errors under the production CSP, and don't
   overflow at 360 px (`pnpm smoke`).
 - Gate pages match their screenshot baselines (`pnpm visual`); update them only for an intended

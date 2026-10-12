@@ -1,6 +1,7 @@
 ---
 title: Versioning and stability
 description: Understand Gyral's 0.x API policy, package versions, migration guides and internal entry points.
+useWhen: checking what counts as public API, how releases work, and how to upgrade safely
 section: Reference
 order: 4
 ---

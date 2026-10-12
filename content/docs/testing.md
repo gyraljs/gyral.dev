@@ -1,6 +1,7 @@
 ---
 title: Testing
 description: Test models without a DOM, components in a real browser with fake drivers and virtual time, and server-rendered pages through hydration.
+useWhen: testing a model without a browser, a component in a browser, fake drivers, virtual time or SSR and hydration
 section: Guides
 order: 16
 ---

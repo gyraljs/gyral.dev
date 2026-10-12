@@ -341,6 +341,8 @@ export function loadErrorsPage(): Promise<readonly DocPage[]> {
       title: 'Error codes',
       description:
         'Every code a production build of Gyral prints, such as G0010: what the message says, what it means and how to fix it.',
+      useWhen:
+        'a production build logs a code such as "Gyral G0010 …" and you need what it means and how to fix it',
       section: 'Reference',
       order: 5,
       draft: false,

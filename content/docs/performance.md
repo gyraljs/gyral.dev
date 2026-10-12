@@ -1,7 +1,7 @@
 ---
 title: Performance
 description: Measure Gyral's production payload, rendering work and hydration cost, then use keyed rows, structural sharing and islands where they help.
-useWhen: making a long list, a frequent update or a large page fast
+useWhen: making long lists, frequent updates, payloads or hydration fast, or reproducing a speed claim
 section: Guides
 order: 23
 ---

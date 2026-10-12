@@ -1,6 +1,7 @@
 ---
 title: Views
 description: Views are pure functions from state to html templates. Name intents, render keyed lists, bind form state, and let the compiler check markup.
+useWhen: writing templates: bindings, keyed lists with each, form state, hooks, dialogs, focus and view transitions
 section: Guides
 order: 4
 ---

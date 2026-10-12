@@ -1,6 +1,7 @@
 ---
 title: Using Gyral in other frameworks
 description: Gyral components are standard custom elements. Use them in plain HTML, React, Vue or Svelte - set their props and listen to their outputs.
+useWhen: using a Gyral component inside React, Vue, Svelte or plain HTML pages
 section: Guides
 order: 18
 ---

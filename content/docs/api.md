@@ -1,6 +1,7 @@
 ---
 title: API reference
 description: The public API of every Gyral package, generated from the type declarations at build time so it always matches the code.
+useWhen: you need to know which package exports a name, or the API reference for one package
 section: Reference
 order: 2
 ---

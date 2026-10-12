@@ -1,6 +1,7 @@
 ---
 title: Model and update
 description: State as plain data, one pure reducer per message, commands returned as data, and the framework messages Gyral sends you.
+useWhen: writing state, reducers and commands, subscriptions for long-lived work, or handling framework messages
 section: Guides
 order: 3
 ---

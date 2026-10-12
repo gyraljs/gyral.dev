@@ -75,6 +75,14 @@ export function llmsProblems(
     )
   )
     problems.push('/llms.txt: llms-small.txt must be the first entry');
+  // Every entry says when to read it (front matter `useWhen`), so an agent can pick pages
+  // without opening them.
+  for (const entry of files.llmsTxt.split('\n').filter((l) => l.startsWith('- ['))) {
+    if (!/\]\([^)]+\): Use when /.test(entry))
+      problems.push(
+        `/llms.txt entry has no "Use when": ${entry.slice(0, 80)} (add useWhen to its front matter)`,
+      );
+  }
   for (const url of siteLinks(files.llmsTxt)) {
     const path = url.slice(ORIGIN.length);
     const file = path.endsWith('/') ? `${path}index.html` : path;

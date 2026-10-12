@@ -1,6 +1,7 @@
 ---
 title: Components
 description: How define() turns a spec into a custom element, and how components pass data to each other with props and outputs.
+useWhen: defining a component: the spec fields, props, child components, outputs and escape hatches
 section: Guides
 order: 1
 ---

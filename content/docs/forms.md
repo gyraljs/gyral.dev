@@ -3,6 +3,7 @@ title: Forms
 description: Validate with the browser's own checks and your messages, or with one Standard Schema for client and server. Forms work with or without JavaScript.
 section: Guides
 order: 6
+useWhen: building a form with validation and error messages, with no extra packages or with one schema shared by client and server; posting a form; file uploads
 ---
 
 # Forms

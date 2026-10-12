@@ -3,6 +3,7 @@ title: Recipes
 description: Complete components to copy, with their tests. A todo list with filters, a signup form with native validation, and fixes for common bugs.
 section: Start here
 order: 2
+useWhen: building a list with add, toggle, delete and filters, or a form with validation and custom error messages; you want a complete, tested component to start from
 ---
 
 # Recipes

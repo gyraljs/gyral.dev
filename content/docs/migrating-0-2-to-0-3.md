@@ -1,6 +1,7 @@
 ---
 title: Migrating from 0.2 to 0.3
 description: Move a Gyral 0.2 app to 0.3 and its own view layer - dependencies, imports, props, lists, form state, tests and server rendering, step by step.
+useWhen: upgrading an app from Gyral 0.2, which rendered with Lit, to 0.3
 section: Reference
 order: 4
 ---

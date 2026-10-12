@@ -1,6 +1,7 @@
 ---
 title: Gyral documentation
 description: Learn Gyral, the Model-View-Intent framework for web components: guides, concepts and reference.
+useWhen: you want the map of the docs and where to start
 section: Start here
 order: 0
 ---

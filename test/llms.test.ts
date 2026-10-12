@@ -94,9 +94,12 @@ describe('Markdown for agents', () => {
       '### Toggling an item in a filtered list changes the wrong item',
     );
     expect(files.llmsSmall).not.toContain('<!-- include:');
+    expect(files.llmsTxt).toContain(
+      '[Forms](https://gyral.dev/docs/forms/index.md): Use when building a form with validation',
+    );
   });
 
-  it('flags an oversized pack and a pack that is not first', () => {
+  it('flags a missing "Use when", an oversized pack and a pack that is not first', () => {
     const files: LlmsFiles = {
       twins: [],
       llmsTxt: '# Gyral\n\n## Docs\n\n- [A](https://gyral.dev/a.md): no use case\n',
@@ -106,6 +109,7 @@ describe('Markdown for agents', () => {
     expect(llmsProblems(files, [], () => true)).toEqual([
       `/llms-small.txt is ${String(LLMS_SMALL_MAX + 10)} bytes, over the ${String(LLMS_SMALL_MAX)}-byte limit: shorten content/llms-small.md or what it includes`,
       '/llms.txt: llms-small.txt must be the first entry',
+      '/llms.txt entry has no "Use when": - [A](https://gyral.dev/a.md): no use case (add useWhen to its front matter)',
     ]);
   });
 });

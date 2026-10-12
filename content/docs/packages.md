@@ -1,6 +1,7 @@
 ---
 title: Packages
 description: Every @gyral package, what it's for, how to install it, and the optional build tools Gyral works with.
+useWhen: choosing which @gyral package to install, checking sizes, or reading known issues
 section: Reference
 order: 1
 ---

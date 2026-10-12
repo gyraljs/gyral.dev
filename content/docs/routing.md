@@ -1,6 +1,7 @@
 ---
 title: Routing
 description: Typed route tables that work on the server and in the browser, navigation as commands, and the current URL streamed into your model.
+useWhen: adding URLs and navigation, links, route tables and page heads
 section: Guides
 order: 10
 ---

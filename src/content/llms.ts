@@ -24,6 +24,8 @@ export interface Twin {
   readonly path: string;
   readonly title: string;
   readonly description: string;
+  /** When to read the page, for its llms.txt entry: `building a form with validation`. */
+  readonly useWhen?: string;
   readonly markdown: string;
 }
 
@@ -76,6 +78,7 @@ const docTwin = (doc: DocPage): Twin => {
     path: twinPath(doc.path),
     title,
     description: doc.description,
+    ...(doc.useWhen === undefined ? {} : { useWhen: doc.useWhen }),
     markdown: document(title, doc.description, doc.path, doc.markdown),
   };
 };
@@ -85,6 +88,7 @@ const postTwin = (post: Post): Twin => ({
   path: twinPath(post.path),
   title: post.title,
   description: post.description,
+  ...(post.useWhen === undefined ? {} : { useWhen: post.useWhen }),
   markdown: document(
     post.title,
     post.description,
@@ -103,6 +107,7 @@ const blogIndexTwin = (posts: readonly Post[]): Twin => {
     path: twinPath('/blog/'),
     title: 'Gyral blog',
     description,
+    useWhen: 'you want release news, or the reasons behind a design decision',
     markdown: document('Gyral blog', description, '/blog/', body),
   };
 };
@@ -140,6 +145,8 @@ async function examplesTwin(root: URL): Promise<Twin> {
     path: twinPath('/examples/'),
     title: 'Gyral examples',
     description,
+    useWhen:
+      'you want a working app to read or adapt: forms, HTTP, routing, shared state, animation or server rendering',
     markdown: document('Gyral examples', description, '/examples/', parts.join('\n')),
   };
 }
@@ -169,12 +176,14 @@ async function demosTwin(): Promise<Twin> {
     path: twinPath(page),
     title: 'What you can build with Gyral',
     description,
+    useWhen: 'deciding whether Gyral fits a project, or explaining what it makes easy; no code',
     markdown: document('What you can build with Gyral', description, page, parts.join('\n')),
   };
 }
 
+/** One llms.txt entry: when to read the page, then what it says. */
 const link = (twin: Twin): string =>
-  `- [${twin.title}](${absolute(twin.path)}): ${twin.description}`;
+  `- [${twin.title}](${absolute(twin.path)}): ${twin.useWhen === undefined ? '' : `Use when ${twin.useWhen}. `}${twin.description}`;
 
 /** `/llms.txt`, in the llmstxt.org format. */
 export function llmsTxt(
@@ -206,8 +215,8 @@ ${examples.map(link).join('\n')}
 ## Optional
 
 ${optional.map(link).join('\n')}
-- [Brand and press](${absolute('/brand/')}): logos, colours and trademark guidelines (HTML).
-- [Source code](${LINKS.github}): the Gyral repository on GitHub.
+- [Brand and press](${absolute('/brand/')}): Use when you need a Gyral logo, its colours or the trademark rules. Logos, colours and trademark guidelines (HTML).
+- [Source code](${LINKS.github}): Use when you need Gyral's own source, its examples or its issue tracker. The Gyral repository on GitHub.
 `;
 }
 

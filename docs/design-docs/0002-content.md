@@ -122,3 +122,25 @@ exist exactly as the package prints them.
 - `test/errors.test.ts` fails when the package has a code without an explanation (or the site
   explains a code that no longer exists), when a code has no anchor on the rendered page, and
   when the package's `ERRORS_URL` stops pointing at this page.
+
+## Addendum: recipes and the agent pack (gyral-7se.22–25, 2026-10-12)
+
+An agent pilot showed that docs need task-sized, complete examples, and a short file an agent
+reads before it writes code.
+
+- **Recipes** (`/docs/recipes/`, Start here) are whole components with their tests: a todo list
+  with filters and a signup form with native validation, plus troubleshooting. Their code lives
+  in `content/recipes/*.ts.txt` (first line `// src/x.ts`) and pages pull it in with a line of its
+  own, `<!-- include: recipes/todo-app.ts.txt -->`; `<!-- include: docs/recipes.md#heading-id -->`
+  pulls in a page's section (`src/content/includes.ts`). The Forms page shows the signup form
+  from the same file. Recipes need nothing beyond a `basic` create-gyral app (no schema library,
+  no `@gyral/http`). `check-snippets` typechecks them, and `pnpm recipes`
+  (`scripts/check-recipes.mjs`, in `pnpm check`) runs their tests in Chromium and drives the built
+  components with a real keyboard and mouse.
+- **`/llms-small.txt`** is `content/llms-small.md` with its includes expanded: the mental model,
+  MUST and DO NOT rules, one complete component, the recipes and a typechecked import map. The
+  build fails over 40,000 bytes (`LLMS_SMALL_MAX`) and when it isn't the first entry of
+  `llms.txt`; its own code blocks are typechecked like a docs page's.
+- **"Use when"**: every `llms.txt` entry starts with when to read the page, from front matter
+  `useWhen` (docs pages and blog posts) or from code (generated pages, examples). The build fails
+  on an entry without one.

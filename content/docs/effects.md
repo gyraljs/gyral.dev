@@ -1,6 +1,7 @@
 ---
 title: Effects and drivers
 description: Reducers return commands, side effects described as data. Drivers run them, with built-in concurrency, retries and cancellation, and answer with messages.
+useWhen: doing anything outside the model: HTTP, timers, randomness, the clipboard, your own driver, concurrency and retries
 section: Guides
 order: 7
 ---

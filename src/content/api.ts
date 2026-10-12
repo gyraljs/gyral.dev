@@ -278,6 +278,7 @@ export function loadApiPages(): Promise<readonly DocPage[]> {
           path: `/docs/api/${pkg.name}/`,
           title: pkg.json.name,
           description: pkg.json.description,
+          useWhen: `you need the exact signature, options or doc comment of an ${pkg.json.name} export`,
           section: 'Reference',
           order: 10 + index,
           draft: false,
