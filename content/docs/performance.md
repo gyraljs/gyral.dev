@@ -1,6 +1,7 @@
 ---
 title: Performance
 description: Measure Gyral's production payload, rendering work and hydration cost, then use keyed rows, structural sharing and islands where they help.
+useWhen: making a long list, a frequent update or a large page fast
 section: Guides
 order: 23
 ---
@@ -58,10 +59,13 @@ whole page, including their loader and preload overhead. See
 
 ## Reproduce a speed claim
 
-The 2026-10-06 renderer comparison ran 0.2.0 and the 0.3 candidate in the same calibrated
-session. Its [raw data and notes](https://github.com/gyraljs/benchmarks/tree/main/results/2026-10-06-gyral-0.3-final)
-describe the machines, versions and variation. That comparison is not a measurement of every
-later 0.3.1 feature or your application.
+The latest [Gyral benchmarks](https://github.com/gyraljs/benchmarks) run, on 2026-10-12,
+measured 0.3.1 and 0.3.0 from npm against current React, Preact, Vue, Svelte, Solid and Lit
+builds of the same six client-rendered apps. Its
+[raw data and notes](https://github.com/gyraljs/benchmarks/tree/main/results/2026-10-12-full)
+describe the machine, versions and variation, including that the machine was busy during that
+run, so compare frameworks within the run only. It measures small apps in one browser; it is
+not a measurement of server rendering or your application.
 
 For your page, record network payloads and a browser performance trace for the action users
 care about. Separate script, layout, paint and frame wait; fewer reducer milliseconds need
