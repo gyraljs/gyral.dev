@@ -239,7 +239,7 @@ How far each one is tested today:
 
 Run the networked `pnpm verify:platforms` in the framework repository to reproduce the Deno
 and workerd checks. The
-[spike report](https://github.com/gyraljs/gyral/blob/v0.3.1/docs/references/platform-spikes-2026-10-11.md)
+[spike report](https://github.com/gyraljs/gyral/blob/v0.3.2/docs/references/platform-spikes-2026-10-11.md)
 describes the tested boundary.
 
 ## Cache headers

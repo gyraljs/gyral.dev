@@ -81,6 +81,17 @@ export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
         shows: [['Writing a driver', '/docs/effects/#writing-a-driver']],
         file: 'src/chart-driver.ts',
       },
+      {
+        slug: 'workload-lab',
+        title: 'Workload lab',
+        summary:
+          'Heavier work under the same rules: a module worker behind a driver that a subscription starts and cancels, timed steps, a booking form with retries, and a canvas grid with pointer capture.',
+        shows: [
+          ['Subscriptions', '/docs/update/#subscriptions'],
+          ['Writing a driver', '/docs/effects/#writing-a-driver'],
+        ],
+        file: 'src/solver.ts',
+      },
     ],
   },
   {

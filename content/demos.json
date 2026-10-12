@@ -6,12 +6,12 @@
       "main": {
         "width": 664,
         "height": 720,
-        "webm": "/demos/undo-replay.6c29d8d7.webm",
-        "mp4": "/demos/undo-replay.6c29d8d7.mp4",
-        "poster": "/demos/undo-replay.6c29d8d7.webp",
+        "webm": "/demos/undo-replay.cd83ae77.webm",
+        "mp4": "/demos/undo-replay.cd83ae77.mp4",
+        "poster": "/demos/undo-replay.cd83ae77.webp",
         "bytes": {
-          "webm": 218817,
-          "mp4": 139584,
+          "webm": 231903,
+          "mp4": 146202,
           "poster": 27204
         }
       }
@@ -24,12 +24,12 @@
       "main": {
         "width": 1008,
         "height": 688,
-        "webm": "/demos/typeahead-race.a3d82de6.webm",
-        "mp4": "/demos/typeahead-race.a3d82de6.mp4",
-        "poster": "/demos/typeahead-race.a3d82de6.webp",
+        "webm": "/demos/typeahead-race.61b1fb62.webm",
+        "mp4": "/demos/typeahead-race.61b1fb62.mp4",
+        "poster": "/demos/typeahead-race.61b1fb62.webp",
         "bytes": {
-          "webm": 246791,
-          "mp4": 190140,
+          "webm": 250424,
+          "mp4": 208742,
           "poster": 40230
         }
       }
@@ -42,24 +42,24 @@
       "js-off": {
         "width": 552,
         "height": 680,
-        "webm": "/demos/no-js-first-js-off.3bffbbba.webm",
-        "mp4": "/demos/no-js-first-js-off.3bffbbba.mp4",
-        "poster": "/demos/no-js-first-js-off.3bffbbba.webp",
+        "webm": "/demos/no-js-first-js-off.a62d6c7c.webm",
+        "mp4": "/demos/no-js-first-js-off.a62d6c7c.mp4",
+        "poster": "/demos/no-js-first-js-off.a62d6c7c.webp",
         "bytes": {
-          "webm": 73706,
-          "mp4": 44836,
+          "webm": 114236,
+          "mp4": 62614,
           "poster": 17212
         }
       },
       "js-on": {
         "width": 552,
         "height": 680,
-        "webm": "/demos/no-js-first-js-on.7f42258c.webm",
-        "mp4": "/demos/no-js-first-js-on.7f42258c.mp4",
-        "poster": "/demos/no-js-first-js-on.7f42258c.webp",
+        "webm": "/demos/no-js-first-js-on.4da9f8c4.webm",
+        "mp4": "/demos/no-js-first-js-on.4da9f8c4.mp4",
+        "poster": "/demos/no-js-first-js-on.4da9f8c4.webp",
         "bytes": {
-          "webm": 68476,
-          "mp4": 37213,
+          "webm": 76363,
+          "mp4": 42843,
           "poster": 19234
         }
       }

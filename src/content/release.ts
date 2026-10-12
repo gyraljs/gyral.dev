@@ -7,12 +7,12 @@ import { fileURLToPath } from 'node:url';
 
 const NODE_MODULES = fileURLToPath(new URL('../../node_modules/', import.meta.url));
 
-/** `0.3.1`. */
+/** `0.3.2`. */
 export const GYRAL_VERSION = (
   JSON.parse(
     readFileSync(join(realpathSync(join(NODE_MODULES, '@gyral', 'core')), 'package.json'), 'utf8'),
   ) as { readonly version: string }
 ).version;
 
-/** `v0.3.1`, the release's tag in gyraljs/gyral. */
+/** `v0.3.2`, the release's tag in gyraljs/gyral. */
 export const GYRAL_TAG = `v${GYRAL_VERSION}`;

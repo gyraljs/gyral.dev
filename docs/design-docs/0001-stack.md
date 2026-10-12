@@ -67,3 +67,12 @@ npm. `sync:examples` and `sync:demos` therefore read `examples/` from the checko
 installed `@gyral/core` (`v0.3.1`), extracted with `git archive` (`scripts/lib/gyral-source.mjs`;
 `GYRAL_REF` overrides it). Recordings still come from the checkout's untracked `.demos/`, so
 `--record` warns when the checkout is not on that tag.
+
+## Addendum: Gyral 0.3.2 release (2026-10-12)
+
+The site pins every `@gyral/*` dependency to exactly `0.3.2` from the registry, with no
+overrides. 0.3.2 only adds to 0.3.1's API, so no site code changed; the client chunks built
+byte for byte the same. The examples sync reads `v0.3.2`, which adds the workload-lab example
+to the gallery. The docs cover `viewOf`, the build-time style manifest, `chunkModules`, the
+helper types, the coverage fix and the MCP server (/docs/coding-agents/, hosted at
+`https://mcp.gyral.dev/mcp`), and /docs/upgrading-0-3-1-to-0-3-2/ announces the release.
