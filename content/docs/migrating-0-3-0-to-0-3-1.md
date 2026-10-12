@@ -50,6 +50,10 @@ periodic(1000, (ticks) => msg)                 →  every(1000, (now) => msg)
 ```
 
 - **`periodic` is replaced by `every`**, which sends `Date.now()` at once and then every `ms`.
+  The value changes meaning: `periodic` passed a tick count, `every` passes a timestamp, so
+  arithmetic written for ticks still compiles and gives the wrong answer. Count messages
+  yourself (`count + 1` per message) or measure elapsed time (`now - startedAt`), and expect
+  the first message immediately rather than after one interval.
 - **A component attached again after a real removal starts its subscriptions again** on its
   own. Commands started from `init` or a reducer are not restarted, so move watches, clocks and
   `listen` into `subscriptions`.
