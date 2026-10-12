@@ -1,6 +1,6 @@
 ---
 title: Versioning and stability
-description: Understand Gyral's 0.x API policy, package versions, migration guides, internal entry points and the difference between releases and tester tarballs.
+description: Understand Gyral's 0.x API policy, package versions, migration guides and internal entry points.
 section: Reference
 order: 4
 ---
@@ -16,19 +16,18 @@ dependency update.
 Use documented public package entries. Entries containing `/internal` are for Gyral's own
 packages and have no stability promise. A symbol being technically exported does not make
 an internal entry an application API. The
-[0.3.1 export inventory](https://github.com/gyraljs/gyral/blob/next/docs/references/public-api-0.3.1.md)
+[0.3.1 export inventory](https://github.com/gyraljs/gyral/blob/v0.3.1/docs/references/public-api-0.3.1.md)
 records the public boundary.
 
-The `@gyral/*` packages release together at a shared version. Keep core, router, HTTP, time,
-testing, devtools and SSR aligned; verify your lockfile when a package manager resolves
-multiple versions. The [package guide](/docs/packages/) explains what each app needs.
+The `@gyral/*` packages and `create-gyral` release together at a shared version. Keep core, router,
+HTTP, time, testing, devtools, SSR and MCP aligned; verify your lockfile when a package manager
+resolves multiple versions. The [package guide](/docs/packages/) explains what each app needs.
 
-## Releases and tester builds
+## Releases
 
-These guides describe **0.3.1**. Public installation instructions use released npm packages;
-check that your chosen version is available on the registry before upgrading. Internal tester
-builds may carry a `-next` suffix without a corresponding npm prerelease. They are for
-release verification and are outside the public installation path.
+These guides describe **0.3.1**, the `latest` version on npm. Every package is published
+from GitHub Actions with npm provenance; install from the registry. Today npm has releases
+only, under the `latest` tag.
 
 For a released application, pin the registry version you verified and retain the lockfile.
 Deploy server output and client assets from the same build: stale HTML with new component

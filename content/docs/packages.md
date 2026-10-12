@@ -7,9 +7,10 @@ order: 1
 
 # Packages
 
-Gyral is a set of small packages under the `@gyral` scope on npm. Every app needs `@gyral/core`;
-add the others when you need them. All packages are released together with the same version
-number, are ES modules with TypeScript types, and are published from GitHub Actions with
+Gyral is a set of small packages under the `@gyral` scope on npm, plus `create-gyral`, which
+sets up a new app. Every app needs `@gyral/core`; add the others when you need them. All nine
+packages are released together with the same version number (0.3.1), are ES modules with
+TypeScript types, and are published from GitHub Actions with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
 ## Core
@@ -36,12 +37,29 @@ Apps that do not import them carry no storage driver code.
 | `@gyral/ssr`      | Server rendering: `renderPage`, `renderToString`, `contentSecurityPolicy`, `styleHashes`, `formAction`. `@gyral/ssr/static` prerenders and serves builds, `@gyral/ssr/node` mounts a fetch handler on Node's `http` and runs the development server. |
 | `@gyral/testing`  | `step`, `run`, `subscriptionsFor`, `outputsIn`, `mount`, `parse`, fake drivers, virtual time, `mountSsr` and `hydrated`. `@gyral/testing/vitest` renders server markup for browser tests.                                                            |
 | `@gyral/devtools` | The in-page devtools panel, for development builds.                                                                                                                                                                                                  |
+| `@gyral/mcp`      | An MCP server for coding agents: it searches these docs, looks up exact API signatures, reads the examples, scaffolds components and typechecks snippets against your project.                                                                       |
 
 ```sh
 npm install @gyral/http @gyral/router @gyral/time
 npm install @gyral/ssr
 npm install -D @gyral/testing @gyral/devtools
 ```
+
+The same `@gyral/http` installation includes optional `@gyral/http/sse` and
+`@gyral/http/websocket` entries for [native network streams](/docs/network-streams/).
+The fetch entry does not include those transports.
+
+`@gyral/mcp` is a stdio server your agent starts with `npx -y @gyral/mcp`, from your project
+directory. It answers from the docs, API and examples of its own version, bundled at build time,
+so it works offline. Its
+[README](https://github.com/gyraljs/gyral/blob/v0.3.1/packages/mcp/README.md) has the setup for
+Claude Code, Cursor, VS Code and Codex.
+
+## create-gyral
+
+`npm create gyral@latest` asks for a directory and a template, `basic` (client-rendered) or
+`ssr` (server-rendered and hydrated), and writes an app that depends on the matching `@gyral/*`
+release. [Getting started](/docs/getting-started/#create-a-project) walks through it.
 
 ## Optional peer dependencies
 
@@ -51,7 +69,9 @@ into are optional peer dependencies: install the ones you use.
 | Package          | Optional peers                                                                            |
 | ---------------- | ----------------------------------------------------------------------------------------- |
 | `@gyral/core`    | `vite` ^8 (preset and compiler), `eslint` 9 or 10 (the plugin), `parse5` (compiler check) |
+| `@gyral/ssr`     | `vite` ^8 (the development server in `@gyral/ssr/node`)                                   |
 | `@gyral/testing` | `vitest` ^4.1 or ^5 (only for `@gyral/testing/vitest`)                                    |
+| `@gyral/mcp`     | `typescript` 5 or later (for `check_snippet`; it uses your project's compiler)            |
 
 Validation in `@gyral/core`, `@gyral/http` and `@gyral/ssr` accepts any
 [Standard Schema](https://standardschema.dev) library; Gyral depends only on its types.
@@ -63,10 +83,6 @@ including ones built with Lit; install that library yourself if you use it. Upgr
 [from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
 
 ## The Vite preset
-
-The same `@gyral/http` installation includes optional `@gyral/http/sse` and
-`@gyral/http/websocket` entries for [native network streams](/docs/network-streams/).
-The fetch entry does not include those transports.
 
 `gyralVitePreset()` from `@gyral/core/vite` holds the settings every Gyral app needs:
 
@@ -80,12 +96,12 @@ export default defineConfig({
 });
 ```
 
-- **`plugins`**: the template compiler, a template-locations plugin and a dev-server plugin. In
-  `vite build` the compiler checks every `html` and `svg` template, dependencies included, fails
-  the build with a code frame on a rule violation, and replaces each template with a precompiled
-  object, so the bundle doesn't carry the runtime template preparer. The dev server and Vitest
-  keep the runtime path, which checks the same rules on first render; there the
-  template-locations plugin tells the runtime where each template is written, so its errors and
+- **`plugins`**: the template compiler, a template-locations plugin, a dev-server plugin and the
+  element-typings plugin. In `vite build` the compiler checks every `html` and `svg` template,
+  dependencies included, fails the build with a code frame on a rule violation, and replaces each
+  template with a precompiled object, so the bundle doesn't carry the runtime template preparer. The
+  dev server and Vitest keep the runtime path, which checks the same rules on first render; there
+  the template-locations plugin tells the runtime where each template is written, so its errors and
   hydration mismatches name your file, line and column. With `parse5` installed, the build also
   compares each template with a full HTML parser's result. The dev-server plugin makes Vite, not
   Node, load `@gyral/*` (and your dependencies that use them) in server code under `vite dev`, so
@@ -95,6 +111,11 @@ export default defineConfig({
   browser test run and reloads the page, list it: `gyralVitePreset({ optimize: ['some-dep'] })`.
 - **`clientOnly: true`**, for apps no server renders, leaves the hydration code out of the
   browser bundle. See [Client-only builds](/docs/rendering-modes/#client-only-builds).
+- **`components: true`** loads each component's module once its tag is on the page, so pages
+  need no client entry. See
+  [Code splitting](/docs/code-splitting/#load-components-by-whats-on-the-page).
+- **`types`**: the preset writes [element typings](/docs/components/#anatomy-of-define) to
+  `.gyral/elements.d.ts` by scanning `src`; `types: false` turns that off.
 
 Import `html` from `@gyral/core` wherever you write templates. The compiler follows that import,
 and refuses an alias (`const h = html`) it can't follow. For Vitest browser tests, spread the
@@ -130,13 +151,16 @@ Measured on Gyral's examples (KiB gzip, production builds with the preset):
 
 | App                      | 0.2.0 | 0.3.1: first load | 0.3.1: all chunks |
 | ------------------------ | ----- | ----------------- | ----------------- |
-| hello-world              | 12.2  | 9.3               | 11.7              |
-| hello-world, client-only | —     | 8.2               | 8.2               |
-| isomorphic (SSR)         | 17.3  | 14.5              | 17.5              |
-| no-js-first (SSR, forms) | 18.7  | 16.6              | 19.2              |
+| hello-world              | 12.2  | 9.5               | 12.0              |
+| hello-world, client-only | —     | 8.5               | 8.5               |
+| isomorphic (SSR)         | 17.3  | 15.3              | 18.3              |
+| no-js-first (SSR, forms) | 18.7  | 19.8              | 19.9              |
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any
-lazy `import()`. On 0.3.0 the same first loads were 8.9, 12.9 and 16.6 KiB. 0.3.1 leaves out
+lazy `import()`. On 0.3.0 the same first loads were 8.9, 12.9 and 16.6 KiB. The no-js-first example now
+loads its components [by what's on the page](/docs/code-splitting/#load-components-by-whats-on-the-page),
+so its first load counts what a page with every component preloads, the hydration chunk
+included; 0.3.0 counted that chunk as lazy. 0.3.1 leaves out
 view transitions, the frame lane and custom states unless a module names their spec field (the
 build reads your code and the packages that depend on Gyral; see [what the build
 reads](/docs/rendering-modes/#what-the-build-reads)), and its production builds print short
@@ -158,7 +182,9 @@ feature-detected and used as enhancements.
 - **Some markup isn't handled yet by the template checks**: `<select>` content under the new
   customizable-select parsing, CDATA in SVG, and `<noscript>` as raw text. Keep these out of
   templates, or put them in `raw()` on the server.
-- **Deno and Cloudflare Workers are not tested yet** for server rendering (see
+- **Deno and Cloudflare Workers have only had a spot check** for server rendering: a
+  `renderPage` bundle ran on Deno and in a local Workers runtime, but adapters, deployed edge
+  behavior, bindings and assets aren't tested (see
   [Deploying](/docs/deploying/#bun-deno-and-cloudflare-workers)).
 - **Without a preload hint, the hydration chunk loads one round trip after the entry** on
   server-rendered pages. Pass `clientAssetsFromManifest()`'s `modulepreload` to `renderPage` (see

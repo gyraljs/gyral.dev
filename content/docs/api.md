@@ -22,6 +22,9 @@ from the code.
 | [`@gyral/testing`](/docs/api/testing/)   | `step`, `run`, `mount`, `parse`, fake drivers, virtual time, `mountSsr`        |
 | [`@gyral/devtools`](/docs/api/devtools/) | `mountDevtools` and the panel                                                  |
 
+`@gyral/mcp` (an MCP server for coding agents) and `create-gyral` (the app scaffolder) aren't
+in this reference; [Packages](/docs/packages/) describes them.
+
 ## Reading the reference
 
 - **Types are the contract.** A component is `define<State, Msg, Props, Output>()(tag, spec)`;
