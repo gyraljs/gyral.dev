@@ -28,13 +28,13 @@ const i = intents<Msg>()                →  const i = intentsOf<typeof Todos>()
 - **List rows** that name intents through the module constant need a return type,
   `(t: Todo): TemplateResult =>`, and the view uses its own `i` parameter, so the row and the
   component don't infer each other's types ([Lists](/docs/views/#lists)).
-- **`IntentName<…>` and `Messages<M>` are gone.** Remove `IntentName<…>` from your message union
-  and keep the parsers: every key of `intent` is an intent name, and a key that isn't a message
-  tag may return any message ([Intent names that aren't messages](/docs/intent/#intent-names-that-arent-messages)).
-  Type helpers that built messages with `Msg` instead of `Messages<Msg>`.
+- **Every key of `intent` is an intent name**, and a key that isn't a message tag may return any
+  message ([Intent names that aren't messages](/docs/intent/#intent-names-that-arent-messages)).
 - **A view that names a tag with no parser** no longer compiles: the view's `i` offers only the
   keys of `intent`. Add the parser.
 - **`IntentNames` takes the names** (`IntentNames<'Save' | 'Cancel'>`), not the message union.
+- **`GyralElementClass` has a fifth type parameter**, the intent names (default `string`). Code
+  that spells out every type parameter can pass them to keep `intentsOf` precise.
 
 ## Long-running work goes in `subscriptions`
 
@@ -50,8 +50,9 @@ periodic(1000, (ticks) => msg)                 →  every(1000, (now) => msg)
 ```
 
 - **`periodic` is replaced by `every`**, which sends `Date.now()` at once and then every `ms`.
-- **The `Connected` message from the prereleases is gone.** A component attached again after a
-  real removal starts its subscriptions again on its own.
+- **A component attached again after a real removal starts its subscriptions again** on its
+  own. Commands started from `init` or a reducer are not restarted, so move watches, clocks and
+  `listen` into `subscriptions`.
 
 ## Drivers: one override rule
 
@@ -72,7 +73,8 @@ undefined })` becomes `command(log, line)`.
 
 - **`page()` and `renderToStream()` are gone**: `renderPage(options)` takes the same options;
   for a string, `await renderPage(options).text()`.
-- **`@gyral/core/server` is internal.** `renderToString` and `styleHashes` come from
+- **`@gyral/core/server` is internal** (now `@gyral/core/internal/server`, with no semver
+  promise). `renderToString` and `styleHashes` come from
   `@gyral/ssr`.
 - **`clientAssets` and `clientEntryFromManifest`** are folded into
   `clientAssetsFromManifest(path, entry)` (`.entry` is the entry's URL). `cacheHeaders` and
@@ -81,28 +83,49 @@ undefined })` becomes `command(log, line)`.
   `renderPage({ components })` replaces a client entry that imports every island and per-page
   flags ([Loading components](/docs/server-rendering/#loading-components-in-the-browser)).
   `gyralDevServer()` from `@gyral/ssr/node` replaces a hand-written development server.
+  The loader also finds tags rendered inside its components' shadow roots, and
+  `await componentsReady()` from `@gyral/core` waits until every rendered component is defined
+  and the page has settled, for tests and page scripts.
 - **`productionServer` hands `createApp` `components`**, and `clientEntry` may be `undefined`
   when a build has no entry of its own.
+- **`ClientAssets` has a required `css` field**, the hashed stylesheets. Code that builds one by
+  hand adds `css: []`.
+- **`productionServer` answers 405** to methods other than `GET` and `HEAD` under `/assets/`; move
+  any other routes there elsewhere. Its `fetch` passes its second argument on to the app, and
+  `FetchApp` takes an `Env` type parameter (default `unknown`).
+- **Gyral has no request layer of its own**: a fetch router such as Hono owns routing,
+  middleware, cookies and error pages ([The request layer](/docs/server-rendering/#the-request-layer)).
+  0.3.1 fixes the seams instead: `formAction`'s `invalid` is optional (every rejection is then
+  the JSON 422), `wantsJson` is exported, and `productionServer({ onResponse })` sees every
+  response. Delete copies of `wantsJson`, `invalid` handlers that only answer JSON, and wrappers
+  around `productionServer.fetch` that add headers.
 
 ## Forms
 
-- **Secret fields are never echoed.** Fields named like `password`, and any listed in
-  `defineForm(schema, { secret: [...] })`, are left out of `IntentRejected.values` and of the
-  re-filled form. Delete hand-written redaction; list card numbers and similar fields in
-  `secret` ([Forms](/docs/forms/#one-schema-for-both-sides)).
-- **`validateForm(definition, …)` and `formValues(definition, …)` are methods**:
-  `definition.validate(data)` and `definition.values(data)`.
-- **`redirectedTo` moved to `@gyral/http`**, next to `submitForm`.
+- **Secret fields are never echoed.** Fields whose name contains `password`, `passcode`, `csrf`
+  or `xsrf`, and any listed in `defineForm(schema, { secret: [...] })`, are left out of
+  `IntentRejected.values` and `definition.values()`, so the re-filled form never shows them.
+  Delete hand-written redaction; list card numbers and similar fields in `secret`
+  ([Forms](/docs/forms/#one-schema-for-both-sides)).
+- **`validateForm(definition, intent, data)` is a method**: `definition.validate(data, intent)`.
+  `definition.values(data)` gives the submitted values without secrets.
+- **`redirectedTo` and `FormRedirected` moved to `@gyral/http`**, next to `submitForm`.
 
 ## Views, hooks and outputs
 
 - **Boolean attributes need `?`.** `selected=${bool}`, `checked=${…}`, `disabled=${…}` and the
   rest of HTML's boolean attributes are template errors; write `?selected=${bool}`.
+- **`modal` and `popover-open` are bound with `?`.** `?modal=${open}` on a `<dialog>` and
+  `?popover-open=${open}` on a `[popover]` element open and close it
+  ([Dialogs and popovers](/docs/views/#dialogs-and-popovers)); either attribute written any other
+  way is a template error. Replace hooks that called `showModal()` or `showPopover()`.
+- **A hand-written `Prop`** (not built with `prop.*`) needs `equals`, such as `equals: Object.is`.
 - **Hooks run after the whole render, children first**, so a parent hook sees its rendered
   children. `defineHook({ update: 'always' })` runs on every render.
 - **Outputs reach only the direct parent.** Once the parent's `child()` intent takes an output,
   it goes no further, and content slotted into a child belongs to the component that wrote it. A
-  parent that relied on a grandchild's outputs listens on the child instead.
+  parent that relied on a grandchild's outputs has the child re-emit them; code that isn't a
+  Gyral component listens for `OUTPUT_EVENT` on the child.
 - **`emit` is no longer exported**: `const emit = outputs<Out>()`.
 - **One-item lists that only re-create an element** can become `keyed(key, template)`.
 
@@ -113,6 +136,7 @@ undefined })` becomes `command(log, line)`.
 - **`readerOf`** is `parse(Component, intent, input, { props, state, stores })`.
 - **`testStore(store, initial)`** is `store.instance(initial)`, and **`sentTo(commands, store)`**
   is `inputsFor(commands, store)`.
+- **`resetDocumentStores`** moved from `@gyral/core` to `@gyral/testing`.
 - **`@gyral/testing/arbitraries` is gone**: write fast-check arbitraries for your messages
   directly.
 
@@ -120,14 +144,12 @@ undefined })` becomes `command(log, line)`.
 
 Each is a few lines of your own now; the docs show the recipe:
 
-- `random`, `randomInt`, `randomDriver`, `toInt`: a random driver ([Writing a driver](/docs/effects/#writing-a-driver)).
-- `capturePointer`: an element hook ([Press and hold](/docs/intent/#press-and-hold)).
+- `random`, `randomInt`, `randomDriver`, `toInt`, `RandomInput`: a random driver ([Writing a driver](/docs/effects/#writing-a-driver)).
 - `labelledBy`: name the form from a prop, or set `ariaLabelledByElements` in a hook.
 - `back`, `forward`, `go`: `command(router, { _tag: 'Traverse', delta: -1 })`.
-- `animationFrames`, and `@gyral/time/delay` (import `delay` and `debounce` from `@gyral/time`;
-  a delay-only app stays the same size).
+- `animationFrames`: `command(time, { _tag: 'Frames' }, …)`.
 - The `events` spec field: write `data-intent-<event>=${i.Name}`, which is always listened for.
-- `gyralTemplateCompiler` and `gyralClientOnly`: `gyralVitePreset({ compiler, clientOnly })`.
+- `gyralTemplateCompiler`: `gyralVitePreset({ compiler })`.
 
 ## The head model
 
@@ -140,24 +162,25 @@ The page's head is one `Head` value, used by the server and the router alike
   `snapshot().title` is `snapshot().head?.title`.
 - **`page({ head })` is `renderPage({ extraHead })`.** Move the description, canonical, robots,
   Open Graph meta (with `media` where needed), alternates and JSON-LD into the `Head` fields
-  `renderPage()` now takes; keep in `extraHead` only what the head model doesn't manage. Managed elements, the
-  description meta included, carry `data-gyral-head`, so tests that match their exact markup
-  change.
+  `renderPage()` now takes; keep in `extraHead` only what the head model doesn't manage.
+  Managed elements, the description meta included, carry `data-gyral-head`, so tests that match
+  their exact markup change.
 
 ## Retries and CSRF tokens
 
 Retries and CSRF tokens are now set where you choose the driver, so apps that don't use them
 don't bundle them ([Effects](/docs/effects/#retries)):
 
-- **`retry` is a wrapper.** The `retry` option of drivers, `subscription(…)`,
-  `makeHttpDriver(…)`, `fakeDriver(…)` and `fakeHttp(…)` is gone; wrap the driver instead:
+- **`retry` is a wrapper.** The `retry` option of drivers, `makeHttpDriver(…)`, `fakeDriver(…)`
+  and `fakeHttp(…)` is gone; wrap the driver instead:
   `retry(makeHttpDriver({ … }), { times: 2, delayMs: 300 })`. In tests, keep reading `calls`
   and `inputs` from the fake itself, not the wrapper.
 - **A CSRF token from a `<meta>` is a driver setting.** `request({ csrf: { meta } })` and
   `submitForm(…, { csrf: { meta } })` are gone. Configure it once:
   `provideDrivers(document.body, { http: makeHttpDriver({ headers: csrfFromMeta('csrf-token') }) })`.
   `submitForm(…, { csrf: { token } })` stays for a token the app already holds. Development
-  builds warn once when a `POST` goes out without the token while the page has the `<meta>`.
+  builds warn once when a request other than `GET` goes out without the token while the page
+  has the `<meta>`.
 - **`HttpError` has a timeout case.** `makeHttpDriver({ timeoutMs })` fails a slow attempt with
   `HttpTimeoutError`, so a `switch` over `HttpError` that handles every case needs a branch for
   it ([Retries](/docs/effects/#retries)).
@@ -177,7 +200,8 @@ reject:
 
 An `html` template whose top level is SVG-only content (a `<path>` without an `<svg>` around
 it) was already an error; its message now points to `svg`. Bound attribute names on SVG
-elements take the browser's spelling, so `viewbox=${v}` binds `viewBox`.
+elements take the browser's spelling, so `viewbox=${v}` binds `viewBox`. Whitespace with a
+newline at the inside edges of an `<svg>` is dropped.
 
 ## settled() waits until messages stop
 
@@ -259,7 +283,7 @@ and logs see:
   element hook that throws no longer skips the other hooks of that render; a failed
   `PropsChanged` is sent again with the next render.
 - **`Errored` is a framework message name**, like `PropsChanged`: rename an app message that
-  uses it. Devtools' `DevEvent` has a new `kind: 'error'`.
+  uses it. The devtools protocol's `DevEvent`, now internal, has a new `kind: 'error'`.
 - **On the server, a failing component no longer truncates the page.** It renders its `error`
   view (or nothing) and the rest of the page is sent; pass `onError: 'throw'` to `renderPage` to
   fail the whole page instead.
@@ -269,8 +293,8 @@ and logs see:
 ## Exports removed from the public API
 
 0.3.1 reviews every export before the API locks; the full list is in Gyral's
-`docs/references/public-api-0.3.1.md`. These are no longer exported, and `tsc` names any you
-used:
+[`docs/references/public-api-0.3.1.md`](https://github.com/gyraljs/gyral/blob/v0.3.1/docs/references/public-api-0.3.1.md).
+These are no longer exported, and `tsc` names any you used:
 
 - `@gyral/core`: `StoreRegistry` and `withStoreScope` (`renderPage({ stores })` uses them for you);
   the internals `headEntries`, `HEAD_ATTRIBUTE`, `HeadEntry`, `scriptSafeJson`, `STORE_SEND`,
@@ -299,6 +323,9 @@ These keep compiling but behave differently. Check each against your app and its
   sees the keys an input's own `keydown` intent declined. If the outer intent must not see them,
   have the inner parser return a message that changes nothing, or check `event.target` in the
   outer parser. Async parsers keep the event, as before.
+- **Every `data-intent-<x>` attribute is an intent for the event `x`**, except `data-intent-on`
+  ([One element, an intent per event](/docs/intent/#one-element-an-intent-per-event)). Rename
+  markup that used the `data-intent-` prefix for anything else.
 - **A prop that receives an equal value changes nothing.** No render and no `PropsChanged`:
   `prop.string`, `prop.number` and `prop.boolean` compare with `Object.is`, `prop.json` compares
   the `JSON.stringify` text, and `prop.value` compares with `Object.is` or its new `equals`
@@ -311,6 +338,10 @@ These keep compiling but behave differently. Check each against your app and its
   [inline styles](/docs/styling/#inline-styles-under-a-strict-csp)). Declarations the browser
   doesn't understand are dropped. Compare computed styles, or the value with its trailing
   semicolon.
+- **Template HTML and `raw()` markup go through a Trusted Types policy named `gyral`**
+  ([Trusted Types](/docs/server-rendering/#trusted-types)). If your Content Security Policy
+  lists the allowed policies (`trusted-types …`), add `gyral`; without it Gyral falls back to
+  plain strings, which works only while Trusted Types aren't enforced.
 - **Removing a component stops its commands one microtask later.** A component that is removed
   and inserted again in the same task (a keyed list reordering rows, `appendChild` of an
   attached element) is a move: its subscriptions, timers and requests keep running, where 0.3.0
@@ -324,6 +355,10 @@ These keep compiling but behave differently. Check each against your app and its
 
 ## Smaller changes tests may notice
 
+- **`href()` is strict.** It throws for an unknown route name, a missing required parameter,
+  an empty or dot-segment value and an invalid catch-all array (use `[]` for an empty one), and
+  writes non-ASCII literal segments percent-encoded (`/café` becomes `/caf%C3%A9`), so snapshots
+  of generated links may change.
 - **Empty segments never match**: `/users//7` no longer matches `/users/:id` in browsers
   without URLPattern, as it already didn't with it. Patterns the two matchers would read
   differently (`/v:id`, `:post-id`, a param named twice) throw.
@@ -350,16 +385,21 @@ mismatch keeps its sentence in production and ends with its code and link.
 
 The prereleases moved some APIs more than once. Where you used one, the released form is:
 
-- `defineDisposableHook` (next.1 to next.6): `defineHook({ client, dispose })`.
-- `IntentName<'…'>` (next.2, next.3): parser keys ([above](#define-takes-two-calls)).
-- `Connected` (next.5, next.6): [`subscriptions`](#long-running-work-goes-in-subscriptions).
-- `capturePointer` and `cssVars`: recipes.
+- `defineDisposableHook`: `defineHook({ client, dispose })`.
+- `IntentName<'…'>` and `Messages<M>`: parser keys ([above](#define-takes-two-calls)); type
+  helpers take `Msg`.
+- `Connected`: [`subscriptions`](#long-running-work-goes-in-subscriptions).
+- `capturePointer` and `cssVars`: recipes ([Press and hold](/docs/intent/#press-and-hold),
+  [Custom properties](/docs/views/#custom-properties)).
+- `formValues(definition, data)`: `definition.values(data)`.
+- `@gyral/time/delay` and `makeDelayTime`: import `delay` and `debounce` from `@gyral/time` (a
+  delay-only app stays the same size).
+- `gyralClientOnly`: `gyralVitePreset({ clientOnly: true })`.
 
-The first prerelease (0.3.1-next.0) also scanned the text of every dependency for spec fields
-and `raw(`, so a word in an unrelated package's comments could keep custom states or the
-invoker fallback. Later builds [read less](/docs/rendering-modes/#what-the-build-reads): if a
-package of yours writes spec fields but doesn't depend on Gyral, give it `@gyral/core` as a peer
-dependency.
+Early prereleases also scanned the text of every dependency for spec fields and `raw(`, so a
+word in an unrelated package's comments could keep custom states or the invoker fallback. Later
+builds [read less](/docs/rendering-modes/#what-the-build-reads): if a package of yours writes
+spec fields but doesn't depend on Gyral, give it `@gyral/core` as a peer dependency.
 
 ## Small cleanups
 
@@ -390,8 +430,9 @@ dependency.
   `call(selector, method)` for [methods on elements](/docs/views/#calling-a-method-on-an-element).
 - Errors: [one channel](/docs/error-handling/) with a `GyralError` per failure, parent
   boundaries through a cancelable `error` event, a component's `error` view and `Errored`
-  reducer, isolated failures on the server with `renderPage({ onError })`, and
-  `collectErrors()` for tests.
+  reducer, isolated failures on the server with `renderPage({ onError })`,
+  `collectErrors()` for tests, and the error table as
+  [`@gyral/core/errors.json`](/docs/error-handling/#monitoring).
 - Components: [`shadow: { delegatesFocus: true }`](/docs/views/#focusing-into-a-child-component),
   also written by the server, [`focus(selector, { wait: true })`](/docs/views/#focusing-what-a-later-render-brings)
   for a target a later render brings, and [prop equality](/docs/components/#when-a-prop-counts-as-changed)
@@ -416,13 +457,18 @@ dependency.
   `gyralVitePreset({ clientOnly: true })`, the default in `create-gyral`'s `basic` template.
 - `style` bindings and static `style="…"` attributes that work under a strict Content
   Security Policy on the client ([inline styles](/docs/styling/#inline-styles-under-a-strict-csp)).
-- Router: a canonical `path` from `match()`, [scroll and focus](/docs/routing/#scroll-and-focus)
-  after a navigation, with `scroll` and `focusReset` options, and the
+- Router: [optional segments and catch-all routes](/docs/routing/#optional-segments-and-catch-all-routes)
+  (`:id?`, `:path*`), a canonical `path` from `match()`,
+  [scroll and focus](/docs/routing/#scroll-and-focus) after a navigation, with `scroll` and `focusReset` options, and the
   [head model](/docs/routing/#the-head) with `setHead()`.
 - `retry(driver, policy)` with `jitter` and `retryIf`, `makeHttpDriver({ timeoutMs })` with
   `retryableHttpError`, and `csrfFromMeta` on the driver ([Effects](/docs/effects/#retries)).
 - [Moves keep commands running](/docs/outside-state/#moves-and-reconnects).
-- Forms: secret fields never echoed, and `definition.validate()` / `definition.values()`.
+- Forms: secret fields never echoed, `definition.validate()` / `definition.values()`, and
+  [custom form controls](/docs/form-associated/) with `formAssociated`.
+- [Browser storage](/docs/browser-storage/) in the optional `@gyral/core/storage` and
+  `@gyral/core/indexeddb` entries, and [network streams](/docs/network-streams/) in
+  `@gyral/http/sse` and `@gyral/http/websocket`. Apps that don't import them don't bundle them.
 - Patterns: [the element under a captured pointer](/docs/intent/#the-element-under-a-captured-pointer)
   and [telling a refused request from no change](/docs/effects/#telling-a-refused-request-from-no-change).
 - Server: opt-in [hashes for server-rendered `style` attributes](/docs/server-rendering/#content-security-policy)
@@ -436,8 +482,8 @@ dependency.
   `assetHandler` answers single `Range` requests, so media can seek, and `productionServer`
   takes Vite's `base`. [Components that load themselves](/docs/server-rendering/#loading-components-in-the-browser),
   [`gyralDevServer()`](/docs/server-rendering/#development-server),
-  `renderPage({ headScripts })`, `media` on head entries, `wantsJson` and
-  `productionServer({ onResponse })`.
+  `componentsReady()`, `renderPage({ headScripts })`, `media` on head entries, an optional
+  `invalid` for `formAction`, `wantsJson` and `productionServer({ onResponse })`.
 - Testing: [`renderOnServer`](/docs/testing/#server-markup-on-demand) for hydration tests with
   real server markup, [`mount()`](/docs/testing/#browser-tests) and `parse()`,
   `subscriptionsFor`, `outputsIn` and `focusTargetsIn`, `fakeDriver(name, run)`, drivers that
@@ -448,10 +494,10 @@ dependency.
 - Smaller bundles: view transitions, the frame lane and custom states ship only when a module
   names their spec field, and production messages are codes. Those savings pay for most of
   0.3.1's additions; error handling adds about 0.75 KiB to every app. Hello-world's first load
-  is 9.3 KiB gzip (8.9 on 0.3.0; 8.2 KiB built client-only); see [Packages](/docs/packages/).
+  is 9.5 KiB gzip (8.9 on 0.3.0; 8.5 KiB built client-only); see [Packages](/docs/packages/).
 
 This site now loads each island on its own pages only, with `components`. On 0.3.0 one entry
 chunk carried both islands, 13.7 KiB gzip (level 9). On 0.3.1 the home page loads the counter
-with the shared core and the loader, 12.4 KiB, and the search page the search box, 14.6 KiB
+with the shared core and the loader, 12.4 KiB, and the search page the search box, 14.8 KiB
 (its debounce is new). The hydration chunk stays at about 2.8 KiB, and docs pages still load
 no island code.

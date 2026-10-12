@@ -14,9 +14,10 @@ props, styles, server rendering and hydration.
 
 Most apps migrate in this order: dependencies, imports, the build checks (the compiler and the
 ESLint rules list every template that needs a change), props, lists, tests, server. This page
-follows that order. The 0.2 snippets are plain text; every 0.3 snippet with a file name
-compiles against the 0.3 packages. Going on to 0.3.1? Read
-[Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/) next.
+follows that order and describes 0.3.0. The 0.2 snippets are plain text; every snippet with a
+file name compiles against the current release, 0.3.1, so it uses 0.3.1's spelling where 0.3.1
+changed one (the two-call `define<…>()(…)`, `intentsOf`, `extraHead`). Once your app runs on
+0.3.0, go on to [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
 
 ## Dependencies
 
@@ -49,11 +50,13 @@ Everything a view needs comes from `@gyral/core`:
 | `LIT_PACKAGES`, `LIT_PREBUNDLE` (`@gyral/core/vite`)             | removed                                           |
 | `el.updateComplete`, `requestUpdate`, `renderRoot`, `hasUpdated` | `await settled()` (see [Tests](#tests))           |
 
-New in `@gyral/core`: `each`, `raw`, `defineHook`, `prop`, `intentsOf`, `settled`,
-`HydrationMismatch`, the `renderOnFrame` spec field (messages from bursty sources render once
-per animation frame), and the entry points `@gyral/core/server` and `@gyral/core/eslint`. New in
-`@gyral/ssr`: `contentSecurityPolicy`, `renderPage({ csp })` and `page({ modulepreload })`; in
-`@gyral/ssr/static`: `clientAssets` and `clientAssetsFromManifest`.
+New in `@gyral/core`: `each`, `raw`, `defineHook`, `prop`, `intents` (`intentsOf` in 0.3.1),
+`settled`, `HydrationMismatch`, the `renderOnFrame` spec field (messages from bursty sources
+render once per animation frame), and the entry points `@gyral/core/server` and
+`@gyral/core/eslint`. New in `@gyral/ssr`: `contentSecurityPolicy`, `renderPage({ csp })` and
+`page({ modulepreload })`; in `@gyral/ssr/static`: `clientAssets` and
+`clientAssetsFromManifest`. 0.3.1 makes `HydrationMismatch` and `@gyral/core/server` internal
+and folds `page()` and `clientAssets` into `renderPage()` and `clientAssetsFromManifest()`.
 
 ## Build: the Vite preset compiles templates
 
@@ -241,8 +244,9 @@ For `keyed(id, template)`, a fresh element whenever an id changes, Gyral has its
 
 Element directives become hooks: small behaviours on the element they sit in, with an optional
 server half that adds attributes to the server-rendered start tag. `invalid(errors)` and
-`labelledBy(id)` are hooks now; their call sites don't change, and `invalid()` writes
-`aria-invalid` on the server itself, so remove any `aria-invalid` you bound next to it.
+`labelledBy(id)` are hooks in 0.3.0 (0.3.1 removes `labelledBy`); their call sites don't
+change, and `invalid()` writes `aria-invalid` on the server itself, so remove any
+`aria-invalid` you bound next to it.
 
 ```ts
 // src/scroll-when.ts
@@ -316,9 +320,10 @@ development console banner.
 
 ## Server rendering
 
-Rendering is Gyral's own (`@gyral/core/server`): synchronous, no DOM shim, any runtime.
-`@gyral/ssr` keeps `renderPage`, `renderToString`, `renderToStream`, `page`,
-`formAction` and `@gyral/ssr/static`, and every template is written with core's `html`:
+Rendering is Gyral's own: synchronous, no DOM shim, any runtime. In 0.3.0, `@gyral/ssr` keeps
+`renderPage`, `renderToString`, `renderToStream`, `page`, `formAction` and `@gyral/ssr/static`
+(0.3.1 folds `page` and `renderToStream` into `renderPage`), and every template is written with
+core's `html`:
 
 ```ts
 // server/home.ts
@@ -331,7 +336,7 @@ export function home(): Response {
   return renderPage({
     title: 'Home',
     styles,
-    extraHead: html`<link rel="icon" href="/favicon.svg" />`, // was serverHtml`…`
+    extraHead: html`<link rel="icon" href="/favicon.svg" />`, // was serverHtml`…`; `head` in 0.3.0
     body: html`<my-home></my-home>`,
     scripts: ['/src/entry-client.ts'],
     csp: { directives: { 'default-src': "'self'" } }, // built when the page renders
@@ -345,8 +350,9 @@ export function home(): Response {
   ahead of time (a static `_headers` file), for the components imported before the call. See
   [Server rendering](/docs/server-rendering/#content-security-policy).
 - **Preloading:** in production, read the entry and its preloads from the Vite manifest with
-  `clientAssetsFromManifest()` and pass `modulepreload` to `renderPage`; `productionServer` now
-  hands `{ clientEntry, modulepreload }` to `createApp`, and a `preload(modules)` for pages
+  `clientAssetsFromManifest()` and pass `modulepreload` to `renderPage`; `productionServer`
+  hands `{ clientEntry, modulepreload }` to `createApp` (0.3.1 adds `components` and
+  `stylesheets`), and a `preload(modules)` for pages
   whose route module is imported lazily. See
   [Static sites](/docs/static-sites/#a-static-build).
 - A `Promise` anywhere in a view is an error: load data in the handler first, as before.
@@ -354,7 +360,8 @@ export function home(): Response {
   output is the template HTML plus values. Regenerate golden SSR fixtures. The Vite preset keeps
   `@gyral/*` out of SSR externalization in the dev server, so server code loaded with
   `ssrLoadModule` gets development output without options. A server run by plain Node gets
-  production output; `{ dev: true }` on `renderPage` or `renderToStream` turns the markers on.
+  production output; `{ dev: true }` on `renderPage` (or 0.3.0's `renderToStream`) turns the
+  markers on.
 
 ## Hydration
 
@@ -396,4 +403,6 @@ ship no framework JavaScript at all.
 `define()` and its type parameters, intents and `data-intent`, reducers and `Next`, commands,
 drivers and concurrency lanes, stores, `form()`, `field()` and `formAction`, the router, time
 and HTTP packages, `step()` and `run()`. If your app's views were already plain `html` with
-`data-intent` and attribute bindings, most of the work is in props, lists and tests.
+`data-intent` and attribute bindings, most of the work is in props, lists and tests. 0.3.1
+then changes some of these (the two-call `define`, drivers provided outside the spec,
+`subscriptions`): see [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
