@@ -5,8 +5,6 @@ date: 2026-10-12
 author: Mike Zupper
 ---
 
-<!-- Do not merge until github.com/mikezupper/sabacc is public: the post links to it. -->
-
 # Case study: moving sabacc.starwars.run from Lit to Gyral
 
 [sabacc.starwars.run](https://sabacc.starwars.run) is a browser version of Sabacc, the card game
