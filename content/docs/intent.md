@@ -12,6 +12,10 @@ order: 2
 messages, and it is the only place where raw input is read. Everything after it, the model and
 the view, works with typed, already-parsed data.
 
+Building a form with validation? The [Forms](/docs/forms/#complete-example-a-validated-form)
+page starts with a complete, copyable component: the submit intent, the messages, the reducers,
+focus and the error markup in one file. [Form submissions](#form-submissions) below sums it up.
+
 ```ts
 // src/search-box.ts
 import { define, html } from '@gyral/core';
@@ -263,6 +267,28 @@ A parser returns one of three things:
 Parsers may return a promise, because schema validation can be async. They must not do side
 effects. The one exception is `event.preventDefault()`, for example to stop arrow keys moving
 the caret.
+
+## Form submissions
+
+A `<form>` with `data-intent` runs its parser on `submit`, and Gyral prevents the page load. The
+parser gets the form as `target` and the submitted values as `formData`. To validate, read each
+field's `validity` from `target.elements` and return one message with every error, or one with
+the clean values:
+
+- **Name the submit intent something that isn't a message tag**, such as `Submit`, so it can
+  return either message (`Rejected` or `SignedUp`). See
+  [Intent names that aren't messages](#intent-names-that-arent-messages).
+- **Put `novalidate` on the form** and keep `required`, `type="email"` and `minlength` on the
+  fields. Without it, a failing constraint stops the `submit` event and the parser never runs.
+- **Keep errors in state** and render them next to their fields with `aria-invalid` and
+  `aria-describedby`. Focus the first invalid field with a `focus()` command from the reducer:
+  the parser may not move focus, because that is a side effect.
+- **With a schema**, `form(definition, toMsg)` parses the `FormData` for you and returns
+  `IntentRejected` with field issues; `fieldErrors(issues)` groups them by field.
+
+The whole component, ready to copy, is
+[Forms: Complete example](/docs/forms/#complete-example-a-validated-form). The schema path is
+[Forms: form() and invalid()](/docs/forms/#form-and-invalid).
 
 ## Declining: passing an event outward
 

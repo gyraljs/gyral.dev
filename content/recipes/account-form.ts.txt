@@ -2,18 +2,20 @@
 import { define, focus, html } from '@gyral/core';
 
 /** The fields, in the order they appear: the first one with an error gets focus. */
-export const FIELDS = ['name', 'email', 'password'] as const;
+export const FIELDS = ['name', 'email', 'password', 'consent'] as const;
 export type Field = (typeof FIELDS)[number];
 
 /** One message per field; `''` means no error. */
 export type Errors = Readonly<Record<Field, string>>;
 
-export const NO_ERRORS: Errors = { name: '', email: '', password: '' };
+export const NO_ERRORS: Errors = { name: '', email: '', password: '', consent: '' };
 
 export interface State {
   readonly errors: Errors;
-  /** The trimmed name after a successful signup. */
-  readonly welcome: string | undefined;
+  /** What the live region announces after a rejected submit; `''` otherwise. */
+  readonly summary: string;
+  /** The clean values after a successful signup. */
+  readonly account: { readonly name: string; readonly email: string } | undefined;
 }
 
 export type Msg =
@@ -31,8 +33,9 @@ const isField = (name: string): name is Field => FIELDS.some((f) => f === name);
  */
 export function problemWith(input: HTMLInputElement): string {
   const { validity } = input;
-  // `required` accepts "   ", so a blank value counts as missing too.
-  const missing = validity.valueMissing || input.value.trim() === '';
+  // A checkbox is missing when unchecked. `required` accepts "   ", so blank text is missing too.
+  const missing =
+    input.type === 'checkbox' ? !input.checked : validity.valueMissing || input.value.trim() === '';
   switch (input.name) {
     case 'name':
       return missing ? 'Enter your name.' : '';
@@ -45,10 +48,16 @@ export function problemWith(input: HTMLInputElement): string {
       return validity.tooShort || input.value.length < input.minLength
         ? 'Use at least 8 characters.'
         : '';
+    case 'consent':
+      return missing ? 'Accept the privacy policy to continue.' : '';
     default:
       return '';
   }
 }
+
+/** What the status region announces after a successful signup. */
+const welcome = (account: State['account']): string =>
+  account === undefined ? '' : `Welcome, ${account.name}! We’ll write to ${account.email}.`;
 
 /** Reads a submitted form: every field's error, or the clean values. */
 function submission(form: Element, data: FormData | undefined): Msg | undefined {
@@ -68,30 +77,40 @@ function submission(form: Element, data: FormData | undefined): Msg | undefined 
 }
 
 export const AccountForm = define<State, Msg>()('my-account-form', {
-  init: () => ({ errors: NO_ERRORS, welcome: undefined }),
+  init: () => ({ errors: NO_ERRORS, summary: '', account: undefined }),
   intent: {
     // Not a message tag, so it may return either message.
     Submit: ({ target, formData }) => submission(target, formData),
+    // Text fields send it on `input`, the checkbox on `change`.
     Checked: ({ target }) =>
       target instanceof HTMLInputElement && isField(target.name)
         ? { _tag: 'Checked', field: target.name, error: problemWith(target) }
         : undefined,
   },
   update: {
-    // Show every error at once, and move focus to the first field that has one.
+    // Show every error at once, announce how many, and focus the first field that has one.
     Rejected: (s, m) => {
+      const count = FIELDS.filter((f) => m.errors[f] !== '').length;
       const first = FIELDS.find((f) => m.errors[f] !== '');
-      return [{ ...s, errors: m.errors }, first === undefined ? [] : [focus(`#${first}`)]];
+      const summary = `Fix ${String(count)} ${count === 1 ? 'field' : 'fields'} to continue.`;
+      return [{ ...s, errors: m.errors, summary }, first === undefined ? [] : [focus(`#${first}`)]];
     },
     // In an app, this also returns the command that posts the form.
-    SignedUp: (_s, m) => ({ errors: NO_ERRORS, welcome: m.name }),
+    SignedUp: (_s, m) => ({
+      errors: NO_ERRORS,
+      summary: '',
+      account: { name: m.name, email: m.email },
+    }),
     // While the user types, only a field that already shows an error is checked again,
     // so a message changes or disappears as soon as the value is fixed.
     Checked: (s, m) =>
       s.errors[m.field] === '' ? s : { ...s, errors: { ...s.errors, [m.field]: m.error } },
   },
+  // No `value` bindings: what the user typed stays in the fields after a rejected submit.
   view: (s, i) => html`
     <form novalidate data-intent=${i.Submit}>
+      <p role="alert">${s.summary}</p>
+
       <label for="name">Name</label>
       <input
         id="name"
@@ -131,8 +150,20 @@ export const AccountForm = define<State, Msg>()('my-account-form', {
       />
       <p id="password-error">${s.errors.password}</p>
 
+      <input
+        id="consent"
+        name="consent"
+        type="checkbox"
+        required
+        aria-invalid=${s.errors.consent !== ''}
+        aria-describedby="consent-error"
+        data-intent=${i.Checked}
+      />
+      <label for="consent">I accept the privacy policy</label>
+      <p id="consent-error">${s.errors.consent}</p>
+
       <button>Create account</button>
     </form>
-    <p role="status">${s.welcome === undefined ? '' : `Welcome, ${s.welcome}!`}</p>
+    <p role="status">${welcome(s.account)}</p>
   `,
 });

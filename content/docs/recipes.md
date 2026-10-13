@@ -46,7 +46,8 @@ Test the model without a browser. `run` folds messages from `init` (or from `sta
 ## A signup form with native validation
 
 No extra packages. The browser's constraint checks find what is wrong, and your own messages
-say it:
+say it. The [Forms](/docs/forms/#complete-example-a-validated-form) page starts with this same
+component and explains each part; here it comes with its tests:
 
 <!-- include: recipes/account-form.ts.txt -->
 
@@ -57,18 +58,19 @@ How it works:
   the submit. Without it, a failing constraint shows the browser's bubble and no `submit` event
   fires, so your messages never appear.
 - **The submit parser reads `validity`.** `problemWith(input)` turns `valueMissing`,
-  `typeMismatch` and `tooShort` into your words. `Submit` checks every field and returns
-  `Rejected` with all the errors, or `SignedUp` with clean values. Reading the form is input
-  parsing, the intent layer's job; reducers see only the result.
+  `typeMismatch`, `tooShort` and an unchecked checkbox into your words. `Submit` checks every
+  field and returns `Rejected` with all the errors, or `SignedUp` with clean values. Reading the
+  form is input parsing, the intent layer's job; reducers see only the result.
 - **Check what the browser doesn't.** `required` accepts a name made of spaces, so the parser
   trims first. `tooShort` is set only after the user types, not for a value set by script or
   rendered by a server, so the parser checks the length too.
 - **Errors are state**: one string per field, `''` for none. The view writes `aria-invalid` and
   the message, and `aria-describedby` links the message to its field.
-- **Focus goes to the first invalid field**, through a `focus()` command from `Rejected`.
-- **An error clears as soon as the field is fixed.** Each field sends `Checked` on input. The
-  reducer updates only a field that already shows an error, so nothing turns red while someone
-  is still typing.
+- **Focus goes to the first invalid field**, through a `focus()` command from `Rejected`,
+  and the `role="alert"` paragraph announces how many fields to fix.
+- **An error clears as soon as the field is fixed.** Each field sends `Checked` on input (the
+  checkbox on change). The reducer updates only a field that already shows an error, so nothing
+  turns red while someone is still typing.
 - **Enter submits.** The form has a submit button, so Enter in any field submits it, like a
   click.
 - **No password in state.** `SignedUp` carries the name and the email. To send the form to a

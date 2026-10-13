@@ -71,7 +71,8 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
 - **MUST put `novalidate` on a form that shows its own error messages**, and read each field's
   `validity` (`valueMissing`, `typeMismatch`, `tooShort`) in the submit parser. Without
   `novalidate`, a failing `required` or `type="email"` stops the `submit` event, so the parser
-  and your messages never run.
+  and your messages never run. The signup form recipe below is a complete validated form to
+  start from (also on [Forms](/docs/forms/#complete-example-a-validated-form)).
 - **MUST keep server-rendered state, props and store state JSON-safe**: strings, numbers,
   booleans, `null`, arrays, plain objects.
 - **MUST `await settled()`** (or use `mount()` from `@gyral/testing`) before reading the DOM in

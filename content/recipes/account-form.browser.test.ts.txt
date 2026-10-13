@@ -9,16 +9,22 @@ it('reads the browser’s checks on submit and focuses the first invalid field',
   await form.type('#password', 'short');
   await form.click('button');
 
+  expect(form.$('[role="alert"]')?.textContent).toBe('Fix 4 fields to continue.');
   expect(form.$('#name-error')?.textContent).toBe('Enter your name.');
   expect(form.$('#email-error')?.textContent).toBe('Enter an email address like ada@example.com.');
   expect(form.$('#password-error')?.textContent).toBe('Use at least 8 characters.');
+  expect(form.$('#consent-error')?.textContent).toBe('Accept the privacy policy to continue.');
   expect(form.el.shadowRoot?.activeElement?.id).toBe('name');
 
   await form.type('#name', '  Ada  ');
   expect(form.$('#name-error')?.textContent).toBe('');
   await form.type('#email', 'ada@example.com');
   await form.type('#password', 'correct horse');
+  await form.click('#consent');
+  expect(form.$('#consent-error')?.textContent).toBe('');
   await form.click('button');
-  expect(form.$('[role="status"]')?.textContent).toBe('Welcome, Ada!');
+  expect(form.$('[role="status"]')?.textContent).toBe(
+    'Welcome, Ada! We’ll write to ada@example.com.',
+  );
   form.dispose();
 });

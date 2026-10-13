@@ -7,15 +7,17 @@ const rejected = {
   name: '',
   email: 'Enter an email address like ada@example.com.',
   password: 'Use at least 8 characters.',
+  consent: '',
 };
 
-it('shows every error and focuses the first invalid field', () => {
+it('shows every error, announces how many and focuses the first invalid field', () => {
   const { state, commands } = step(
     AccountForm.spec,
-    { errors: NO_ERRORS, welcome: undefined },
+    { errors: NO_ERRORS, summary: '', account: undefined },
     { _tag: 'Rejected', errors: rejected },
   );
   expect(state.errors).toEqual(rejected);
+  expect(state.summary).toBe('Fix 2 fields to continue.');
   expect(focusTargetsIn(commands)).toEqual([{ selector: '#email' }]);
 });
 
@@ -33,5 +35,9 @@ it('welcomes the new user and forgets old errors', () => {
     { _tag: 'Rejected', errors: rejected },
     { _tag: 'SignedUp', name: 'Ada', email: 'ada@example.com' },
   ]);
-  expect(state).toEqual({ errors: NO_ERRORS, welcome: 'Ada' });
+  expect(state).toEqual({
+    errors: NO_ERRORS,
+    summary: '',
+    account: { name: 'Ada', email: 'ada@example.com' },
+  });
 });

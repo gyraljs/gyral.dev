@@ -155,7 +155,9 @@ try {
     name: await error('name'),
     email: await error('email'),
     password: await error('password'),
+    consent: await error('consent'),
   });
+  const summary = async () => (await form.locator('[role="alert"]').textContent())?.trim();
   await form.locator('#name').focus();
   await page.keyboard.press('Enter');
   await settle();
@@ -163,7 +165,13 @@ try {
     name: 'Enter your name.',
     email: 'Enter your email address.',
     password: 'Enter a password.',
+    consent: 'Accept the privacy policy to continue.',
   });
+  check(
+    'the live region says how many fields to fix',
+    await summary(),
+    'Fix 4 fields to continue.',
+  );
   check('focus goes to the first invalid field', await focused('my-account-form'), 'name');
   check(
     'invalid fields are marked',
@@ -193,7 +201,10 @@ try {
     name: '',
     email: 'Enter an email address like ada@example.com.',
     password: 'Use at least 8 characters.',
+    consent: 'Accept the privacy policy to continue.',
   });
+  check('the live region counts again', await summary(), 'Fix 3 fields to continue.');
+  check('the typed values stay for correction', await form.locator('#email').inputValue(), 'ada');
   check('focus goes to the first invalid field again', await focused('my-account-form'), 'email');
   check(
     'nobody is welcomed yet',
@@ -207,19 +218,25 @@ try {
   await form.locator('#password').fill('correct horse');
   await settle();
   check('a fixed password clears', await error('password'), '');
+  await form.locator('#consent').focus();
+  await page.keyboard.press('Space');
+  await settle();
+  check('checking the box clears its error', await error('consent'), '');
   await form.locator('#password').press('Enter');
   await settle();
   check(
     'Enter submits a valid form, with the name trimmed',
     (await form.locator('[role="status"]').textContent())?.trim(),
-    'Welcome, Ada!',
+    'Welcome, Ada! We’ll write to ada@example.com.',
   );
+  check('the live region empties after success', await summary(), '');
 
   // A whitespace-only name is missing, even though `required` accepts it.
   await form.locator('#name').fill('   ');
   await form.getByRole('button', { name: 'Create account' }).click();
   await settle();
   check('a blank name is missing', await error('name'), 'Enter your name.');
+  check('one field to fix', await summary(), 'Fix 1 field to continue.');
 
   check('no page errors', errors, []);
 } finally {
