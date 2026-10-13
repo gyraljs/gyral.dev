@@ -10,7 +10,7 @@ order: 1
 
 Gyral is a set of small packages under the `@gyral` scope on npm, plus `create-gyral`, which
 sets up a new app. Every app needs `@gyral/core`; add the others when you need them. All nine
-packages are released together with the same version number (0.3.3), are ES modules with
+packages are released together with the same version number (0.3.4), are ES modules with
 TypeScript types, and are published from GitHub Actions with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
@@ -84,8 +84,9 @@ Lit is gone from the dependency tree. Any custom element still works next to Gyr
 including ones built with Lit; install that library yourself if you use it. Upgrading? See
 [Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/),
 [from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/),
-[from 0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/) and
-[from 0.3.2 to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/) (no code changes in either).
+[from 0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/),
+[from 0.3.2 to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/) and
+[from 0.3.3 to 0.3.4](/docs/upgrading-0-3-3-to-0-3-4/) (no code changes in the last three).
 
 ## The Vite preset
 

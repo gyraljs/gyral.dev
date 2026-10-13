@@ -42,7 +42,8 @@ Any other client that speaks Streamable HTTP: add a server with the URL
 The hosted server has every tool except `check_snippet`, which needs your project's
 TypeScript and packages. It can run an older `@gyral/mcp` than the latest release; its
 `initialize` response and `https://mcp.gyral.dev/healthz` report the version it serves. The
-tools marked 0.3.2 below need that version to be 0.3.2 or later.
+tools marked 0.3.2 below need that version to be 0.3.2 or later, and the `get_api` guidance
+below needs 0.3.4.
 
 ## The local MCP server
 
@@ -82,21 +83,31 @@ the latest docs at startup instead; it falls back to the bundled copy after 3 se
 
 ## The tools
 
-| Tool                 | What it returns                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------- |
-| `start_here`         | The mental model, the rules, the workflow, and which example or guide covers which task (0.3.2)   |
-| `search_docs`        | Ranked doc sections for a query: title, URL and snippet                                           |
-| `get_doc`            | One docs page, or one section with `#anchor`, such as `forms#the-server-half`                     |
-| `get_api`            | The declaration, doc comment and import line of an export; on a miss, the nearest names (0.3.2)   |
-| `list_examples`      | Every example and what it shows                                                                   |
-| `get_example`        | One example's component source                                                                    |
-| `scaffold_component` | Starting code: `basic`, `form`, `form-native` (0.3.2) or `ssr-page`, importing only what you have |
-| `check_snippet`      | Type errors for a module against your project, with a suggested fix for each (local only)         |
+| Tool                 | What it returns                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `start_here`         | The mental model, the rules, the workflow, and which example or guide covers which task (0.3.2)                                            |
+| `search_docs`        | Ranked doc sections for a query: title, URL and snippet                                                                                    |
+| `get_doc`            | One docs page, or one section with `#anchor`, such as `forms#the-server-half`                                                              |
+| `get_api`            | The declaration, doc comment and import line of an export, with usage code and the next call (0.3.4); on a miss, the nearest names (0.3.2) |
+| `list_examples`      | Every example and what it shows                                                                                                            |
+| `get_example`        | One example's component source                                                                                                             |
+| `scaffold_component` | Starting code: `basic`, `form`, `form-native` (0.3.2) or `ssr-page`, importing only what you have                                          |
+| `check_snippet`      | Type errors for a module against your project, with a suggested fix for each (local only)                                                  |
 
-The workflow the server teaches, in every tool description: call `start_here` once, start
-from `get_example` or `scaffold_component`, write a small implementation, then run
-`check_snippet` and apply its suggested fixes until it passes. Use `get_api` for one symbol
-you're about to use, not to read the whole API.
+The workflow the server teaches, first in its instructions and in every tool description: call
+`start_here` once, start from `get_example` or `scaffold_component`, write the module right
+away, then run `check_snippet` and apply its suggested fixes until it passes. Use `get_api` only
+for a name you already saw in an example or an error, not to read the API type by type.
+
+Since 0.3.4, `get_api` steers back to that loop. On a function with a matching example, such as
+`define`, `each`, `fieldErrors` or `every`, it adds a short usage module and the call that gives
+working code for the task, such as `scaffold_component({ tag: "signup-form", kind: "form-native" })`.
+On a type, it adds a note that TypeScript infers it and that `check_snippet` names the real type
+errors. `get_api("*")` groups the functions by task, with the example or scaffold to start from,
+and collapses the types into one line. The local stdio server also counts lookups: from the
+fourth `get_api` call since the last `get_example`, `scaffold_component` or `check_snippet`, its
+answers end with a nudge naming the next call. The HTTP server, hosted or your own, keeps no
+state between requests, so it never nudges.
 
 Since 0.3.2, `scaffold_component` imports only packages your project has installed, and
 writes a model test only when `@gyral/testing` and `vitest` are there. `form-native` needs no
@@ -126,7 +137,10 @@ has the details.
 ## The agent skill
 
 The skill teaches an agent the rules and the API, with a reference per topic that it loads
-when the task needs it. Every code block in it typechecks against the packages.
+when the task needs it. Every code block in it typechecks against the packages. Since 0.3.4,
+`SKILL.md` opens with where to start from working code (the recipes, llms-small.txt and the MCP
+loop) and the rule that the entry must import every component module, and its forms reference
+starts with native validation, as the [Forms guide](/docs/forms/) does.
 
 In Claude Code, add Gyral's repository as a plugin marketplace and install the plugin:
 

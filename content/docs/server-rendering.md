@@ -148,9 +148,11 @@ rendered tag that no client module defines is a development warning, so a missin
 fail silently. For app-wide setup in the browser (providing drivers to the page), keep a small
 client entry and pass it in `scripts` next to `components`.
 
-The preset finds components written as `export const X = define<…>()('my-tag', …)`. A component
-created through a helper of your own (one that calls `define()` with a tag it was given) is
-invisible to that scan, so list it with its module, relative to the project root:
+The preset finds components written as `export const X = define<…>()('my-tag', …)`. It reads
+code only: since 0.3.4, a `define()` inside a comment, a string, template text or a regular
+expression doesn't count, so a code sample in a doc comment or a test fixture defines no tag. A
+component created through a helper of your own (one that calls `define()` with a tag it was
+given) is invisible to that scan, so list it with its module, relative to the project root:
 
 ```ts
 // vite.config.ts
@@ -166,7 +168,10 @@ export default defineConfig({
 ```
 
 A component module that the client entry or another component also imports is bundled into that
-chunk; it still loads, and its preload is that chunk. In a large app, measure before you switch
+chunk; it still loads, and its preload is that chunk. The links `renderPage` writes after the body
+leave out what the head already links (`modulepreload`, `stylesheets` and `scripts`), so pass
+`modulepreload` next to `components` as you get them: since 0.3.4, no module is linked twice.
+In a large app, measure before you switch
 from a hand-written loader: each component becomes its own chunk, and the loader carries the
 list of their dependencies.
 
