@@ -84,3 +84,14 @@ The site pins every `@gyral/*` dependency to exactly `0.3.3`. 0.3.3 changes only
 0.3.2's `gyral-mcp-http`), so no site code changed. The examples and demos sync read `v0.3.3`
 with no drift. /docs/upgrading-0-3-2-to-0-3-3/ announces the release, and the coding-agents and
 packages pages describe `gyral-mcp http`.
+
+## Addendum: Gyral 0.3.4 release (2026-10-13)
+
+The site pins every `@gyral/*` dependency to exactly `0.3.4`. 0.3.4 fixes repeated
+`modulepreload` links after the body (`@gyral/ssr`), stops the component scan from reading
+comments and strings (`@gyral/core`'s Vite preset) and changes what `@gyral/mcp`'s `get_api`
+answers; the site needed no code changes. The examples and demos sync read `v0.3.4`.
+/docs/upgrading-0-3-3-to-0-3-4/ announces the release. `GYRAL_DOCS_VERSION` (scripts/build.ts)
+lets a release branch build its llms files under the upcoming version before that version is on
+npm, for the MCP docs snapshot; the deployed build leaves it unset and reads the installed
+`@gyral/core`.

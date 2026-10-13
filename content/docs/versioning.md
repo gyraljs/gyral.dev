@@ -17,7 +17,7 @@ dependency update.
 Use documented public package entries. Entries containing `/internal` are for Gyral's own
 packages and have no stability promise. A symbol being technically exported does not make
 an internal entry an application API. The
-[export inventory](https://github.com/gyraljs/gyral/blob/v0.3.3/docs/references/public-api-0.3.1.md)
+[export inventory](https://github.com/gyraljs/gyral/blob/v0.3.4/docs/references/public-api-0.3.1.md)
 records the public boundary: what 0.3.1 exports, and what 0.3.2 added. 0.3.3 and 0.3.4 export
 the same as 0.3.2.
 
