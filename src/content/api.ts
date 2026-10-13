@@ -25,6 +25,25 @@ export const API_PACKAGES = [
   { name: 'devtools', entries: ['.'] },
 ] as const;
 
+/**
+ * Where to start writing code with each package: a one-line title for llms.txt and the links
+ * each reference page opens with. Agents that only had the reference read it type by type until
+ * their budget ran out (agent pilot, protocol v3), so the pages send them to working code first.
+ */
+const GUIDES: Readonly<Record<string, { readonly title: string; readonly links: string }>> = {
+  core: {
+    title: 'Recipes or Forms',
+    links:
+      '[Recipes](/docs/recipes/) has a task list with filters and a signup form, with their tests; [Forms](/docs/forms/) opens with a complete validated form; [Getting started](/docs/getting-started/) builds a first component',
+  },
+  http: { title: 'Effects and drivers', links: '[Effects and drivers](/docs/effects/)' },
+  router: { title: 'Routing', links: '[Routing](/docs/routing/)' },
+  time: { title: 'Effects and drivers', links: '[Effects and drivers](/docs/effects/)' },
+  ssr: { title: 'Server rendering', links: '[Server rendering](/docs/server-rendering/)' },
+  testing: { title: 'Testing', links: '[Testing](/docs/testing/)' },
+  devtools: { title: 'Devtools', links: '[Devtools](/docs/devtools/)' },
+};
+
 const NODE_MODULES = fileURLToPath(new URL('../../node_modules/', import.meta.url));
 const SOURCE = `https://github.com/gyraljs/gyral/tree/${GYRAL_TAG}/packages`;
 
@@ -210,6 +229,10 @@ function entryMarkdown(entry: Entry, symbols: readonly ApiSymbol[]): string {
       .sort((a, b) => a.name.localeCompare(b.name));
     if (members.length === 0) continue;
     parts.push(`### ${group.title}\n`);
+    if (group.kind === 'type')
+      parts.push(
+        'You rarely write most of these yourself: TypeScript infers them from the functions above. Look one up when an example or a compiler error names it.\n',
+      );
     parts.push('| Name | Summary |\n| --- | --- |');
     for (const s of members) {
       parts.push(`| [\`${s.name}\`](#${anchor(entry.specifier, s.name)}) | ${summary(s.doc)} |`);
@@ -240,6 +263,7 @@ function packageMarkdown(pkg: Package, symbols: ReadonlyMap<string, readonly Api
     '```sh',
     `npm install ${install}`,
     '```\n',
+    `> **Writing code? Start from working code, not from this page.** ${GUIDES[pkg.name]?.links ?? '[Recipes](/docs/recipes/)'}. Adapt the closest example and check it, then look a name up here when you are about to call it.\n`,
     `Generated from the package's type declarations. Entry points: ${pkg.entries
       .map((e) => `[\`${e.specifier}\`](#${slugify(e.specifier)})`)
       .join(', ')}.\n`,
@@ -278,7 +302,7 @@ export function loadApiPages(): Promise<readonly DocPage[]> {
           path: `/docs/api/${pkg.name}/`,
           title: pkg.json.name,
           description: pkg.json.description,
-          useWhen: `you need the exact signature, options or doc comment of an ${pkg.json.name} export`,
+          useWhen: `you need the exact signature, options or doc comment of an ${pkg.json.name} export you already saw in an example or a compiler error; to write code, start from ${GUIDES[pkg.name]?.title ?? 'Recipes'}`,
           section: 'Reference',
           order: 10 + index,
           draft: false,

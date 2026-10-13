@@ -13,6 +13,12 @@ written in the source (function bodies left out) and its documentation comment. 
 generated from the packages this site is built with, every time it's built, so they can't drift
 from the code.
 
+> **Writing code? Start from working code, not from the reference.** [Recipes](/docs/recipes/)
+> has a task list with filters and a signup form, with their tests, and [Forms](/docs/forms/)
+> opens with a complete validated form. Adapt the closest one and check it; come here to look up
+> a name an example or a compiler error shows you. Most of the types are inferred, so you rarely
+> write them yourself.
+
 | Package                                  | What's in it                                                                   |
 | ---------------------------------------- | ------------------------------------------------------------------------------ |
 | [`@gyral/core`](/docs/api/core/)         | `define`, commands, subscriptions, stores, forms, the view layer; Vite, ESLint |
