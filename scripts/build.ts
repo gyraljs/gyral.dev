@@ -55,13 +55,26 @@ export async function buildSite(dist: string): Promise<readonly string[]> {
   return pages.map((p) => p.path);
 }
 
-/** The installed Gyral version, for llms.txt. */
-const gyralVersion = (): string =>
-  (
+/**
+ * The Gyral version for llms.txt: the installed @gyral/core's, or `GYRAL_DOCS_VERSION` when a
+ * release branch is built before that release is on npm, so the MCP docs snapshot taken from
+ * this build names the release it ships in (gyral releasing.md, step 2). Repository links still
+ * use the installed release's tag (src/content/release.ts), since the new tag doesn't exist yet.
+ */
+const gyralVersion = (): string => {
+  const installed = (
     JSON.parse(
       readFileSync(new URL('../node_modules/@gyral/core/package.json', import.meta.url), 'utf8'),
     ) as { version: string }
   ).version;
+  const upcoming = process.env['GYRAL_DOCS_VERSION'];
+  if (upcoming === undefined || upcoming === '') return installed;
+  if (!/^\d+\.\d+\.\d+$/.test(upcoming)) {
+    throw new Error(`GYRAL_DOCS_VERSION must be a version such as 0.3.4, not "${upcoming}"`);
+  }
+  console.log(`llms files describe Gyral ${upcoming} (installed: ${installed})`);
+  return upcoming;
+};
 
 /**
  * llms.txt, llms-full.txt and a Markdown twin per page (src/content/llms.ts). Fails the build
