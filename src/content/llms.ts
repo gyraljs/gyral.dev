@@ -138,7 +138,7 @@ async function examplesTwin(root: URL): Promise<Twin> {
   }
   parts.push(
     '## A whole application\n',
-    `[gyral-shop](${LINKS.shop}) is a department store built with Gyral: catalog, search, cart, checkout, accounts and an admin area, server-rendered with forms that work without JavaScript, and four switchable themes.\n`,
+    `[gyral-shop](${LINKS.shop}) is a department store built with Gyral: catalog, search, cart, checkout, accounts and an admin area, server-rendered with forms that work without JavaScript, and four switchable themes. It runs at ${LINKS.demoShop}, reset every night.\n`,
   );
   return {
     page: '/examples/',

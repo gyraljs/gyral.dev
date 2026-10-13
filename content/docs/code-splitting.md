@@ -98,9 +98,10 @@ CSS to `css`. On a server, `productionServer` hands your app an `assets(modules)
 same per page and returns `{ modulepreload, stylesheets }` to spread into `renderPage` (see
 [Deploying](/docs/deploying/#node)).
 
-[gyral-shop](https://github.com/gyraljs/gyral-shop/blob/main/src/client/lazy.ts) uses this
-pattern for every page-specific component (listing, product gallery, checkout, admin), and adds
-a `MutationObserver` for components inserted after load.
+[gyral-shop](https://github.com/gyraljs/gyral-shop) used a loader like this until automatic
+components replaced it. Its
+[`vite.components.ts`](https://github.com/gyraljs/gyral-shop/blob/main/vite.components.ts) now
+only names the tags the scan can't see and keeps the admin sections in one chunk.
 
 ## Lazy hydration
 

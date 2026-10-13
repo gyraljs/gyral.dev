@@ -98,17 +98,22 @@ export async function examplesBody(): Promise<ChildValue> {
             Its four themes change only CSS, from a dense marketplace to an airy boutique. See them
             side by side on the <a href="/#showcase">home page</a>.
           </p>
+          <p>
+            Try it at <a href=${LINKS.demoShop} rel="external">demo-shop.gyral.dev</a>, where the
+            store resets every night and payments are mocked, or read
+            <a href="/blog/gyral-demo-shop/">how it keeps pages fast</a>.
+          </p>
         </div>
         <figure>
           <img
-            src="/showcase/shop-default.jpg"
-            alt="gyral-shop home page in its default theme"
+            src="/showcase/shop-marketplace.jpg"
+            alt="gyral-shop home page in the Marketplace theme"
             width="1280"
             height="800"
             loading="lazy"
             decoding="async"
           />
-          <figcaption>gyral-shop, default theme</figcaption>
+          <figcaption>gyral-shop in Marketplace, its default theme</figcaption>
         </figure>
       </div>
     </section>

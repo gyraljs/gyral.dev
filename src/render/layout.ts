@@ -167,6 +167,7 @@ const siteFooter = () => html`
           <li><a href=${LINKS.github} rel="external">GitHub</a></li>
           <li><a href=${LINKS.npm} rel="external">npm</a></li>
           <li><a href=${LINKS.shop} rel="external">gyral-shop</a></li>
+          <li><a href=${LINKS.demoShop} rel="external">Demo shop</a></li>
           <li><a href="/brand/">Brand and press</a></li>
         </ul>
       </section>

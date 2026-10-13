@@ -14,6 +14,8 @@ export const DESCRIPTION =
 export const LINKS = {
   github: 'https://github.com/gyraljs/gyral',
   shop: 'https://github.com/gyraljs/gyral-shop',
+  /** gyral-shop running live, reset to its seed every night. */
+  demoShop: 'https://demo-shop.gyral.dev',
   brand: 'https://github.com/gyraljs/brand',
   npm: 'https://www.npmjs.com/org/gyral',
   cyclejs: 'https://cycle.js.org',

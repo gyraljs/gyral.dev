@@ -191,6 +191,7 @@ export async function homeBody(): Promise<ChildValue> {
           <a href=${LINKS.shop} rel="external">gyral-shop</a> is a full department store built with
           Gyral: catalog, search, accounts, cart, checkout, orders and admin. Its themes change only
           CSS. The markup stays the same, the way the CSS Zen Garden proved it could.
+          <a href=${LINKS.demoShop} rel="external">Try the live demo</a>.
         </p>
       </hgroup>
       <ul role="list" class="shots">
