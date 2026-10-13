@@ -130,6 +130,20 @@ Read it from the bottom up:
 Run `npm run dev` and open the address it prints. The counter is a standard custom element with
 its own Shadow DOM, so it works in any page and alongside any framework.
 
+When the page loads an entry module instead (the `basic` template's `src/main.ts`), that module
+must import every component module, for its side effect. Each new component in its own file
+gets a line here, such as the stepper below:
+
+```ts
+// src/main.ts
+import './counter.js';
+import './stepper.js';
+```
+
+A module that nothing imports never runs, so its tag is never defined: `<my-stepper>` stays an
+empty unknown element, with no error in the console. A component that renders another
+component in its view imports that module too.
+
 ## Read input
 
 Intents get more than the event. Here's a step size the user can type, read from the input's

@@ -39,6 +39,11 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
 - **MUST define components in two calls**: `define<State, Msg>()('my-tag', { … })`. The first
   call takes the types, the second the tag (with a hyphen) and the spec. One call fails with
   "Expected 0 arguments, but got 2".
+- **MUST import every component module from the entry module.** `define()` registers the tag
+  when its module runs, so a component in its own file (`src/signup-form.ts`) needs a
+  side-effect import in `src/main.ts`, or in a module `main.ts` imports:
+  `import './signup-form.js';`. Without it the tag is never defined: `<signup-form>` stays an
+  empty unknown element, with no error.
 - **MUST write messages as a tagged union** with `readonly` fields:
   `{ readonly _tag: 'Toggle'; readonly id: number }`. `update` needs a reducer for every tag.
 - **MUST keep reducers, `init` and `view` pure.** Return a new object

@@ -71,6 +71,12 @@ The type parameters are the contract. `State` is a plain data record (JSON, when
 is [server-rendered](/docs/server-rendering/#loading-components-in-the-browser)), `Msg` a union of tagged objects, and TypeScript checks that `update` has a reducer for every tag and that the view
 only names intents that exist.
 
+`define()` registers the tag when its module runs, so the page's entry module (or a module it
+imports) must import every component module: `import './greeter.js';` in `src/main.ts`. A
+component module that nothing imports never runs, and its tag stays an empty unknown element,
+with no error. A parent that renders a child imports it too, as `Total` imports `Stepper`
+[below](#child-components-and-outputs).
+
 `define()` returns the element class. Its `spec` property is the object you passed in, which is
 how [tests](/docs/testing/) run `update` without a DOM. Export it as
 `export const Greeter = define…`, and the Vite preset writes `HTMLElementTagNameMap` entries for
