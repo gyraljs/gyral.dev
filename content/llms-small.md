@@ -44,6 +44,9 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
   side-effect import in `src/main.ts`, or in a module `main.ts` imports:
   `import './signup-form.js';`. Without it the tag is never defined: `<signup-form>` stays an
   empty unknown element, with no error.
+- **MUST render a component by its tag**: `<signup-form></signup-form>`, with the name given to
+  `define()`. Never a JSX-style `<SignupForm />`: templates are HTML, which reads it as an
+  unknown `<signupform>` element that renders nothing.
 - **MUST write messages as a tagged union** with `readonly` fields:
   `{ readonly _tag: 'Toggle'; readonly id: number }`. `update` needs a reducer for every tag.
 - **MUST keep reducers, `init` and `view` pure.** Return a new object
