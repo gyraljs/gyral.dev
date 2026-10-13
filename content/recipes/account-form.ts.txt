@@ -93,7 +93,8 @@ export const AccountForm = define<State, Msg>()('my-account-form', {
       const count = FIELDS.filter((f) => m.errors[f] !== '').length;
       const first = FIELDS.find((f) => m.errors[f] !== '');
       const summary = `Fix ${String(count)} ${count === 1 ? 'field' : 'fields'} to continue.`;
-      return [{ ...s, errors: m.errors, summary }, first === undefined ? [] : [focus(`#${first}`)]];
+      const focusFirst = first === undefined ? [] : [focus(`#${first}`)];
+      return [{ ...s, errors: m.errors, summary }, focusFirst];
     },
     // In an app, this also returns the command that posts the form.
     SignedUp: (_s, m) => ({
