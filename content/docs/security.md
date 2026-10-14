@@ -143,8 +143,7 @@ export const csp = await contentSecurityPolicy({
 The build runs your component modules, so they must be safe to import in Node; split a
 browser-only module from its component definition first. Pass `vite` with aliases or plugins
 the modules need. Ship the JSON with the HTML and assets of the same build, and regenerate it
-with every release: an old hash blocks new styles. On 0.3.1, which lacks both, import the
-components at build time and call `styleHashes()`. Both are new in 0.3.2.
+with every release: an old hash blocks new styles.
 
 On a static host, deliver CSP as an HTTP response header where the host allows it. A
 `<meta http-equiv>` policy is the fallback for hosts that can't set headers, and it can't set

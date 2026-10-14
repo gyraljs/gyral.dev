@@ -210,7 +210,8 @@ export type Msg =
   | { readonly _tag: 'Typed'; readonly query: string };
 
 export const ProductFilters = define<State, Msg>()('my-product-filters', {
-  init: () => [{ query: '' }, [listen((location): Msg => ({ _tag: 'Routed', location }))]],
+  init: () => ({ query: '' }),
+  subscriptions: () => [listen((location): Msg => ({ _tag: 'Routed', location }))],
   intent: { Typed: ({ value }) => ({ _tag: 'Typed', query: value ?? '' }) },
   update: {
     // The URL is the source of truth: a shared link or back and forward set the box.

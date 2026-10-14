@@ -229,7 +229,7 @@ filter the list.
 
 0.3.4 writes each module once on every render path, so the shop dropped its workaround: the
 product page has 19 links for 19 modules, and the scripts it loads didn't change by a byte. See
-[Upgrading from 0.3.3 to 0.3.4](/docs/upgrading-0-3-3-to-0-3-4/#server-rendered-pages-link-each-module-once).
+the [SSR changelog](https://github.com/gyraljs/gyral/blob/main/packages/ssr/CHANGELOG.md).
 
 ## The shop's own performance check
 

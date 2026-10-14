@@ -1,6 +1,6 @@
 ---
 title: Deploying
-description: Ship a Gyral app to a static host, a Node server or Bun, with the right cache headers and a strict Content Security Policy.
+description: Ship a Gyral app to a static host, a Node server, Bun, Deno or Cloudflare Workers, with the right cache headers and a strict Content Security Policy.
 useWhen: shipping an app to a static host, Node, Bun, Deno or Cloudflare Workers, with cache headers and a CSP
 section: Guides
 order: 15

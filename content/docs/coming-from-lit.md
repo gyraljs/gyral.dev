@@ -9,7 +9,7 @@ order: 3
 # Coming from Lit
 
 Gyral components are standard custom elements, so you can migrate one at a time alongside
-your existing Lit elements. Gyral 0.3 uses its own renderer. Its templates are not Lit
+your existing Lit elements. Gyral uses its own renderer. Its templates are not Lit
 templates, and Lit directives do not work in them.
 
 ## A small component
@@ -37,8 +37,8 @@ export const Counter = define<State, Msg>()('my-counter', {
 
 There is no event closure in the template. `true` creates the tag-only message; a parser
 extracts typed data for a message that needs it. Reducers and views are pure, while commands
-describe work performed by drivers. This example uses the 0.3.1 curried `define` spelling;
-the [0.3.1 migration guide](/docs/migrating-0-3-0-to-0-3-1/) covers that change.
+describe work performed by drivers. `define` takes two calls: the first names the types, the
+second the tag and the spec.
 
 ## Translate responsibilities
 
@@ -106,6 +106,4 @@ Lit installed for your remaining Lit elements, but Gyral itself does not depend 
 For Lit's original contracts, see its official
 [properties](https://lit.dev/docs/components/properties/),
 [lifecycle](https://lit.dev/docs/components/lifecycle/) and
-[controllers](https://lit.dev/docs/composition/controllers/) documentation. The
-[0.2-to-0.3 guide](/docs/migrating-0-2-to-0-3/) is for upgrading a Gyral application that
-previously used Lit internally; it is a separate migration.
+[controllers](https://lit.dev/docs/composition/controllers/) documentation.

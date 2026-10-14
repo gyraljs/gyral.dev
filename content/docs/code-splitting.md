@@ -139,7 +139,7 @@ server-rendered components fetch. Preload it with the entry: `clientAssetsFromMa
 
 With `gyralVitePreset({ components: true })`, the client build writes
 `.vite/gyral-components.json` next to Vite's manifest. Its `chunks` maps each tag to the chunk
-that defines it. Since 0.3.2, `chunkModules` maps every emitted JavaScript chunk to the source
+that defines it. `chunkModules` maps every emitted JavaScript chunk to the source
 modules in it, as paths relative to the project root:
 
 ```json

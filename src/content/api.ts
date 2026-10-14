@@ -130,9 +130,11 @@ function declarationText(node: ts.Declaration, name: string, checker: ts.TypeChe
     const type = checker.typeToString(
       checker.getTypeAtLocation(node),
       undefined,
-      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
+      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.NoTruncation,
     );
-    return `const ${name}: ${type}`;
+    return name === 'default'
+      ? `declare const _default: ${type};\nexport default _default;`
+      : `const ${name}: ${type}`;
   }
   return upTo(node, node.end);
 }
@@ -158,10 +160,17 @@ function describeExports(program: ts.Program, file: string): ApiSymbol[] {
     const node = symbol.declarations?.[0];
     if (node === undefined) throw new Error(`API reference: ${exported.name} has no declaration`);
     const kind = kindOf(node, checker);
+    // An overloaded function shows every signature (`define<S, M>()` and `define()`), without
+    // the implementation's when it is read from source.
+    const signatures = (symbol.declarations ?? []).filter(ts.isFunctionDeclaration);
+    const overloads = signatures.length > 1 ? signatures.filter((d) => d.body === undefined) : [];
     return {
       name: exported.name,
       kind,
-      declaration: declarationText(node, exported.name, checker),
+      declaration:
+        overloads.length > 1
+          ? overloads.map((d) => declarationText(d, exported.name, checker)).join('\n')
+          : declarationText(node, exported.name, checker),
       doc: ts.displayPartsToString(symbol.getDocumentationComment(checker)),
     };
   });

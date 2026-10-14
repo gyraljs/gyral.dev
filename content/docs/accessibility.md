@@ -29,8 +29,8 @@ A label and its control must share the relevant tree. A page's `label for` canno
 point at an input hidden in another component's shadow root. Put the label inside the
 component, or use a deliberate naming contract that copies the external label into its
 accessible name. The skill's [view recipes](https://github.com/gyraljs/gyral/blob/v0.3.5/skills/gyral/references/view.md#naming-a-components-form-from-the-page)
-include naming a component's form from the page. The former `labelledBy` export was removed
-in 0.3.1; the recipe is application code.
+include naming a component's form from the page; the recipe is application code, not a Gyral
+export.
 
 Test the computed accessible name in the browser. Setting a prop called `label` does not
 itself guarantee the rendered control has a name. Prefer native semantics before adding ARIA;

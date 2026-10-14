@@ -202,7 +202,7 @@ it('shows the name it found', async () => {
 ```
 
 This tests what the view renders for a state, nothing more. Hooks, focus, native validity and
-hydration need the browser tests below. `viewOf` is new in 0.3.2.
+hydration need the browser tests below.
 
 ## Browser tests
 
@@ -600,9 +600,8 @@ settings: `test: { coverage: { provider: 'v8', include: ['src/**/*.ts'] } }`. In
 `@vitest/coverage-v8` at the same version as Vitest.
 
 In development and tests, the preset records where each `html` and `svg` template was written,
-so errors can name the file and line. Since 0.3.2 that adds no branches to your coverage
-report: the counts are your own code's. On 0.3.1 each template call site added branches of its
-own, so keep any workaround (a lower branch threshold, say) until you upgrade.
+so errors can name the file and line. That adds no branches to your coverage report: the counts
+are your own code's.
 
 ## Accessibility checks for your app
 

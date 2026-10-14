@@ -150,7 +150,7 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   },
   41: {
     explanation:
-      'A driver failed, after any `retry()` policy, and the command has no `onFailure`. Since 0.3.1 this is an error, not a warning: it is reported as a `GyralError` (phase `command`) and reaches the component’s `Errored` reducer, if any. Without one, the component can’t react: a spinner may spin forever.',
+      'A driver failed, after any `retry()` policy, and the command has no `onFailure`. This is an error, not a warning: it is reported as a `GyralError` (phase `command`) and reaches the component’s `Errored` reducer, if any. Without one, the component can’t react: a spinner may spin forever.',
     fix: 'Give the command an `onFailure` that turns the error into a message, and handle that message in `update`. Expected failures (the network, a 5xx, a refusal) should always be messages.',
   },
   42: {
@@ -298,7 +298,7 @@ function errorsMarkdown(errors: readonly GyralError[], version: string): string 
     'Development builds of `@gyral/core` print each diagnostic in full. Production builds print a short line instead, so the message texts stay out of your bundle: `Gyral`, the code, the message’s arguments in order, and a link to this page.\n',
     '```text\nGyral G0010 my-cart Add https://gyral.dev/errors/#G0010\n```\n',
     'Read that one as: `<my-cart>` has no update for the message `Add`. Find the code below; its message shows where each argument goes. For the full sentence, reproduce the problem in development (the dev server, tests, or a build with `--mode development`). A hydration mismatch keeps its own sentence in production and ends with its code and link.\n',
-    `The codes and messages are read from \`@gyral/core\` ${version}, the version this site is built with; codes are never reused. Production builds print them since 0.3.1 (see [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/#short-error-messages-in-production)).\n`,
+    `The codes and messages are read from \`@gyral/core\` ${version}, the version this site is built with; codes are never reused.\n`,
   ];
   for (const group of groups) {
     parts.push(`## ${group}\n`);

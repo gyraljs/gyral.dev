@@ -182,8 +182,7 @@ control, a self-closing `<my-el />` (HTML ignores the slash, so the element swal
 follows it), an unquoted `class=a${b}`, markup the browser would repair (a `<tr>` directly in a
 `<table>`, a `<div>` inside a `<p>`), an HTML element such as `<button>` inside an `<svg>` (it
 would become an unknown SVG element that renders nothing), a bound `xlink:href=${…}`, a
-`${…}` inside `<script>` or `<style>`, a list row that reads the view's variables, and (since
-0.3.5) a JSX-style `<SignupForm>` where the component's tag `<signup-form>` belongs. Each
+`${…}` inside `<script>` or `<style>`, a list row that reads the view's variables, and a JSX-style `<SignupForm>` where the component's tag `<signup-form>` belongs. Each
 message says what to write instead.
 
 The ESLint config also reports a function written in a hole (`${() => …}`), which is never
@@ -412,11 +411,11 @@ export const Board = define<State, Msg>()('my-board', {
   the other column, and for tasks whose slot changed. Tasks that move because the layout changed
   around them, after a resize, aren't animated.
 - **`seen` keeps the keys of deleted tasks.** Clear it when the board loads new data.
-- **The native way is a View Transition.** With [`viewTransition`](#view-transitions), a task
-  whose `view-transition-name` is the same before and after (a style binding on the row,
-  `style="view-transition-name: task-${t.id}"`) morphs from its old place to its new one.
-  Same-document View Transitions are only newly available in browsers, so keep the hook as the
-  fallback for now.
+- **A View Transition doesn't replace the hook here.** No browser captures a
+  `view-transition-name` set inside a shadow root, and components use shadow DOM by default, so
+  rows named that way don't morph. [`viewTransition`](#view-transitions) with a per-row
+  `view-transition-name` works only in a `shadow: false` component. In shadow DOM, the FLIP hook
+  above is the way to animate moves between lists.
 
 ## Form state
 
@@ -942,7 +941,9 @@ A missing element or method, or a method that throws, is reported through the
 Return `true` from the optional `viewTransition(prev, next, msg)` spec field to render that
 change inside a [View Transition](https://developer.mozilla.org/docs/Web/API/View_Transition_API):
 a route change, a list that reorders. Gyral skips it where the browser has no support or the
-visitor asked for reduced motion, and the animation itself is CSS.
+visitor asked for reduced motion, and the animation itself is CSS. Browsers don't capture a
+`view-transition-name` set inside a shadow root, so naming single items (rows that should morph
+to their new place) needs a `shadow: false` component; the host element itself can carry a name.
 
 ## When the DOM updates
 

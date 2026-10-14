@@ -39,9 +39,8 @@ build contract: do not use that option for a server-rendered page.
 
 The repository's `pnpm size --json` measures production JavaScript with gzip level 9 and
 reports the initial payload separately from all chunks. `pnpm size:check` enforces example
-budgets. The [package overview](/docs/packages/#whats-inside) and
-[migration guide](/docs/migrating-0-2-to-0-3/#size) give dated measurements; they are examples,
-not a guarantee of your app's size. Compare versions with the same build options and assets.
+budgets. The [package overview](/docs/packages/#whats-inside) gives measurements of Gyral's
+examples; they are examples, not a guarantee of your app's size. Compare versions with the same build options and assets.
 
 ## Hydration and loading
 
@@ -59,13 +58,11 @@ whole page, including their loader and preload overhead. See
 
 ## Reproduce a speed claim
 
-The latest [Gyral benchmarks](https://github.com/gyraljs/benchmarks) run, on 2026-10-12,
-measured 0.3.1 and 0.3.0 from npm against current React, Preact, Vue, Svelte, Solid and Lit
-builds of the same six client-rendered apps. Its
-[raw data and notes](https://github.com/gyraljs/benchmarks/tree/main/results/2026-10-12-full)
-describe the machine, versions and variation, including that the machine was busy during that
-run, so compare frameworks within the run only. It measures small apps in one browser; it is
-not a measurement of server rendering or your application.
+The [Gyral benchmarks](https://github.com/gyraljs/benchmarks) build the same six
+client-rendered apps with Gyral from npm and with current React, Preact, Vue, Svelte, Solid and
+Lit. Each run's [raw data and notes](https://github.com/gyraljs/benchmarks/tree/main/results)
+describe the machine, versions and variation, so compare frameworks within one run only. They
+measure small apps in one browser, not server rendering or your application.
 
 For your page, record network payloads and a browser performance trace for the action users
 care about. Separate script, layout, paint and frame wait; fewer reducer milliseconds need

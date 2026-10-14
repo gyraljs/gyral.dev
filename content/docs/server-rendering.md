@@ -120,8 +120,7 @@ the props in `init`: `init: (p) => p.product ? [{ … }] : [{ … }, [load()]]`.
 same decision.
 
 The renderer yields a chunk at every component boundary, and it is fast: a 1,000-row table
-renders to a string in about 0.2 ms on Node 24 (1.3 ms including encoding), where Gyral 0.2 took
-24 to 28 ms.
+renders to a string in about 0.2 ms on Node 24 (1.3 ms including encoding).
 
 ## Loading components in the browser
 
@@ -149,7 +148,7 @@ fail silently. For app-wide setup in the browser (providing drivers to the page)
 client entry and pass it in `scripts` next to `components`.
 
 The preset finds components written as `export const X = define<…>()('my-tag', …)`. It reads
-code only: since 0.3.4, a `define()` inside a comment, a string, template text or a regular
+code only: a `define()` inside a comment, a string, template text or a regular
 expression doesn't count, so a code sample in a doc comment or a test fixture defines no tag. A
 component created through a helper of your own (one that calls `define()` with a tag it was
 given) is invisible to that scan, so list it with its module, relative to the project root:
@@ -170,7 +169,7 @@ export default defineConfig({
 A component module that the client entry or another component also imports is bundled into that
 chunk; it still loads, and its preload is that chunk. The links `renderPage` writes after the body
 leave out what the head already links (`modulepreload`, `stylesheets` and `scripts`), so pass
-`modulepreload` next to `components` as you get them: since 0.3.4, no module is linked twice.
+`modulepreload` next to `components` as you get them: no module is linked twice.
 In a large app, measure before you switch
 from a hand-written loader: each component becomes its own chunk, and the loader carries the
 list of their dependencies.
@@ -184,7 +183,7 @@ loader knows about is defined and the page has settled; without automatic compon
 import { componentsReady } from '@gyral/core';
 
 await componentsReady();
-document.querySelector('site-search')?.focus();
+document.querySelector<HTMLElement>('site-search')?.focus();
 ```
 
 Hydration is built into `@gyral/core`, and module order doesn't matter. When a server-rendered
@@ -332,7 +331,7 @@ components imported before the call. Use it where no page renders per request: a
 writes it into the host's headers file at build time (see
 [Static sites](/docs/static-sites/#headers-and-csp)), as this site does. A server that
 shouldn't import every component can read the hashes from a file the build writes, with
-`writeComponentStyleManifest` and `componentStyleHashes` (0.3.2; see
+`writeComponentStyleManifest` and `componentStyleHashes` (see
 [Security](/docs/security/#style-hashes-from-the-build)). In development, `renderPage` warns
 when a header string it is given lacks a registered component's hash.
 

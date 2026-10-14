@@ -62,8 +62,8 @@ export const SearchBox = define<State, Msg>()('my-search-box', {
 
 ## Naming intents in markup
 
-The view puts `data-intent=${i.Search}` on an element. `i` holds the message tags, typed, so a
-misspelt intent is a compile error. When that element's trigger event fires, Gyral calls the
+The view puts `data-intent=${i.Search}` on an element. `i` holds the intent names (the keys of
+`intent`), typed, so a misspelt intent is a compile error. When that element's trigger event fires, Gyral calls the
 parser registered under the same name in `intent`, and sends whatever it returns through
 `update`.
 
@@ -362,12 +362,9 @@ section's `Save` sees Ctrl+S from there too.
 - **Only a synchronous `undefined` declines.** A parser that returns a promise has taken the
   event, whatever the promise resolves to: lookup can't wait for it.
 - **Declining stays inside the component.** A nested component's lookup ends at its own root.
-  The outer component sees the same event through its own listener, once, as before.
+  The outer component sees the same event through its own listener, once.
 - **To skip events by where they started** rather than by key, compare `event.target` (the
   element that was hit) with `target` (the element with the intent).
-
-Before Gyral 0.3.1, `undefined` ended the lookup, so an outer intent never saw an event that an
-inner parser ignored. See the [migration guide](/docs/migrating-0-3-0-to-0-3-1/#behavior-changes).
 
 ## Props, state and stores in a parser
 
@@ -497,7 +494,7 @@ export const parseSearch = ({
 `_tag: 'Search' as const` in the returned object works too. The same holds for the mappers of
 `child()`, `form()` and `field()`. To type a parser that reads the context, use
 `IntentParser<Variant, Props>`, or `IntentParser<Variant, Props, State>` when it reads `state`.
-Since 0.3.2, `Variant<Msg, 'Search'>` from `@gyral/core` names the variant without `Extract`,
+`Variant<Msg, 'Search'>` from `@gyral/core` names the variant without `Extract`,
 and `ParseResult<M>` is what a parser may return: a message, `IntentRejected` or `undefined`.
 `StandardSchemaV1` is exported too, for helpers that take a schema the way `field()` and
 `defineForm()` do.

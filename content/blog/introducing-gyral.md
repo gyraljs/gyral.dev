@@ -38,8 +38,8 @@ define<{ readonly count: number }, Msg>('my-counter', {
 
 > **Update, 2026-10-12:** since Gyral 0.3.1, `define` takes two calls so TypeScript can infer
 > the rest of the spec: `define<{ readonly count: number }, Msg>()('my-counter', { … })`. And
-> `periodic` became `every`, which sends the current time. See
-> [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
+> `periodic` became `every`, which sends the current time. See the
+> [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md).
 
 **Intent** turns platform events into typed messages. **Update** turns messages into new
 state, one reducer per message, checked for completeness by TypeScript. **View** turns state
@@ -88,8 +88,8 @@ cascade layers and `:state()` driven by the model.
 > alone. Views are still `html` tagged templates, now imported from `@gyral/core` and checked at
 > build time by a template compiler and an ESLint plugin. Server rendering and hydration are
 > built into core, a strict Content Security Policy needs no `'unsafe-inline'`, and the smallest
-> app's first load went from 12.2 KiB to 8.9 KiB gzipped. See
-> [Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/).
+> app's first load went from 12.2 KiB to 8.9 KiB gzipped. See the
+> [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md).
 
 ## A real application
 

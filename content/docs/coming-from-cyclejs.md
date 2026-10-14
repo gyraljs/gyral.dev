@@ -43,6 +43,7 @@ instead of streams.
 Cycle.js, from its examples:
 
 ```js
+// Cycle.js (xstream), not Gyral
 function main(sources) {
   const action$ = xs.merge(
     sources.DOM.select('.decrement')

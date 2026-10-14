@@ -48,9 +48,9 @@ custom element, when you need to.
 
 You don't need streams, a functional-effects library or decorators to use Gyral. The API is
 plain TypeScript: functions, objects, unions and promises. Implementation choices stay
-implementation details where they can: Gyral 0.1 ran commands on Effect, 0.2 moved them to a
-small built-in runtime without changing a public type. 0.3 replaced the view layer, which
-templates touch directly, so it came with a [migration guide](/docs/migrating-0-2-to-0-3/).
+implementation details where they can: commands run on a small built-in runtime that no public
+type exposes, so it can change without touching your code. A change that does reach your code
+waits for a new minor version and comes with an upgrade guide.
 
 ## Semantic HTML and accessibility are correctness
 
@@ -77,5 +77,5 @@ against the real packages, and every page passes accessibility checks in light a
 
 Performance claims come from measurements. Bundle size is tracked per example with production
 builds, and changes such as the devtools hook are measured before and after. Budgets follow
-measurements, not the other way round: when Gyral 0.3 set out to make the smallest app 8 KiB, it
-measured 8.9 KiB and says so.
+measurements, not the other way round: the [package guide](/docs/packages/#whats-inside)
+publishes what the examples measure, not what they were meant to weigh.

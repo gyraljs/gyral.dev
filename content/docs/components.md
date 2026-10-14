@@ -82,7 +82,7 @@ how [tests](/docs/testing/) run `update` without a DOM. Export it as
 `export const Greeter = define…`, and the Vite preset writes `HTMLElementTagNameMap` entries for
 every such component into `.gyral/elements.d.ts` (list that file in your tsconfig's `include`),
 so `document.querySelector('my-greeter')` is typed with no declaration of your own. It reads
-calls in code, not in comments or strings (since 0.3.4). For `tsc` outside Vite, the
+calls in code, not in comments or strings. For `tsc` outside Vite, the
 `gyral-types` command writes the same file.
 
 ## Props
