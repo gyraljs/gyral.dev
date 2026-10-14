@@ -182,7 +182,8 @@ control, a self-closing `<my-el />` (HTML ignores the slash, so the element swal
 follows it), an unquoted `class=a${b}`, markup the browser would repair (a `<tr>` directly in a
 `<table>`, a `<div>` inside a `<p>`), an HTML element such as `<button>` inside an `<svg>` (it
 would become an unknown SVG element that renders nothing), a bound `xlink:href=${…}`, a
-`${…}` inside `<script>` or `<style>`, and a list row that reads the view's variables. Each
+`${…}` inside `<script>` or `<style>`, a list row that reads the view's variables, and (since
+0.3.5) a JSX-style `<SignupForm>` where the component's tag `<signup-form>` belongs. Each
 message says what to write instead.
 
 The ESLint config also reports a function written in a hole (`${() => …}`), which is never

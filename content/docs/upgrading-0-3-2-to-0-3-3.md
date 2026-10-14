@@ -21,8 +21,9 @@ Add every other `@gyral/*` package your app uses to that command, at the same ve
 made with `create-gyral` 0.3.3 start on `^0.3.3`. From 0.3.1, the same command works; see
 [Upgrading from 0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/) for what 0.3.2 added.
 
-0.3.4 followed with fixes and no code changes either: install 0.3.4 instead; see
-[Upgrading from 0.3.3 to 0.3.4](/docs/upgrading-0-3-3-to-0-3-4/).
+0.3.4 and 0.3.5 followed with no code changes either: install 0.3.5 instead; see
+[Upgrading from 0.3.3 to 0.3.4](/docs/upgrading-0-3-3-to-0-3-4/) and
+[from 0.3.4 to 0.3.5](/docs/upgrading-0-3-4-to-0-3-5/).
 
 ## `npx -y @gyral/mcp` works again
 

@@ -21,6 +21,9 @@ Add every other `@gyral/*` package your app uses to that command, at the same ve
 made with `create-gyral` 0.3.4 start on `^0.3.4`. From 0.3.1 or 0.3.2, the same command works;
 see [Upgrading from 0.3.2 to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/) for what 0.3.3 changed.
 
+0.3.5 followed with no code changes either: install 0.3.5 instead; see
+[Upgrading from 0.3.4 to 0.3.5](/docs/upgrading-0-3-4-to-0-3-5/).
+
 ## Server-rendered pages link each module once
 
 With [automatic components](/docs/server-rendering/#loading-components-in-the-browser)

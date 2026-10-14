@@ -236,5 +236,6 @@ rendering, hydration and virtual time. See [Testing](/docs/testing/).
 - Coming from Gyral 0.2? Read [Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/). From
   0.3.0? Read [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/). From 0.3.1,
   upgrading [to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/),
-  [to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/) and
-  [to 0.3.4](/docs/upgrading-0-3-3-to-0-3-4/) needs no code changes.
+  [to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/),
+  [to 0.3.4](/docs/upgrading-0-3-3-to-0-3-4/) and
+  [to 0.3.5](/docs/upgrading-0-3-4-to-0-3-5/) needs no code changes.
