@@ -44,8 +44,14 @@ interface TableRow {
   readonly url: string;
 }
 
-/** The installed @gyral/core's diagnostics table (`@gyral/core/errors.json`). */
+/**
+ * The installed @gyral/core's diagnostics table (`@gyral/core/errors.json`), or
+ * `GYRAL_ERRORS_JSON` (with `GYRAL_DOCS_VERSION`) when a release branch is built before that
+ * release is on npm, so the MCP docs snapshot lists the release's codes (gyral releasing.md,
+ * step 2): `GYRAL_ERRORS_JSON=../gyral/packages/core/src/errors.json`.
+ */
 export const errorsFile = (): string =>
+  process.env['GYRAL_ERRORS_JSON'] ||
   join(realpathSync(join(NODE_MODULES, '@gyral', 'core')), 'dist', 'errors.json');
 
 /** Every diagnostic in the installed @gyral/core, in table order, with the URL production prints. */
@@ -100,6 +106,11 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
     explanation:
       'A prop’s Standard Schema returned a promise. Props are validated synchronously, while the element updates and renders, so they can’t wait for it.',
     fix: 'Use a synchronous schema or a type guard for the prop, and do asynchronous checks in a command.',
+  },
+  14: {
+    explanation:
+      'Development builds look for custom-element tags on the page that nothing has defined, 3 seconds after load and again after each later `define()`. Such an element renders nothing: usually the entry never imports the module that defines it.',
+    fix: 'Import the component’s module from the entry (or from a module the entry imports). For a third-party element, load its package; ignore the warning for an element you define later on purpose.',
   },
   21: {
     explanation:
@@ -325,14 +336,17 @@ let page: Promise<DocPage> | undefined;
 /** The errors page, as a generated docs page in the Reference section. */
 export function loadErrorsPage(): Promise<readonly DocPage[]> {
   page ??= (async () => {
-    const version = (
-      JSON.parse(
-        readFileSync(
-          join(realpathSync(join(NODE_MODULES, '@gyral', 'core')), 'package.json'),
-          'utf8',
-        ),
-      ) as { version: string }
-    ).version;
+    const upcoming = process.env['GYRAL_ERRORS_JSON'] ? process.env['GYRAL_DOCS_VERSION'] : '';
+    const version =
+      upcoming ||
+      (
+        JSON.parse(
+          readFileSync(
+            join(realpathSync(join(NODE_MODULES, '@gyral', 'core')), 'package.json'),
+            'utf8',
+          ),
+        ) as { version: string }
+      ).version;
     const markdown = errorsMarkdown(readGyralErrors(), version);
     const { html, headings } = await renderMarkdown(markdown);
     return {
