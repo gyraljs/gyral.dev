@@ -34,7 +34,7 @@ Apps that do not import them carry no storage driver code.
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@gyral/http`     | The `http` driver: `get`, `request`, `submitForm`, typed errors, schema decoding. `@gyral/http/testing` has `fakeHttp`.                                                                                                                                                                |
 | `@gyral/router`   | Typed route tables, `listen`, `navigate`, `setHead`, browser and memory history.                                                                                                                                                                                                       |
-| `@gyral/time`     | `delay`, `debounce` and `every` as commands; a delay-only app stays as small as before.                                                                                                                                                                                                |
+| `@gyral/time`     | `delay`, `debounce` and `every` as commands; an app that only delays doesn't bundle `every`.                                                                                                                                                                                           |
 | `@gyral/ssr`      | Server rendering: `renderPage`, `renderToString`, `contentSecurityPolicy`, `styleHashes`, `formAction`. `@gyral/ssr/static` prerenders and serves builds and writes component style hashes, `@gyral/ssr/node` mounts a fetch handler on Node's `http` and runs the development server. |
 | `@gyral/testing`  | `step`, `run`, `viewOf`, `subscriptionsFor`, `outputsIn`, `mount`, `parse`, fake drivers, virtual time, `mountSsr` and `hydrated`. `@gyral/testing/vitest` renders server markup for browser tests.                                                                                    |
 | `@gyral/devtools` | The in-page devtools panel, for development builds.                                                                                                                                                                                                                                    |
@@ -52,8 +52,7 @@ The fetch entry does not include those transports.
 
 `@gyral/mcp` is a stdio server your agent starts with `npx -y @gyral/mcp`, from your project
 directory. It answers from the docs, API and examples of its own version, bundled at build time,
-so it works offline. `gyral-mcp http` runs a read-only Streamable HTTP server instead (since
-0.3.3; 0.3.2 had it as a second binary, `gyral-mcp-http`); Gyral hosts one at
+so it works offline. `gyral-mcp http` runs a read-only Streamable HTTP server instead; Gyral hosts one at
 `https://mcp.gyral.dev/mcp`, with no token. Setup for Claude Code,
 VS Code, Cursor, Codex and other clients is in
 [Use Gyral with coding agents](/docs/coding-agents/).
@@ -79,15 +78,9 @@ into are optional peer dependencies: install the ones you use.
 Validation in `@gyral/core`, `@gyral/http` and `@gyral/ssr` accepts any
 [Standard Schema](https://standardschema.dev) library; Gyral depends only on its types.
 
-Gyral 0.2 rendered with Lit and asked your app to install it. 0.3 has its own view layer, so
-Lit is gone from the dependency tree. Any custom element still works next to Gyral components,
-including ones built with Lit; install that library yourself if you use it. Upgrading? See
-[Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/),
-[from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/),
-[from 0.3.1 to 0.3.2](/docs/upgrading-0-3-1-to-0-3-2/),
-[from 0.3.2 to 0.3.3](/docs/upgrading-0-3-2-to-0-3-3/),
-[from 0.3.3 to 0.3.4](/docs/upgrading-0-3-3-to-0-3-4/) and
-[from 0.3.4 to 0.3.5](/docs/upgrading-0-3-4-to-0-3-5/) (no code changes in the last four).
+Any custom element works next to Gyral components, including ones built with Lit; install that
+library yourself if you use it. Upgrading an existing app? See
+[Versioning and stability](/docs/versioning/).
 
 ## The Vite preset
 
@@ -154,31 +147,28 @@ cancellation, concurrency lanes and retries.
 Apps ship only the features they use. `each`, `raw`, hooks, commands, stores and the prop builders
 register themselves when your code first calls them, so an app that never calls one doesn't
 bundle it, and the hydration code is a separate chunk that only server-rendered pages fetch.
-Measured on Gyral's examples (KiB gzip, production builds with the preset):
+Measured on Gyral's examples at 0.3.5 (KiB gzip, production builds with the preset):
 
-| App                      | 0.2.0 | 0.3.1: first load | 0.3.1: all chunks |
-| ------------------------ | ----- | ----------------- | ----------------- |
-| hello-world              | 12.2  | 9.5               | 12.0              |
-| hello-world, client-only | —     | 8.5               | 8.5               |
-| isomorphic (SSR)         | 17.3  | 15.3              | 18.3              |
-| no-js-first (SSR, forms) | 18.7  | 19.8              | 19.9              |
+| App                      | First load | All chunks |
+| ------------------------ | ---------- | ---------- |
+| hello-world              | 9.6        | 12.0       |
+| hello-world, client-only | 8.5        | 8.5        |
+| isomorphic (SSR)         | 15.3       | 18.3       |
+| no-js-first (SSR, forms) | 19.8       | 20.0       |
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any
-lazy `import()`. On 0.3.0 the same first loads were 8.9, 12.9 and 16.6 KiB. The no-js-first example now
-loads its components [by what's on the page](/docs/code-splitting/#load-components-by-whats-on-the-page),
-so its first load counts what a page with every component preloads, the hydration chunk
-included; 0.3.0 counted that chunk as lazy. 0.3.1 leaves out
-view transitions, the frame lane and custom states unless a module names their spec field (the
+lazy `import()`. The no-js-first example loads its components
+[by what's on the page](/docs/code-splitting/#load-components-by-whats-on-the-page), so its first
+load counts what a page with every component preloads, the hydration chunk included. Builds leave
+out view transitions, the frame lane and custom states unless a module names their spec field (the
 build reads your code and the packages that depend on Gyral; see [what the build
-reads](/docs/rendering-modes/#what-the-build-reads)), and its production builds print short
-[error codes](/errors/) instead of messages. Those savings pay for most of 0.3.1's additions;
-the largest, [error handling](/docs/error-handling/), adds about 0.75 KiB to every app. The client-only
-row is the same app built with [`clientOnly: true`](/docs/rendering-modes/#client-only-builds).
-The isomorphic example routes, and the router's [scroll and focus
-handling](/docs/routing/#scroll-and-focus) costs it about 0.5 KiB of first load; the History API
-code (about 0.75 KiB) loads only in browsers without the Navigation API.
-The migration guides have this site's own numbers: [before and after
-0.3.0](/docs/migrating-0-2-to-0-3/#size), and [after 0.3.1](/docs/migrating-0-3-0-to-0-3-1/#new-in-031).
+reads](/docs/rendering-modes/#what-the-build-reads)), and production builds print short
+[error codes](/errors/) instead of messages. [Error handling](/docs/error-handling/), which every
+app carries, costs about 0.75 KiB. The client-only row is the same app built with
+[`clientOnly: true`](/docs/rendering-modes/#client-only-builds). The isomorphic example
+routes, and the router's [scroll and focus handling](/docs/routing/#scroll-and-focus) costs it
+about 0.5 KiB of first load; the History API code (about 0.75 KiB) loads only in browsers without
+the Navigation API.
 
 Browser code targets [Baseline](https://web.dev/baseline) "widely available" features. Newer
 APIs, such as the Navigation API, URLPattern, invoker commands and View Transitions, are

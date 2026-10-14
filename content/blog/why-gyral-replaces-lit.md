@@ -16,8 +16,8 @@ and the router work as they did in 0.2.
 > **Update, 2026-10-12:** Gyral 0.3.1 changed a few of the 0.3.0 APIs this post shows.
 > `define` takes two calls, `define<State, Msg>()(tag, spec)`; `intents<Msg>()` became
 > `intentsOf<typeof Component>()`; and `@gyral/core/server` is internal, so apps render with
-> `@gyral/ssr`. The view layer described here is unchanged. See
-> [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
+> `@gyral/ssr`. The view layer described here is unchanged. See the
+> [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md).
 
 This post explains why I made that change, what the new view layer does differently, and what it
 measured, including the places where Gyral is still behind.
@@ -347,8 +347,8 @@ Start a new app:
 npm create gyral@latest my-app -- --template ssr
 ```
 
-Upgrading a 0.2 app? [Migrating from 0.2 to 0.3](/docs/migrating-0-2-to-0-3/) walks through it in
-order, and the ESLint plugin lists most of the templates that need a change. The benchmark apps,
+Upgrading a 0.2 app? The [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md) lists what changed, and the ESLint
+plugin lists most of the templates that need a change. The benchmark apps,
 method and raw results are in the [benchmarks repository](https://github.com/gyraljs/benchmarks).
 If you find a template the compiler rejects and shouldn't, or a page that hydrates wrongly,
 please open an [issue](https://github.com/gyraljs/gyral/issues).

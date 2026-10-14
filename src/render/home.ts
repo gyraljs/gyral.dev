@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { html, raw, type ChildValue } from '@gyral/core';
 import { loadDemos } from '../content/demos.js';
 import { highlight } from '../content/markdown.js';
+import { GYRAL_VERSION } from '../content/release.js';
 import { DEMOS_PATH } from './demos.js';
 import { DESCRIPTION, LINKS, ORIGIN, SITE_NAME, TAGLINE } from '../site.js';
 import type { PageMeta } from './layout.js';
@@ -91,7 +92,7 @@ export async function homeBody(): Promise<ChildValue> {
 
   return html`
     <section class="hero" aria-labelledby="hero-title">
-      <p class="eyebrow">New in 0.3: Gyral's own view layer</p>
+      <p class="eyebrow">Gyral ${GYRAL_VERSION}</p>
       <h1 id="hero-title">Model-View-Intent web components on the modern web platform.</h1>
       <p class="lead">
         Your app is a pure function, and side effects happen at the edges, as data. Gyral builds

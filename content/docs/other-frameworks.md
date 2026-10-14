@@ -199,12 +199,12 @@ component's module before the markup renders. For outputs, listen on the element
 `addEventListener` in an effect, as in the React example. The client spike verifies Svelte
 5.57.2 assigning and updating array properties and hearing outputs with an effect listener.
 
-These checks run in real Chromium with `pnpm verify:platforms` in the framework repository; the
-recorded results are from a build shortly before the 0.3.1 release. They install pinned host
+These checks run in real Chromium with `pnpm verify:platforms` in the framework repository. They
+install pinned host
 packages in a temporary directory, leaving Gyral's runtime dependency graph unchanged. They cover
 client mounts, not each host's SSR/hydration integration. The [spike
 report](https://github.com/gyraljs/gyral/blob/v0.3.5/docs/references/platform-spikes-2026-10-11.md)
-records the fixtures and limits.
+records the results, fixtures and limits.
 
 ## Server rendering in another framework
 

@@ -37,7 +37,7 @@ in this reference; [Packages](/docs/packages/) describes them.
 - **Types are the contract.** A component is `define<State, Msg, Props, Output>()(tag, spec)`;
   `ComponentSpec` in `@gyral/core` describes every field of `spec`.
 - **Helper types are exported.** `Reducer`, `Variant`, `ParseResult` and `StandardSchemaV1`
-  (type-only, since 0.3.2) are the types `Update`, `IntentParser` and the form helpers are
+  (type-only) are the types `Update`, `IntentParser` and the form helpers are
   built from, so a reducer or parser written outside a spec can be typed without copying
   Gyral's definitions.
 - **Functions return data.** Command helpers such as `get`, `delay` and `navigate` return a

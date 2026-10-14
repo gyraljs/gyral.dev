@@ -128,9 +128,8 @@ Swapping the tarballs alone passed every check before any app change. Then they 
 options one by one. Later prereleases made 0.3.1's breaking changes, the one-time exception before
 Gyral's API is locked. The one every app meets is `define`: `define<State, Msg>(tag, spec)` became
 `define<State, Msg>()(tag, spec)`. I tried that build on a copy of their code first. The type
-checker listed every call site, and the whole fix was 16 lines in 9 files. Every behavior change in
-0.3.1 is listed, with who it affects and its fix, in [Migrating from 0.3.0 to
-0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
+checker listed every call site, and the whole fix was 16 lines in 9 files. Every change in 0.3.1 is
+listed in the [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md).
 
 ## The Three.js stage as a custom element
 
@@ -419,7 +418,7 @@ If you do move, sabacc's route is a good one:
 
 Play at [sabacc.starwars.run](https://sabacc.starwars.run). The source is at
 [github.com/mikezupper/sabacc](https://github.com/mikezupper/sabacc).
-Gyral's side of this story is in [Migrating from 0.3.0 to 0.3.1](/docs/migrating-0-3-0-to-0-3-1/).
+Gyral's side of this story is in the [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md).
 
 Thanks to the sabacc team for a precise report, for letting me quote their code, and for reviewing
 a draft of this post. Several of 0.3.1's changes started as a line in their report.

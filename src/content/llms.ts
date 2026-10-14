@@ -261,7 +261,8 @@ export async function buildLlmsFiles(
   const blog = blogIndexTwin(posts);
   return {
     twins: [...docTwins, examples, demos, blog, ...postTwins],
-    llmsTxt: llmsTxt(version, guides, api, [examples, demos], [...background, blog, ...postTwins]),
+    // Blog posts are dated stories, not docs: they keep their twins but stay out of the index.
+    llmsTxt: llmsTxt(version, guides, api, [examples, demos], background),
     llmsFull: llmsFull(version, [...guides, ...api, ...background, examples, demos]),
     llmsSmall: await llmsSmall(version, root),
   };

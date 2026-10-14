@@ -111,7 +111,7 @@ context, `{ props, read }`: the component's [props](/docs/components/#props) and
 `Math.random()`, no DOM.
 
 A reducer written outside the spec, to share it or test it alone, is typed with `Reducer` and
-`Variant` from `@gyral/core` (type-only exports, new in 0.3.2). `Variant<Msg, 'Add'>` is the
+`Variant` from `@gyral/core` (type-only exports). `Variant<Msg, 'Add'>` is the
 member of `Msg` tagged `'Add'`:
 
 ```ts
