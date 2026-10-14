@@ -102,8 +102,8 @@ for a name you already saw in an example or an error, not to read the API type b
 Since 0.3.4, `get_api` steers back to that loop. On a function with a matching example, such as
 `define`, `each`, `fieldErrors` or `every`, it adds a short usage module and the call that gives
 working code for the task, such as `scaffold_component({ tag: "signup-form", kind: "form-native" })`.
-On a type, it adds a note that TypeScript infers it and that `check_snippet` names the real type
-errors. `get_api("*")` groups the functions by task, with the example or scaffold to start from,
+On a type, it adds a note that TypeScript infers it and that the real type errors come from
+`check_snippet` (on the local server) or your typecheck. `get_api("*")` groups the functions by task, with the example or scaffold to start from,
 and collapses the types into one line. The local stdio server also counts lookups: from the
 fourth `get_api` call since the last `get_example`, `scaffold_component` or `check_snippet`, its
 answers end with a nudge naming the next call. The HTTP server, hosted or your own, keeps no

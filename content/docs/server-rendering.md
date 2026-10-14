@@ -184,7 +184,7 @@ loader knows about is defined and the page has settled; without automatic compon
 import { componentsReady } from '@gyral/core';
 
 await componentsReady();
-document.querySelector('site-search')?.focus();
+document.querySelector<HTMLElement>('site-search')?.focus();
 ```
 
 Hydration is built into `@gyral/core`, and module order doesn't matter. When a server-rendered

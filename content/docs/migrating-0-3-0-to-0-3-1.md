@@ -21,6 +21,7 @@ app and its tests.
 TypeScript can infer the component's intent names from the keys of `intent`:
 
 ```text
+0.3.0                                   →  0.3.1
 define<State, Msg>('my-todos', spec)    →  define<State, Msg>()('my-todos', spec)
 define('my-badge', spec)                →  define()('my-badge', spec)
 const i = intents<Msg>()                →  const i = intentsOf<typeof Todos>()
@@ -45,6 +46,7 @@ Work that runs while a condition holds (a clock, polling, a socket, a store watc
 should be running. Gyral starts, restarts and stops them as state and props change:
 
 ```text
+0.3.0                                          →  0.3.1
 init: () => [s0, [listen(toMsg)]]              →  init: () => s0, subscriptions: () => [listen(toMsg)]
 PropsChanged reducer that restarts a watch     →  subscriptions: (s, p) => [watch(p.id)]
 periodic(1000, (ticks) => msg)                 →  every(1000, (now) => msg)
@@ -243,7 +245,7 @@ export async function loadingThenDone(
 }
 ```
 
-- **A cycle now fails the test.** When messages never stop (more than 100 flushes or busy
+- **A cycle now fails the test.** When messages never stop (more than 10,000 flushes or busy
   turns), `settled()` rejects with an error that names the likely cycle, like the loop guard.
 
 ## The router scrolls and moves focus
@@ -292,8 +294,8 @@ and logs see:
 - **On the server, a failing component no longer truncates the page.** It renders its `error`
   view (or nothing) and the rest of the page is sent; pass `onError: 'throw'` to `renderPage` to
   fail the whole page instead.
-- New error codes G0073 to G0078; G0031, G0040 and G0041 have new texts
-  ([error codes](/errors/)).
+- Error handling adds error codes G0073 to G0078 ([error codes](/errors/)). 0.3.1 is the first
+  release whose messages carry codes; see [short error messages in production](#short-error-messages-in-production).
 
 ## Exports removed from the public API
 

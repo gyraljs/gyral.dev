@@ -3,7 +3,7 @@ title: Browser support
 description: Gyral targets Baseline widely available browser features, with explicit fallbacks and progressive enhancement for newer platform APIs.
 useWhen: checking which browsers Gyral supports and what happens where a newer API is missing
 section: Reference
-order: 3
+order: 3.5
 ---
 
 # Browser support

@@ -224,8 +224,9 @@ then every `ms`. In model tests, `subscriptionsFor(Clock.spec, state, props)` re
 
 ## Framework messages
 
-Gyral sends five messages of its own. Their reducers are optional: leave one out and the
-message changes nothing.
+Gyral sends five messages of its own, plus three to
+[form-associated components](/docs/form-associated/) (`FormReset`, `FormDisabled` and
+`FormStateRestore`). Their reducers are optional: leave one out and the message changes nothing.
 
 | Message          | Sent when                                                                                                                                |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |

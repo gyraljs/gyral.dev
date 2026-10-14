@@ -3,7 +3,7 @@ title: Upgrading from 0.3.4 to 0.3.5
 description: Gyral 0.3.5 needs no code changes. The template compiler now reports a JSX-style component tag such as `<SignupForm>`, which never rendered.
 useWhen: upgrading an app from Gyral 0.3.4 to 0.3.5, or a build that fails with template rule 15 after upgrading
 section: Reference
-order: 2.8
+order: 2.6
 ---
 
 # Upgrading from 0.3.4 to 0.3.5

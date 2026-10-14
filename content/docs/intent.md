@@ -62,8 +62,8 @@ export const SearchBox = define<State, Msg>()('my-search-box', {
 
 ## Naming intents in markup
 
-The view puts `data-intent=${i.Search}` on an element. `i` holds the message tags, typed, so a
-misspelt intent is a compile error. When that element's trigger event fires, Gyral calls the
+The view puts `data-intent=${i.Search}` on an element. `i` holds the intent names (the keys of
+`intent`), typed, so a misspelt intent is a compile error. When that element's trigger event fires, Gyral calls the
 parser registered under the same name in `intent`, and sends whatever it returns through
 `update`.
 

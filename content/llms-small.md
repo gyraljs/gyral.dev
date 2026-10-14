@@ -19,7 +19,7 @@ Side effects never run in your code. A reducer returns **commands**, plain data 
 to do (`focus('#email')`, `delay(500, msg)`, `get(url, handlers)`, `command(driver, input,
 handlers)`), and a **driver** does it and sends the answer back as another message. Work that
 should keep running while some condition holds (a timer, a socket, a store watch) is returned
-from **`subscriptions(state)`**, and Gyral starts and stops it as the state changes.
+from **`subscriptions(state, props)`**, and Gyral starts and stops it as the state changes.
 
 Because the parts are pure functions of data, a test feeds messages to `update` and checks the
 state and the commands, with no browser (`step`, `run` from `@gyral/testing`). The same view
