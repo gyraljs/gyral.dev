@@ -103,3 +103,14 @@ The site pins every `@gyral/*` dependency to exactly `0.3.5`. 0.3.5 adds templat
 the refreshed docs snapshot in `@gyral/mcp`; the site needed no code changes, and none of its
 templates trips the rule. The examples and demos sync read `v0.3.5`.
 /docs/upgrading-0-3-4-to-0-3-5/ announces the release.
+
+## Addendum: Gyral 0.3.6 release (2026-10-14)
+
+The site pins every `@gyral/*` dependency to exactly `0.3.6`. 0.3.6 adds the G0014
+development warning for undefined custom-element tags, runs template rule 15 in the browser
+only in development and removes the empty `@gyral/ssr/hydrate` entry; the site needed no code
+changes. The docs describe only the current release (upgrade pages for earlier releases were
+removed and redirect to /docs/versioning/). `GYRAL_ERRORS_JSON` (src/content/errors.ts) lets a
+release branch read the upcoming error table from the gyral checkout, so the MCP snapshot's
+errors page lists the new code before npm has it. Hand-written repository links in the docs
+pages pin the release tag too; a content test fails when one names another tag.
