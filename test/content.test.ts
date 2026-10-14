@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -15,6 +15,7 @@ import { loadAllDocs, loadDoc, loadDocs } from '../src/content/docs.js';
 import { API_PACKAGES, docMarkdown, loadApiPages } from '../src/content/api.js';
 import { longDate, loadPost, loadPosts } from '../src/content/blog.js';
 import { ALL_EXAMPLES, excerpt } from '../src/content/examples.js';
+import { GYRAL_TAG } from '../src/content/release.js';
 
 describe('front matter', () => {
   it('reads strings, numbers and booleans', () => {
@@ -209,5 +210,22 @@ describe('API reference', () => {
     expect(pages.find((p) => p.slug === 'api/http')?.markdown).toContain('makeWebSocketDriver');
     expect(core?.html).not.toMatch(/\blit\b/i);
     expect(core?.headings.map((h) => h.text)).toContain('Functions');
+  });
+});
+
+describe('repository links', () => {
+  it('pin the documented release tag in every docs page', async () => {
+    // Links into gyraljs/gyral point at the release the site documents, never an older tag.
+    const dir = 'content/docs';
+    const stale: string[] = [];
+    for (const file of (await readdir(dir)).filter((f) => f.endsWith('.md'))) {
+      const text = await readFile(join(dir, file), 'utf8');
+      for (const [, tag] of text.matchAll(
+        /github\.com\/gyraljs\/gyral\/(?:blob|tree)\/(v\d[^/)\s]*)/g,
+      )) {
+        if (tag !== GYRAL_TAG) stale.push(`${file}: ${tag}`);
+      }
+    }
+    expect(stale).toEqual([]);
   });
 });
