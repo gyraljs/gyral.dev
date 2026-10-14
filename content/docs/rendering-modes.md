@@ -74,7 +74,7 @@ With `clientOnly: true` the browser bundle carries no hydration code: no seed re
 hydration chunk, and when your app has no other `import()`, Vite's preload helper goes too. The
 fallback for [invoker commands](/docs/intent/#invoker-commands) stays only when a module may make
 a component listen for `command` intents ([what the build reads](#what-the-build-reads)).
-Measured on Gyral's examples (gzip, 0.3.5):
+Measured on Gyral's examples (gzip, 0.3.6):
 
 | App         | Default: first load | Default: all chunks | `clientOnly: true` |
 | ----------- | ------------------- | ------------------- | ------------------ |

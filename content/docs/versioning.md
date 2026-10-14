@@ -18,7 +18,7 @@ Use documented public package entries. Entries containing `/internal` are for Gy
 packages and have no stability promise. A symbol being technically exported does not make
 an internal entry an application API. The
 [export inventory](https://github.com/gyraljs/gyral/blob/v0.3.5/docs/references/public-api-0.3.1.md)
-records the public boundary of 0.3.5: every entry and what it exports.
+records the public boundary of 0.3.6: every entry and what it exports.
 
 The `@gyral/*` packages and `create-gyral` release together at a shared version. Keep core, router,
 HTTP, time, testing, devtools, SSR and MCP aligned; verify your lockfile when a package manager
@@ -26,7 +26,7 @@ resolves multiple versions. The [package guide](/docs/packages/) explains what e
 
 ## Releases
 
-These guides describe **0.3.5**, the `latest` version on npm. Every package is published
+These guides describe **0.3.6**, the `latest` version on npm. Every package is published
 from GitHub Actions with npm provenance; install from the registry. Today npm has releases
 only, under the `latest` tag.
 
@@ -35,7 +35,7 @@ Deploy server output and client assets from the same build: stale HTML with new 
 templates can cause hydration mismatches. Versioned hashed assets help keep that agreement.
 
 Breaking changes wait for a new minor version, and that release gets an upgrade guide in these
-docs. On an older 0.3.x release? Install 0.3.5 and read the
+docs. On an older 0.3.x release? Install 0.3.6 and read the
 [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md).
 
 ## Upgrade with evidence

@@ -141,7 +141,8 @@ import './stepper.js';
 ```
 
 A module that nothing imports never runs, so its tag is never defined: `<my-stepper>` stays an
-empty unknown element, with no error in the console. A component that renders another
+empty unknown element. In development, Gyral warns in the console (G0014) when a tag on the page
+is still undefined 3 seconds after it loaded; production builds stay silent. A component that renders another
 component in its view imports that module too.
 
 ## Read input
@@ -234,4 +235,4 @@ rendering, hydration and virtual time. See [Testing](/docs/testing/).
 - Working with a coding agent? Connect it to Gyral's MCP server and skill:
   [Use Gyral with coding agents](/docs/coding-agents/).
 - Upgrading an existing app? [Versioning and stability](/docs/versioning/) explains how to move
-  to 0.3.5 safely.
+  to 0.3.6 safely.

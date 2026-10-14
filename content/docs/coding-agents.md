@@ -42,12 +42,14 @@ Any other client that speaks Streamable HTTP: add a server with the URL
 The hosted server has every tool except `check_snippet`, which needs your project's
 TypeScript and packages. It can run an older `@gyral/mcp` than the latest release; its
 `initialize` response and `https://mcp.gyral.dev/healthz` report the version it serves. This
-page describes the tools as `@gyral/mcp` 0.3.5 provides them.
+page describes the tools as `@gyral/mcp` 0.3.6 provides them.
 
 ## The local MCP server
 
 Run the server on your machine when the agent writes code. It adds `check_snippet`, which
-typechecks against the TypeScript and `@gyral/*` versions installed in your project, and
+typechecks against the TypeScript and `@gyral/*` versions installed in your project
+(TypeScript 5 or 6; TypeScript 7 has no compiler API, so there it asks you to run your own
+typecheck), and
 `scaffold_component` reads your `package.json`. Start it from the project directory:
 
 ```sh
@@ -101,9 +103,10 @@ for a name you already saw in an example or an error, not to read the API type b
 working code for the task, such as `scaffold_component({ tag: "signup-form", kind: "form-native" })`.
 On a type, it adds a note that TypeScript infers it and that the real type errors come from
 `check_snippet` (on the local server) or your typecheck. `get_api("*")` groups the functions by task, with the example or scaffold to start from,
-and collapses the types into one line. The local stdio server also counts lookups: from the
-fourth `get_api` call since the last `get_example`, `scaffold_component` or `check_snippet`, its
-answers end with a nudge naming the next call. The HTTP server, hosted or your own, keeps no
+and collapses the types into one line. The local stdio server also counts reads (every docs, API and example lookup) since the
+agent last called `scaffold_component` or `check_snippet`: from the third `get_example`, the
+fourth `get_api` or the eighth read of any kind, its answers end with a nudge that names the
+examples read and suggests adapting the closest one, then `check_snippet`. The HTTP server, hosted or your own, keeps no
 state between requests, so it never nudges.
 
 `scaffold_component` imports only packages your project has installed, and

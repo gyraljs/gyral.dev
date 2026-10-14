@@ -43,7 +43,7 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
   when its module runs, so a component in its own file (`src/signup-form.ts`) needs a
   side-effect import in `src/main.ts`, or in a module `main.ts` imports:
   `import './signup-form.js';`. Without it the tag is never defined: `<signup-form>` stays an
-  empty unknown element, with no error.
+  empty unknown element (development builds warn G0014 after 3 seconds).
 - **MUST render a component by its tag**: `<signup-form></signup-form>`, with the name given to
   `define()`. Never a JSX-style `<SignupForm />`: templates are HTML, which reads it as an
   unknown `<signupform>` element that renders nothing.
