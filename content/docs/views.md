@@ -162,7 +162,8 @@ rules runs in three places, with the same messages:
   prepares templates at runtime out of your bundle. With the optional `parse5` package
   installed, the compiler also compares each template with what a full HTML parser builds.
 - **The development runtime** (the dev server and tests) checks each template the first time it
-  renders and throws with the same message, naming where the template is written:
+  renders and throws with the same message (a production bundle built without the preset
+  leaves out one check, rule 15 on component tag names, to stay small), naming where the template is written:
   `at src/cart.ts:12:5`. Under Vite the preset gives the exact file, line and column; elsewhere
   they come from the stack trace. Hydration mismatches name it too.
 - **ESLint**, in your editor, with `@gyral/core/eslint`:

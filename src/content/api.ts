@@ -12,8 +12,7 @@ import { GYRAL_TAG } from './release.js';
 
 /**
  * Every published package and its public entry points, in reading order. Left out:
- * `@gyral/core/compiled` (what the template compiler emits, not API) and `@gyral/ssr/hydrate`
- * (kept for 0.2 imports; it does nothing since hydration moved into core).
+ * `@gyral/core/compiled` (what the template compiler emits, not API).
  */
 export const API_PACKAGES = [
   { name: 'core', entries: ['.', './storage', './indexeddb', './vite', './eslint'] },

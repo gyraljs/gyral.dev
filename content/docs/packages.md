@@ -10,7 +10,7 @@ order: 1
 
 Gyral is a set of small packages under the `@gyral` scope on npm, plus `create-gyral`, which
 sets up a new app. Every app needs `@gyral/core`; add the others when you need them. All nine
-packages are released together with the same version number (0.3.5), are ES modules with
+packages are released together with the same version number (0.3.6), are ES modules with
 TypeScript types, and are published from GitHub Actions with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
@@ -73,7 +73,7 @@ into are optional peer dependencies: install the ones you use.
 | `@gyral/core`    | `vite` ^8 (preset and compiler), `eslint` 9 or 10 (the plugin), `parse5` (compiler check) |
 | `@gyral/ssr`     | `vite` ^8 (the development server in `@gyral/ssr/node`)                                   |
 | `@gyral/testing` | `vitest` ^4.1 or ^5 (only for `@gyral/testing/vitest`)                                    |
-| `@gyral/mcp`     | `typescript` 5 or later (for `check_snippet`; it uses your project's compiler)            |
+| `@gyral/mcp`     | `typescript` 5 or 6 (for `check_snippet`, which uses your project's compiler)             |
 
 Validation in `@gyral/core`, `@gyral/http` and `@gyral/ssr` accepts any
 [Standard Schema](https://standardschema.dev) library; Gyral depends only on its types.
@@ -147,7 +147,7 @@ cancellation, concurrency lanes and retries.
 Apps ship only the features they use. `each`, `raw`, hooks, commands, stores and the prop builders
 register themselves when your code first calls them, so an app that never calls one doesn't
 bundle it, and the hydration code is a separate chunk that only server-rendered pages fetch.
-Measured on Gyral's examples at 0.3.5 (KiB gzip, production builds with the preset):
+Measured on Gyral's examples at 0.3.6 (KiB gzip, production builds with the preset):
 
 | App                      | First load | All chunks |
 | ------------------------ | ---------- | ---------- |

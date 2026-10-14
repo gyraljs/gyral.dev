@@ -73,8 +73,8 @@ only names intents that exist.
 
 `define()` registers the tag when its module runs, so the page's entry module (or a module it
 imports) must import every component module: `import './greeter.js';` in `src/main.ts`. A
-component module that nothing imports never runs, and its tag stays an empty unknown element,
-with no error. A parent that renders a child imports it too, as `Total` imports `Stepper`
+component module that nothing imports never runs, and its tag stays an empty unknown element;
+development builds warn (G0014) when a tag is still undefined 3 seconds after the page loaded. A parent that renders a child imports it too, as `Total` imports `Stepper`
 [below](#child-components-and-outputs).
 
 `define()` returns the element class. Its `spec` property is the object you passed in, which is
