@@ -12,14 +12,14 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       '@gyral/core':
-        specifier: 0.3.5
-        version: 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+        specifier: 0.3.6
+        version: 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@gyral/ssr':
-        specifier: 0.3.5
-        version: 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+        specifier: 0.3.6
+        version: 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@gyral/time':
-        specifier: 0.3.5
-        version: 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+        specifier: 0.3.6
+        version: 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
     devDependencies:
       '@axe-core/playwright':
         specifier: 4.13.0
@@ -28,17 +28,17 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.12.0)
       '@gyral/devtools':
-        specifier: 0.3.5
-        version: 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+        specifier: 0.3.6
+        version: 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@gyral/http':
-        specifier: 0.3.5
-        version: 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+        specifier: 0.3.6
+        version: 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@gyral/router':
-        specifier: 0.3.5
-        version: 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+        specifier: 0.3.6
+        version: 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@gyral/testing':
-        specifier: 0.3.5
-        version: 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))(vitest@5.0.3)
+        specifier: 0.3.6
+        version: 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))(vitest@5.0.3)
       '@hono/node-server':
         specifier: ^2.1.3
         version: 2.1.3(hono@4.13.13)
@@ -375,8 +375,8 @@ packages:
   '@fontsource-variable/sora@5.3.0':
     resolution: {integrity: sha512-h8kHta4Z8SkfUGeI82TUy1n3rbrKpBRGwuk4t4qCwto5oEHxlbOFD2yGP+Df5fbmTXwKGn+o667vYp0E4K8Whw==}
 
-  '@gyral/core@0.3.5':
-    resolution: {integrity: sha512-vBmmsRWmB5PWkZcvLhPwXiBkzWLHEtmFUS4jiAkaKLp4E/ln3u8wRoxfNcQcITyjom5Ae2BpcEDRbg7McNwHOw==}
+  '@gyral/core@0.3.6':
+    resolution: {integrity: sha512-Mk6PbELKMHgAO0C5gj0wfLfnq6+rMhLCpKSN/9lm/dNAnJFE8TXVf3vkUsORdTV5ifcMN7eHH3DWdbp4K329QQ==}
     hasBin: true
     peerDependencies:
       eslint: ^9.0.0 || ^10.0.0
@@ -390,33 +390,33 @@ packages:
       vite:
         optional: true
 
-  '@gyral/devtools@0.3.5':
-    resolution: {integrity: sha512-+hAhgG/WGYW5hHTJMhzrpik2k0ctd3qkEm+Mb5481iSbq9dkVc405ttUhCFbST7HQnC5bMWcMrlQW0ZJgjN8cQ==}
+  '@gyral/devtools@0.3.6':
+    resolution: {integrity: sha512-sc88JJmPcB1MPBCRyVSW47TX+cIdUMzDLnUId7Srr/xTDsbh4dFm54PYtZOc5hrc1y0io4M8VYM9PVPxiWHG8w==}
 
-  '@gyral/http@0.3.5':
-    resolution: {integrity: sha512-zClEjkyio4qpuoTekAtyK9KYid0oNAY3UChkMRlZtKdaEqfeRpEVyacto59b78urKb7JSSuchJLYytuEKhxJ/Q==}
+  '@gyral/http@0.3.6':
+    resolution: {integrity: sha512-QWxwPMih81tfl+6xKAH/QADw18p9qBjfpxuPNqinNDsOhjCi/V6JWogIuf6JpqJdrQpNV9OBbMPwCqfB1JKhHw==}
 
-  '@gyral/router@0.3.5':
-    resolution: {integrity: sha512-ibHPtumRenISl3QqS9rRRy/c1ChX5dRG5mFKam9iXnVeRqtwGUcm/DM3VlCNdJn7GrAHzJo4yZvdVn5tzQj5+w==}
+  '@gyral/router@0.3.6':
+    resolution: {integrity: sha512-KvkkOjbhxLvOMeCVk9bzH4iuoxzZpmDk3P4gvfBoaA/pG5xIN4h0PrWR7dyAog+pD8qySdTMR15+a3TDUW+NQQ==}
 
-  '@gyral/ssr@0.3.5':
-    resolution: {integrity: sha512-4qD67F0EwDySoUwvLZeBvlWbY/u8iSBCX8kunIls8LJPuGxqIU1lMMLm01asWRu1CEzUZNZEkK3lbLFSwYOswg==}
+  '@gyral/ssr@0.3.6':
+    resolution: {integrity: sha512-I3MTztmGYskcpN0MeEuwc6ptSDG/j+AYFsewZe04m/+Mb3cLEsQ8mwjkrSGdJ3RjH0gLtWMufVg1kRQIfC2agQ==}
     peerDependencies:
       vite: ^8.0.0
     peerDependenciesMeta:
       vite:
         optional: true
 
-  '@gyral/testing@0.3.5':
-    resolution: {integrity: sha512-89OpVbFSbYwwr+KwT1s2mnx+t8Gh1D+R8RtDV8/UtAOF8BzS1YB9aVMSXNMIh2b5pB2HcPt+2gM7buVZPmImLQ==}
+  '@gyral/testing@0.3.6':
+    resolution: {integrity: sha512-Kzq497HcwNHeDxlOkL1X0KtPzjTDn+A5nHhDwjAEyhwES8EPNjqcf1Xdfs6N5LPgWvHcbZQV1fEWQdA/SSNaaw==}
     peerDependencies:
       vitest: ^4.1.0 || ^5.0.0
     peerDependenciesMeta:
       vitest:
         optional: true
 
-  '@gyral/time@0.3.5':
-    resolution: {integrity: sha512-Bpzb1AnGj2Y/rvgJDryeXe6Q6dgwKqjEPLOuHQT3YPE/+R+tduRAFAOOdd8PTlbOKPot/fMKSCMbVl18bIvUTw==}
+  '@gyral/time@0.3.6':
+    resolution: {integrity: sha512-JT0aq5hMWlL4fYOuA9mtGVJV3LnRzCuwSmnLsSjheW/hn61PYUmXZdOvRaqm2RlIE4d1C8oi5lyY7QO/mkZxPQ==}
 
   '@hono/node-server@2.1.3':
     resolution: {integrity: sha512-TA//nWMqPhbfdfneACk6t5a9eqbS9lABEPyKn0/xZTah3H3U2XaVg85rJFl0/Fyit0I552YDHgXGVSf3GwqbUw==}
@@ -2032,7 +2032,7 @@ snapshots:
 
   '@fontsource-variable/sora@5.3.0': {}
 
-  '@gyral/core@0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@gyral/core@0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
       '@standard-schema/spec': 1.1.0
     optionalDependencies:
@@ -2040,34 +2040,34 @@ snapshots:
       parse5: 8.0.1
       vite: 8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15)
 
-  '@gyral/devtools@0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@gyral/devtools@0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
-      '@gyral/core': 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+      '@gyral/core': 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
     transitivePeerDependencies:
       - eslint
       - parse5
       - vite
 
-  '@gyral/http@0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@gyral/http@0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
-      '@gyral/core': 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+      '@gyral/core': 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@standard-schema/spec': 1.1.0
     transitivePeerDependencies:
       - eslint
       - parse5
       - vite
 
-  '@gyral/router@0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@gyral/router@0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
-      '@gyral/core': 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+      '@gyral/core': 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
     transitivePeerDependencies:
       - eslint
       - parse5
       - vite
 
-  '@gyral/ssr@0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@gyral/ssr@0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
-      '@gyral/core': 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+      '@gyral/core': 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@standard-schema/spec': 1.1.0
     optionalDependencies:
       vite: 8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15)
@@ -2075,9 +2075,9 @@ snapshots:
       - eslint
       - parse5
 
-  '@gyral/testing@0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))(vitest@5.0.3)':
+  '@gyral/testing@0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))(vitest@5.0.3)':
     dependencies:
-      '@gyral/core': 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+      '@gyral/core': 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
       '@sinonjs/fake-timers': 15.4.0
       '@standard-schema/spec': 1.1.0
     optionalDependencies:
@@ -2087,9 +2087,9 @@ snapshots:
       - parse5
       - vite
 
-  '@gyral/time@0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
+  '@gyral/time@0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))':
     dependencies:
-      '@gyral/core': 0.3.5(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
+      '@gyral/core': 0.3.6(eslint@10.12.0)(parse5@8.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(tsx@4.23.15))
     transitivePeerDependencies:
       - eslint
       - parse5
