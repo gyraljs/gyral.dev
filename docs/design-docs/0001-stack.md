@@ -95,3 +95,11 @@ answers; the site needed no code changes. The examples and demos sync read `v0.3
 lets a release branch build its llms files under the upcoming version before that version is on
 npm, for the MCP docs snapshot; the deployed build leaves it unset and reads the installed
 `@gyral/core`.
+
+## Addendum: Gyral 0.3.5 release (2026-10-14)
+
+The site pins every `@gyral/*` dependency to exactly `0.3.5`. 0.3.5 adds template rule 15
+(`@gyral/core`: a JSX-style component tag such as `<SignupForm>` is a template error) and ships
+the refreshed docs snapshot in `@gyral/mcp`; the site needed no code changes, and none of its
+templates trips the rule. The examples and demos sync read `v0.3.5`.
+/docs/upgrading-0-3-4-to-0-3-5/ announces the release.
