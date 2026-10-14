@@ -221,6 +221,7 @@ async function checkNonHtml() {
     '/llms.txt',
     '/llms-full.txt',
     '/llms-small.txt',
+    '/context7.json',
   ]) {
     const res = await fetch(base + path);
     if (res.status !== 200) fail('non-HTML', `${path} → ${String(res.status)}`);

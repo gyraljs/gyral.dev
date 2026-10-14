@@ -244,6 +244,7 @@ describe('_headers', () => {
       '/llms.txt',
       '/llms-full.txt',
       '/docs/intent/index.md',
+      '/context7.json',
     ]) {
       expect(names(path), path).not.toContain('content-security-policy');
       expect(names(path), path).toContain('x-content-type-options');
