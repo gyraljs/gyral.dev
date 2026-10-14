@@ -7,7 +7,7 @@
 /blog/why-i-rebuilt-cyclejs /blog/why-i-built-gyral/ 301
 /blog/why-i-rebuilt-cyclejs/index.md /blog/why-i-built-gyral/index.md 301
 
-# Upgrade guides for releases before 0.3.5 were removed on 2026-10-14; the changelog keeps the history.
+# Upgrade and migration guides up to 0.3.5 were removed on 2026-10-14; the changelogs keep the history.
 /docs/migrating-0-2-to-0-3/ /docs/versioning/ 301
 /docs/migrating-0-2-to-0-3 /docs/versioning/ 301
 /docs/migrating-0-2-to-0-3/index.md /docs/versioning/index.md 301
