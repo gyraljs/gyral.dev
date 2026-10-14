@@ -130,7 +130,7 @@ GYRAL_MCP_PUBLIC_ORIGIN=http://127.0.0.1:3000 npx -y @gyral/mcp http
 
 It is configured by environment variables only; `gyral-mcp http --help` lists them. Put it
 behind TLS, and pin the package version you deploy. The
-[package README](https://github.com/gyraljs/gyral/blob/v0.3.5/packages/mcp/README.md#public-hosting)
+[package README](https://github.com/gyraljs/gyral/blob/v0.3.6/packages/mcp/README.md#public-hosting)
 has the details.
 
 ## The agent skill
@@ -151,7 +151,7 @@ In Claude Code, add Gyral's repository as a plugin marketplace and install the p
 From a shell: `claude plugin marketplace add gyraljs/gyral && claude plugin install gyral@gyral`.
 
 Other agents: copy
-[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.5/skills/gyral) into the agent's
+[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.6/skills/gyral) into the agent's
 skills or rules folder, or point it at `SKILL.md`.
 
 ## Docs for agents
