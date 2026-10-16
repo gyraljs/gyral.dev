@@ -377,6 +377,8 @@ See [Deploying](/docs/deploying/) for both.
 `renderToString(value)` from `@gyral/ssr` renders a template to a string, and
 `styleHashes()` lists the CSP hashes of every registered component's styles, for a policy you
 build yourself. Import them only from server code, so client bundles carry no server renderer.
+`renderToString` is also what a Rust server calls when it embeds Gyral through `gyral-rs`
+([Rust servers](/docs/rust-servers/#embedded-rendering-with-gyral-rs)).
 
 ## Production checklist
 

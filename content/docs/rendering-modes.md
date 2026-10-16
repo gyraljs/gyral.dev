@@ -140,4 +140,6 @@ This site server-renders its pages and hydrates two islands, so it builds withou
 - **Per request**: [Server rendering](/docs/server-rendering/).
 - **Shipping it**: [Deploying](/docs/deploying/) covers static hosts, Node, Bun and edge
   runtimes.
+- **A Rust backend**: [Rust servers](/docs/rust-servers/) covers each mode with Rust as the
+  web server.
 - **Less JavaScript on each page**: [Code-splitting and lazy loading](/docs/code-splitting/).
