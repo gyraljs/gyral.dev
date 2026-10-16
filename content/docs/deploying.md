@@ -14,7 +14,8 @@ What you deploy depends on how your pages [render](/docs/rendering-modes/):
 - **Any page rendered per request**: a small server that runs your app, plus the same files.
 
 Either way, the build output is ordinary: HTML, content-hashed JavaScript and CSS, and your
-public files. Gyral adds no runtime service of its own.
+public files. Gyral adds no runtime service of its own. If your server is written in Rust, see
+[Rust servers](/docs/rust-servers/).
 
 ## Static hosts
 
