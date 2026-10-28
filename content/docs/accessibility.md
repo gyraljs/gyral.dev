@@ -28,7 +28,7 @@ not replace a visible label.
 A label and its control must share the relevant tree. A page's `label for` cannot simply
 point at an input hidden in another component's shadow root. Put the label inside the
 component, or use a deliberate naming contract that copies the external label into its
-accessible name. The skill's [view recipes](https://github.com/gyraljs/gyral/blob/v0.3.6/skills/gyral/references/view.md#naming-a-components-form-from-the-page)
+accessible name. The skill's [view recipes](https://github.com/gyraljs/gyral/blob/v0.3.7/skills/gyral/references/view.md#naming-a-components-form-from-the-page)
 include naming a component's form from the page; the recipe is application code, not a Gyral
 export.
 

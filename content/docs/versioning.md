@@ -17,7 +17,7 @@ interchangeable dependency update.
 Use documented public package entries. Entries containing `/internal` are for Gyral's own
 packages and have no stability promise. A symbol being technically exported does not make
 an internal entry an application API. The
-[export inventory](https://github.com/gyraljs/gyral/blob/v0.3.6/docs/references/public-api-0.3.1.md)
+[export inventory](https://github.com/gyraljs/gyral/blob/v0.3.7/docs/references/public-api-0.3.1.md)
 records the public boundary of 0.3.7: every entry and what it exports.
 
 The `@gyral/*` packages and `create-gyral` release together at a shared version. Keep core, router,
