@@ -112,6 +112,11 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
       'Development builds look for custom-element tags on the page that nothing has defined, 3 seconds after load and again after each later `define()`. Such an element renders nothing: usually the entry never imports the module that defines it.',
     fix: 'Import the component’s module from the entry (or from a module the entry imports). For a third-party element, load its package; ignore the warning for an element you define later on purpose.',
   },
+  15: {
+    explanation:
+      'Development only: two copies of `@gyral/core` run in the page. A value one copy makes, such as a stylesheet from `css` or a store, doesn’t work in the other, so components fail far from the cause (`styles.flatMap is not a function`). `gyralVitePreset` also warns at startup, in dev and builds, when the package is installed more than once, naming each copy’s version, folder and the packages that use it.',
+    fix: 'Pin `@gyral/core` to one version with your package manager’s overrides (pnpm or npm `overrides`, Yarn `resolutions`) and reinstall. A library should list `@gyral/core` as a peer dependency, so it shares the app’s copy.',
+  },
   21: {
     explanation:
       'A prop value failed its type or its schema, so it is treated as missing and its `default` applies. Attributes are checked in every build; property sets and hydration seeds in development only.',
@@ -124,8 +129,13 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   },
   23: {
     explanation:
-      'A component declares props named after built-in element properties (`hidden`, `title`, `id`). The prop would replace the platform’s property, so setting it would change how the element behaves. Development throws; production warns.',
-    fix: 'Rename the props.',
+      'A component declares props named like a member every element already has: a built-in property (`hidden`, `title`, `id`), or one of Gyral’s (`state`, `send`, `drivers`, `stores`, `initialMessages`, the custom-element callbacks). The prop would replace the member: a prop named `hidden` hides the element, one named `state` hides the component’s model. TypeScript rejects these names and development throws; production warns about built-in names.',
+    fix: 'Rename the property. One of Gyral’s names can stay the public attribute: `badge: prop.string({ attribute: "state" })`.',
+  },
+  24: {
+    explanation:
+      'Development only: the element carries an attribute HTML lowercased from a camelCase prop’s name, such as `playerbase` for `playerBase`, written in the page’s HTML or set by a host framework. The prop reads its kebab-case attribute, `player-base`, so the value never reached it.',
+    fix: 'Write the prop’s attribute (`player-base="…"`), or set the property in code. In templates, the build and ESLint report the same mistake ([template rules](/docs/views/#checked-before-it-runs)).',
   },
   // Scheduling
   30: {
@@ -172,7 +182,7 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   43: {
     explanation:
       'The command’s driver is a token: `defineDriver<I, O, E>(name)` without an implementation of its own. Nothing above the component provides that name, so the command can’t run. It is reported through the error channel (phase `command`); `onFailure` isn’t called, because there was no driver to fail.',
-    fix: 'Provide the driver where the app starts, `provideDrivers(document.body, { name: implementation })`, or on the element with `el.drivers`. In tests, pass a fake by the same name ([Drivers the app provides](/docs/effects/#drivers-the-app-provides)).',
+    fix: 'Provide the driver where the app starts, `provideDrivers(document.body, { name: implementation })`, or on the element with `el.drivers`. A page provides it before its components first render: before importing them, or later in the same task with no `await` in between ([Substituting drivers](/docs/effects/#substituting-drivers)). In tests, pass a fake by the same name ([Drivers the app provides](/docs/effects/#drivers-the-app-provides)).',
   },
   // Stores
   50: {
@@ -227,6 +237,11 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
     fix: 'Fix the mismatch the warning describes; reproducing it in development gives the full message and the template’s location.',
   },
   // Templates
+  69: {
+    explanation:
+      'Production only: a `?modal` or `?popover-open` binding ran in a build that left the dialog and popover code out, so the dialog didn’t open. The build adds that code when a module it reads binds one, in source or in a package’s compiled templates, and it doesn’t read installed packages that don’t depend on Gyral.',
+    fix: 'Make the package that ships the template depend on `@gyral/core` (a library lists it as a peer dependency), so the build reads it, or move the template into your own source.',
+  },
   70: {
     explanation:
       'A bundle built with the Vite preset leaves out the runtime template preparer, so every `html` template must be precompiled, and this one wasn’t. The build normally fails before this can happen.',
