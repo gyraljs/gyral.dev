@@ -138,7 +138,17 @@ export const Badge = define<Stateless, never, Props>()('my-badge', {
 A prop named `maxValue` reads the attribute `max-value`; pass `attribute: 'name'` to choose
 another, or `attribute: false` for a property only. The options are `required`, `default`,
 `attribute` and `schema`, and `equals` for `prop.json` and `prop.value`
-([below](#when-a-prop-counts-as-changed)).
+([below](#when-a-prop-counts-as-changed)). Templates write that attribute name: HTML lowercases
+attribute names, so `maxValue=${n}` on a custom element would set `maxvalue`, which no prop
+reads, and the build and ESLint report it. Write `max-value=${n}`, or set the property with
+`.maxValue=${n}`. Development also warns ([G0024](/errors/#G0024)) when a page's HTML or a
+host framework writes the lowercased name.
+
+A prop can't take the name of a member every element already has: a built-in property such as
+`hidden` or `title`, which would change what the platform does, or one of Gyral's, `state`,
+`send`, `drivers`, `stores` and `initialMessages`, which would hide the component's model.
+TypeScript rejects the name and development throws ([G0023](/errors/#G0023)). Rename the
+property, and keep the attribute if pages use it: `badge: prop.string({ attribute: 'state' })`.
 
 The schemas are [Standard Schema](https://standardschema.dev), so any library that implements it
 works: valibot, zod, ArkType. `string`, `number` and `boolean` carry tiny built-in schemas, so

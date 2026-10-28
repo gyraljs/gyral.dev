@@ -163,7 +163,8 @@ rules runs in three places, with the same messages:
   installed, the compiler also compares each template with what a full HTML parser builds.
 - **The development runtime** (the dev server and tests) checks each template the first time it
   renders and throws with the same message (a production bundle built without the preset
-  leaves out one check, rule 15 on component tag names, to stay small), naming where the template is written:
+  leaves out two checks, on component tag names and custom-element attribute names, to stay
+  small), naming where the template is written:
   `at src/cart.ts:12:5`. Under Vite the preset gives the exact file, line and column; elsewhere
   they come from the stack trace. Hydration mismatches name it too.
 - **ESLint**, in your editor, with `@gyral/core/eslint`:
@@ -183,7 +184,7 @@ control, a self-closing `<my-el />` (HTML ignores the slash, so the element swal
 follows it), an unquoted `class=a${b}`, markup the browser would repair (a `<tr>` directly in a
 `<table>`, a `<div>` inside a `<p>`), an HTML element such as `<button>` inside an `<svg>` (it
 would become an unknown SVG element that renders nothing), a bound `xlink:href=${…}`, a
-`${…}` inside `<script>` or `<style>`, a list row that reads the view's variables, and a JSX-style `<SignupForm>` where the component's tag `<signup-form>` belongs. Each
+`${…}` inside `<script>` or `<style>`, a list row that reads the view's variables, a JSX-style `<SignupForm>` where the component's tag `<signup-form>` belongs, and a camelCase attribute on a custom element (`<pool-card playerBase=${…}>`, which HTML lowercases to `playerbase`, an attribute no prop reads). Each
 message says what to write instead.
 
 The ESLint config also reports a function written in a hole (`${() => …}`), which is never

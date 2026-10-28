@@ -10,7 +10,7 @@ order: 1
 
 Gyral is a set of small packages under the `@gyral` scope on npm, plus `create-gyral`, which
 sets up a new app. Every app needs `@gyral/core`; add the others when you need them. All nine
-packages are released together with the same version number (0.3.6), are ES modules with
+packages are released together with the same version number (0.3.7), are ES modules with
 TypeScript types, and are published from GitHub Actions with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
@@ -107,8 +107,12 @@ export default defineConfig({
   Node, load `@gyral/*` (and your dependencies that use them) in server code under `vite dev`, so
   server rendering there gets development output and shares one copy of `@gyral/core`. If your
   config has plugins of its own, list them all: `plugins: [...gyralVitePreset().plugins, mine()]`.
-- **`optimizeDeps.include`**: empty by default. If Vite discovers a dependency during the first
+- **`optimizeDeps.include`**: the browser entry points of every Gyral package installed for the
+  app, so the dev server and Vitest pre-bundle them together and never load a second copy of
+  `@gyral/core` partway through a run. If Vite discovers another dependency during the first
   browser test run and reloads the page, list it: `gyralVitePreset({ optimize: ['some-dep'] })`.
+  The preset also warns once when `@gyral/core` is installed more than once
+  ([G0015](/errors/#G0015)): pin one version with your package manager's overrides.
 - **`clientOnly: true`**, for apps no server renders, leaves the hydration code out of the
   browser bundle. See [Client-only builds](/docs/rendering-modes/#client-only-builds).
 - **`components: true`** loads each component's module once its tag is on the page, so pages
@@ -147,13 +151,13 @@ cancellation, concurrency lanes and retries.
 Apps ship only the features they use. `each`, `raw`, hooks, commands, stores and the prop builders
 register themselves when your code first calls them, so an app that never calls one doesn't
 bundle it, and the hydration code is a separate chunk that only server-rendered pages fetch.
-Measured on Gyral's examples at 0.3.6 (KiB gzip, production builds with the preset):
+Measured on Gyral's examples at 0.3.7 (KiB gzip, production builds with the preset):
 
 | App                      | First load | All chunks |
 | ------------------------ | ---------- | ---------- |
 | hello-world              | 9.6        | 12.0       |
 | hello-world, client-only | 8.5        | 8.5        |
-| isomorphic (SSR)         | 15.3       | 18.3       |
+| isomorphic (SSR)         | 15.4       | 18.4       |
 | no-js-first (SSR, forms) | 19.8       | 20.0       |
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any

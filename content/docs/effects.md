@@ -427,6 +427,13 @@ import { csrfFromMeta, makeHttpDriver } from '@gyral/http';
 provideDrivers(document.body, { http: makeHttpDriver({ headers: csrfFromMeta('csrf-token') }) });
 ```
 
+A component starts its `init` commands after its first render, a microtask after it connects.
+So `provideDrivers` anywhere in the entry's synchronous code is in time, even when the entry
+imports its components first and their elements are already in the page. After an `await` it
+is too late for those elements: provide drivers before awaiting, or create the element in code
+and set its `drivers` before inserting it. A token nothing provides is reported as
+[G0043](/errors/#G0043).
+
 `csrfFromMeta` reads `<meta name="csrf-token">` when each request runs, so components never read
 the DOM for it. The driver's headers are the one place a CSRF token from a `<meta>` is
 configured. Development builds warn once when a

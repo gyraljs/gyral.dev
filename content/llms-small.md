@@ -46,7 +46,8 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
   empty unknown element (development builds warn G0014 after 3 seconds).
 - **MUST render a component by its tag**: `<signup-form></signup-form>`, with the name given to
   `define()`. Never a JSX-style `<SignupForm />`: templates are HTML, which reads it as an
-  unknown `<signupform>` element that renders nothing.
+  unknown `<signupform>` element that renders nothing. Attributes on it are kebab-case, as its
+  props read them: `max-value=${n}` (or the property, `.maxValue=${n}`), never `maxValue=`.
 - **MUST write messages as a tagged union** with `readonly` fields:
   `{ readonly _tag: 'Toggle'; readonly id: number }`. `update` needs a reducer for every tag.
 - **MUST keep reducers, `init` and `view` pure.** Return a new object
