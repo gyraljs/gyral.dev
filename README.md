@@ -16,9 +16,9 @@ pnpm dev      # http://localhost:5400
 pnpm check    # the full gate, including a production build and a browser smoke test
 ```
 
-`@gyral/*` comes from npm (pinned to `0.3.7`), matching the version the docs describe. A checkout of
+`@gyral/*` comes from npm (pinned to `0.3.8`), matching the version the docs describe. A checkout of
 `gyraljs/gyral` is only needed for `pnpm sync:examples` and `pnpm sync:demos`: `GYRAL_DIR` if set,
-else the sibling folder `../gyral`. They read its git tag for the installed version (`v0.3.7`),
+else the sibling folder `../gyral`. They read its git tag for the installed version (`v0.3.8`),
 not `main`, so unreleased framework work never reaches the site.
 
 ## Contributing to the docs

@@ -10,7 +10,7 @@ import { absolute, COPYRIGHT_YEAR, LINKS, NAV, SITE_NAME, TAGLINE } from '../sit
 export interface Assets {
   readonly stylesheet: string;
   /**
-   * The islands' client modules (gyralVitePreset({ components }) finds every define()'d tag under
+   * The islands' client modules (gyral({ components }) finds every define()'d tag under
    * src/). renderPage loads, preloads and hashes only the ones a page rendered, so a page with no
    * island ships no component JavaScript. Undefined in tests.
    */
