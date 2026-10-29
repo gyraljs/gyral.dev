@@ -10,7 +10,7 @@ order: 2
 
 These are the beliefs Gyral is built on. Each one explains a decision you'll meet in the API.
 The full reasoning lives in the decision records in
-[Gyral's repository](https://github.com/gyraljs/gyral/tree/v0.3.7/docs/design-docs).
+[Gyral's repository](https://github.com/gyraljs/gyral/tree/v0.3.8/docs/design-docs).
 
 ## The platform is the framework
 
