@@ -123,3 +123,26 @@ gyraljs repository (Gyral's ADR 0032, bead gyral-337.7). `minimumReleaseAge: 201
 as long. A Gyral release the owner verified comes in early through an exact-version
 `minimumReleaseAgeExclude` entry, removed once it is two weeks old. Vite moved to 8.3.4 for
 GHSA-587h-7wmj-h5pm and five other advisories fixed in 8.3.3 (gyral-337.8).
+
+## Addendum: dependency update for Gyral 0.3.8 (2026-10-29)
+
+Every dependency moved to its newest version that is two weeks old (Gyral epic gyral-337), except
+TypeScript, which stays on 6.0 because typescript-eslint supports only `<6.1`, and `@gyral/*`,
+which stays on 0.3.7 until 0.3.8 is published. The majors are `@types/node` 26 (Gyral supports
+Node 24 and 26; the types follow 26) and pixelmatch 8, whose OKLab colour metric keeps the API
+and the `threshold` scale: the visual baselines still match. Playwright is 1.64.1.
+
+pnpm moved from 10.33.2 to 12.14.0. pnpm 12 checks the lockfile against the age gate on every
+install, so the verified Gyral 0.3.7 comes in through exact `minimumReleaseAgeExclude` entries
+(until 2026-11-11 or 0.3.8). It also fails on build scripts nobody decided on, so `allowBuilds`
+lists esbuild as not run (pnpm 10 skipped its postinstall too). The lockfile gains a first
+document that pins pnpm itself. Cloudflare's preinstalled pnpm 10 switches to the
+`packageManager` version (checked with a standalone 10.11.1); `PNPM_VERSION` on the Pages project
+would pin it otherwise. The CI workflow pins its actions by commit (checkout v7.0.1 without
+persisted credentials, pnpm/action-setup v6.1.0, setup-node v7.1.0) and Node to 24.22.0.
+
+Held back as too young: eslint 10.13.0 (until 2026-10-30), stylelint-plugin-use-baseline 1.4.8
+(11-01), typescript-eslint 8.72 (11-02), vite 8.3.5 and pnpm 12.15 (11-04), hono 4.13.14 (11-08),
+marked 18.1.2 (11-09) and `@types/node` 26.6.6 (11-11). fast-uri 3.1.9 (11-02) fixes four
+advisories in URI parsing, reached here only through ajv validating the config of stylelint's
+`table` output, so it waits too.
