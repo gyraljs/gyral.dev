@@ -105,7 +105,7 @@ operation. Support varies by browser; keep CSP's other protections in place.
 
 `renderPage({ csp })` hashes the styles of the components imported by the server. A server or
 proxy that only builds the header, without importing your components, can take the hashes
-from the build instead. After the client build (`gyralVitePreset({ components: true })`), and
+from the build instead. After the client build (`gyral({ components: true })`), and
 before `.vite` is deleted, `writeComponentStyleManifest` from `@gyral/ssr/static` imports the
 app's component modules in a separate Node process and writes their real `<style>` hashes to a
 JSON file:

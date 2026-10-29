@@ -14,9 +14,10 @@ major browser engines for at least 30 months. The repository uses the Browsersli
 feature floor, not a promise to support one permanently fixed browser version.
 
 Custom elements, Shadow DOM, template cloning, constructable stylesheets and declarative
-shadow roots are part of that floor. Gyral renders with these native primitives. Node 24+
-is the repository's server/build target; browser support and server-runtime support are
-separate questions.
+shadow roots are part of that floor. Gyral renders with these native primitives. On the server
+and in builds, Gyral supports both Node LTS lines, 24 and 26, and its gate runs on each;
+`create-gyral` and `@gyral/mcp` also run on Node 22.12 and later, and `@gyral/codemod` on 22.18
+or later and 24.11 or later. Browser support and server-runtime support are separate questions.
 
 ## What happens without newer APIs
 

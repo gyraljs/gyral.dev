@@ -215,11 +215,31 @@ export interface Move {
   readonly to: string;
 }
 
-/** Provided once by the app: provideDrivers(document.body, { session: makeSession(url) }). */
+/** A token: the app's entry provides its implementation (below). */
 export const session = defineDriver<Move, { readonly accepted: boolean }, string>('session');
 
 export const sendMove = <M>(move: Move, answered: (accepted: boolean) => M): Command<M> =>
   command(session, move, { onSuccess: (r) => answered(r.accepted) });
+```
+
+The app's entry provides the implementation from the token itself. `session.provide(run)` is a
+driver with the token's name, concurrency and `toError`, and a `run` checked against the token's
+input and output, so a wrong type fails to compile and the name can't be mistyped. A token for a
+stream is provided the same way, with `subscription(token, subscribe)`
+([State Gyral doesn't own](/docs/outside-state/#a-store-per-page-provided-by-a-token)):
+
+```ts
+// src/app-drivers.ts
+import { provideDrivers } from '@gyral/core';
+import { session } from './session.js';
+
+provideDrivers(document.body, [
+  session.provide(async (move, { signal }) => {
+    const body = JSON.stringify(move);
+    const response = await fetch('/api/moves', { method: 'POST', body, signal });
+    return { accepted: response.ok };
+  }),
+]);
 ```
 
 ### Retries
@@ -243,15 +263,15 @@ and 5xx. It doesn't read `Retry-After`.
 import { provideDrivers, retry } from '@gyral/core';
 import { makeHttpDriver, retryableHttpError } from '@gyral/http';
 
-provideDrivers(document.body, {
-  http: retry(makeHttpDriver({ baseUrl: '/api', timeoutMs: 8_000 }), {
+provideDrivers(document.body, [
+  retry(makeHttpDriver({ baseUrl: '/api', timeoutMs: 8_000 }), {
     times: 2,
     delayMs: 300,
     backoff: 'exponential',
     jitter: true,
     retryIf: retryableHttpError,
   }),
-});
+]);
 ```
 
 `HttpError` is a union, so a `switch` that handles every case needs one for timeouts:
@@ -372,7 +392,8 @@ export const CopyLink = define<State, Msg, { readonly url: string }>()('my-copy-
   click's message, as above: with a synchronous parser, it starts while the click is still
   being handled. Started later, the browser rejects it with `NotAllowedError`, `denied` here.
 - **Tests never touch the real clipboard**: they substitute the driver by name,
-  `el.drivers = { clipboard: fakeDriver('clipboard') }` ([Testing](/docs/testing/#fake-drivers-and-commands)).
+  `el.drivers = [fakeDriver(clipboard)]`, a fake that takes the driver's name
+  ([Testing](/docs/testing/#fake-drivers-and-commands)).
 
 ## Streaming results with emit
 
@@ -417,15 +438,22 @@ or a configured instance, Gyral looks drivers up **by name**, in this order:
    `provideDrivers(element, drivers)`;
 3. the driver object on the command.
 
-For example, give every request on the page default headers, once, at the app's entry:
+Supply drivers as a list: each one goes under its own name, so there is no key to mistype. For
+example, give every request on the page default headers, once, at the app's entry:
 
 ```ts
 // src/entry-client.ts
 import { provideDrivers } from '@gyral/core';
 import { csrfFromMeta, makeHttpDriver } from '@gyral/http';
 
-provideDrivers(document.body, { http: makeHttpDriver({ headers: csrfFromMeta('csrf-token') }) });
+provideDrivers(document.body, [makeHttpDriver({ headers: csrfFromMeta('csrf-token') })]);
 ```
+
+A record keyed by name, `{ http: makeHttpDriver(…) }`, works in the same places and reads well
+for fakes in tests. Its keys must be the drivers' names, because a command looks its driver up
+by the driver's own name: development warns when a key isn't the name of the driver under it
+([G0045](/errors/#G0045)), and throws for two drivers of one name in a list
+([G0044](/errors/#G0044)).
 
 A component starts its `init` commands after its first render, a microtask after it connects.
 So `provideDrivers` anywhere in the entry's synchronous code is in time, even when the entry

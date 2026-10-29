@@ -42,7 +42,7 @@ Any other client that speaks Streamable HTTP: add a server with the URL
 The hosted server has every tool except `check_snippet`, which needs your project's
 TypeScript and packages. It can run an older `@gyral/mcp` than the latest release; its
 `initialize` response and `https://mcp.gyral.dev/healthz` report the version it serves. This
-page describes the tools as `@gyral/mcp` 0.3.7 provides them.
+page describes the tools as `@gyral/mcp` 0.3.8 provides them.
 
 ## The local MCP server
 
@@ -149,6 +149,22 @@ In Claude Code, add Gyral's repository as a plugin marketplace and install the p
 ```
 
 From a shell: `claude plugin marketplace add gyraljs/gyral && claude plugin install gyral@gyral`.
+
+To keep the skill in the project itself, for every agent that works on it, let `@gyral/mcp`
+write it. Run it from the app's directory, with the version of `@gyral/core` the app has
+installed:
+
+```sh
+npx @gyral/mcp@0.3.8 skill           # write the skill into the project
+npx @gyral/mcp@0.3.8 skill --check   # in CI: fail when a copy differs
+```
+
+`skill` writes `SKILL.md` and its references to `.claude/skills/gyral`, and to
+`.agents/skills/gyral` when that folder exists (`--dir <folder>` names others), and removes files
+the skill no longer has. The version must match the installed `@gyral/core`, because each
+release's skill describes that release; it says which command to run when it doesn't. With
+`--check` it writes nothing and exits 1 when a copy differs, so a CI job catches a skill left
+behind by an upgrade.
 
 Other agents: copy
 [`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.7/skills/gyral) into the agent's

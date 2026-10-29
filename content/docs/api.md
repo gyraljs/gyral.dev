@@ -43,7 +43,7 @@ in this reference; [Packages](/docs/packages/) describes them.
 - **Functions return data.** Command helpers such as `get`, `delay` and `navigate` return a
   `Command`, which does nothing until a reducer returns it.
 - **The view layer is Gyral's own.** `html`, `css`, `each`, `keyed`, `raw`, `defineHook` and
-  `nothing` are documented with the rest of `@gyral/core`; `@gyral/core/vite` is the preset and
-  `@gyral/core/eslint` the template rules. Server rendering is `@gyral/ssr`.
+  `nothing` are documented with the rest of `@gyral/core`; `@gyral/core/vite` is `gyral()`, the Vite
+  plugins, and `@gyral/core/eslint` the lint rules. Server rendering is `@gyral/ssr`.
 
 The guides explain how the pieces fit together: start with [Components](/docs/components/).

@@ -130,7 +130,7 @@ export const Shell = define<State, Msg>()('my-shell', {
 [`subscriptions`](/docs/update/#subscriptions). It delivers the current location at once, then
 every change (link clicks, `navigate()`, back and forward), while the component is on the page.
 Link capture is the router's own option: the app's entry provides the router once,
-`provideDrivers(document.body, { router: makeRouter({ captureLinks: true }) })`.
+`provideDrivers(document.body, [makeRouter({ captureLinks: true })])`.
 Each location carries a `seq`, which counts the URL changes the router has seen: `0` is the URL
 the page loaded with. The view is a pure function of the route in state.
 

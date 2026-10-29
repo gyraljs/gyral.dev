@@ -51,7 +51,9 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
 - **MUST write messages as a tagged union** with `readonly` fields:
   `{ readonly _tag: 'Toggle'; readonly id: number }`. `update` needs a reducer for every tag.
 - **MUST keep reducers, `init` and `view` pure.** Return a new object
-  (`{ ...s, items: [...s.items, x] }`); never mutate state.
+  (`{ ...s, items: [...s.items, x] }`); never mutate state. A component renders only when its
+  state, a declared prop or a declared store's value changes, so a reducer with nothing to
+  change returns `s` itself, and a view that reads anything else shows stale values (G0017).
 - **MUST return side effects as commands**: `Save: (s) => [{ ...s, saving: true }, [cmd]]`.
   Focus is a command too: `focus('#name')` runs after the update renders.
 - **MUST start long-lived work from `subscriptions(state, props)`**, not from `init` or a
@@ -59,7 +61,10 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
 - **MUST name intents in markup**: `data-intent=${i.Add}`, where `i` is the view's second
   argument. Override the event with `data-intent-on="keydown"`.
 - **MUST validate input in the parser.** `value` is a string or `undefined`; parse it once
-  (`Number`, a type guard, `trim()`) and return `undefined` for input you don't accept.
+  (`Number`, a type guard, `trim()`) and return `undefined` for input you don't accept. For one
+  event type, `on('keydown', { keys: ['Enter'] }, (input) => …)` types `input.event` and adds
+  `modifiers`, `files`, `valueAsNumber` (a number input's value) and `origin`; bind its intent to
+  that event (G0018 otherwise).
 - **MUST carry ids, not positions**, in list controls: `value=${todo.id}` on the button or
   checkbox, and match by id in the reducer (`t.id === m.id`). With a filter or sort, a position
   points at the wrong item.
@@ -96,6 +101,9 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
   `subscriptions` does both.
 - **DO NOT do side effects in an intent parser.** It may read the event, the target element and
   the form's fields; the one write it may do is `event.preventDefault()`.
+- **DO NOT check `instanceof KeyboardEvent`, modifier keys or `composedPath()[0]` by hand** in a
+  parser for one event: write it with `on()` and a key filter (`modifiers: 'none'` keeps Ctrl+R
+  for the browser).
 - **DO NOT annotate a parser with the whole union** (`(): Msg => …`). Leave the return type
   off: each `intent` key returns its own variant. A key that isn't a message tag may return any
   message.
@@ -222,7 +230,8 @@ it('asks the driver for a quote and shows the answer', () => {
 });
 ```
 
-In a browser test, substitute the driver by name: `mount(QuoteCard, { drivers: { quotes: fake } })`.
+In a browser test, substitute the driver by name: `mount(QuoteCard, { drivers: [fake] })`, with
+`const fake = fakeDriver(quotes)`, which takes the driver's name.
 
 <!-- include: docs/recipes.md#a-todo-list-with-filters -->
 
@@ -243,15 +252,16 @@ export {
   html, // view templates; also css (styles), svg, nothing, raw
   css,
   nothing,
-  each, // each(items, key, row, pick?): keyed lists with pure rows
+  each, // each(items, key, row, pick?) or (…, { pick, equals }): keyed lists with pure rows
   keyed, // keyed(key, template): fresh elements when the key changes
   intentsOf, // const i = intentsOf<typeof C>(): intent names for list rows
+  on, // on('keydown', { keys?, modifiers? }, parser): a parser typed by its event
   defineHook, // behaviour on one element: defineHook({ client, server?, dispose? })
   focus, // focus(selector, { wait?, select?, preventScroll? }): a command
   call, // call(selector, method, ...args): a command
   command, // command(driver, input, { onSuccess, onFailure })
-  defineDriver, // defineDriver<Input, Output, Error?>({ name, run, concurrency? })
-  subscription, // a command that reads a store or feed Gyral doesn't own
+  defineDriver, // defineDriver<I, O, E?>({ name, run }), or a token: defineDriver<I, O, E?>('name')
+  subscription, // subscription(nameOrToken, subscribe, { select?, equals?, coalesce? })
   outputs, // const emit = outputs<Out>(): a child's outputs to its parent
   child, // child(Child, (out) => msg): a parent's intent for a child's outputs
   prop, // prop.string({ default }), prop.number(…), prop.value(guard): props
@@ -259,7 +269,7 @@ export {
   send, // send(store, msg): a command
   changed, // changed(store, storeChangedMsg) in a StoreChanged reducer
   settled, // await settled(): every component rendered
-  provideDrivers, // provideDrivers(element, { name: driver }): substitute drivers
+  provideDrivers, // provideDrivers(element, [driver, token.provide(run)]): substitute drivers
   defineForm, // schema forms: defineForm(standardSchema, { secret? })
   form, // form(definition, toMsg): a schema-checked submit intent
   field, // field(schema, toMsg): one schema-checked control
@@ -278,7 +288,7 @@ export type {
   Variant, // Variant<Msg, 'Add'>: one member of the message union
   ParseResult, // what a parser returns: a message, IntentRejected or undefined
 } from '@gyral/core';
-export { gyralVitePreset } from '@gyral/core/vite'; // vite.config.ts: { ...gyralVitePreset() }
+export { gyral } from '@gyral/core/vite'; // vite.config.ts: { plugins: [gyral()] }
 
 // @gyral/testing: model tests (no DOM) and browser tests
 export {
@@ -291,7 +301,8 @@ export {
   resolve, // resolve(command, output): the message a command would send back
   subscriptionsFor, // subscriptionsFor(C.spec, state): what should be running
   viewOf, // viewOf(C, state): the view, no DOM; renderToString from @gyral/ssr makes HTML
-  mount, // await mount(C, { drivers }): $, type, click, settled, dispose
+  mount, // await mount(C, { drivers: [fake] }): $, type, click, settled, dispose
+  fakeDriver, // fakeDriver(driverOrToken, run?): records calls, under the driver's name
   virtualTime, // fake timers for delay, debounce and every
 } from '@gyral/testing';
 

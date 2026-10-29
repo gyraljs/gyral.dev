@@ -89,7 +89,8 @@ objects. No `Date`, `Map` or class instances. Three things depend on it:
   a seed won't survive the trip.
 - **Devtools** and tests can print and compare state.
 - **Reducers return new objects.** State is never mutated, so "did it change?" is a reference
-  check.
+  check. A component renders only when its state, a declared prop or a declared store changes:
+  a reducer with nothing to change returns `s` itself, and that message renders nothing.
 
 Model what can happen with unions rather than flags. `{ _tag: 'Loading' } | { _tag: 'Found';
 repos } | { _tag: 'Failed'; message }` can't be loading and failed at once; two booleans can.

@@ -48,19 +48,21 @@ npm install @gyral/core
 `@gyral/core` is the whole runtime: Gyral renders with its own view layer and has no runtime
 dependencies.
 
-Then add Gyral's Vite preset. It adds the template compiler to `vite build`: every template is
-checked and precompiled, so a mistake fails the build with a code frame and the bundle doesn't
-carry the code that prepares templates at runtime:
+Then add Gyral's Vite plugins, `gyral()`. They add the template compiler to `vite build`: every
+template is checked and precompiled, so a mistake fails the build with a code frame and the
+bundle doesn't carry the code that prepares templates at runtime:
 
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 
 export default defineConfig({
-  ...gyralVitePreset(),
+  plugins: [gyral()],
 });
 ```
+
+List plugins of your own beside it: `plugins: [gyral(), mine()]`.
 
 To see the same checks in your editor, add the ESLint config from `@gyral/core/eslint` (see
 [Views](/docs/views/#checked-before-it-runs)). Optionally, `npm install -D parse5` lets the
@@ -147,12 +149,13 @@ component in its view imports that module too.
 
 ## Read input
 
-Intents get more than the event. Here's a step size the user can type, read from the input's
-`value` and parsed before it reaches the model:
+Intents get more than the event. Here's a step size the user can type. `on('input', parser)`
+gives the parser the number input's `valueAsNumber` (`undefined` while the field is empty or
+invalid), and the parser checks it before it reaches the model:
 
 ```ts
 // src/stepper.ts
-import { define, html } from '@gyral/core';
+import { define, html, on } from '@gyral/core';
 
 export interface State {
   readonly count: number;
@@ -166,11 +169,10 @@ export const Stepper = define<State, Msg>()('my-stepper', {
   init: () => ({ count: 0, step: 1 }),
   intent: {
     Increment: () => ({ _tag: 'Increment' }),
-    StepChanged: ({ value }) => {
-      const step = Number(value);
-      // Not a whole number: ignore the keystroke, keep the last good step.
-      return Number.isInteger(step) ? { _tag: 'StepChanged', step } : undefined;
-    },
+    // Not a whole number: ignore the keystroke, keep the last good step.
+    StepChanged: on('input', ({ valueAsNumber: step }) =>
+      step !== undefined && Number.isInteger(step) ? { _tag: 'StepChanged', step } : undefined,
+    ),
   },
   update: {
     Increment: (s) => ({ ...s, count: s.count + s.step }),
@@ -235,4 +237,4 @@ rendering, hydration and virtual time. See [Testing](/docs/testing/).
 - Working with a coding agent? Connect it to Gyral's MCP server and skill:
   [Use Gyral with coding agents](/docs/coding-agents/).
 - Upgrading an existing app? [Versioning and stability](/docs/versioning/) explains how to move
-  to 0.3.7 safely.
+  to 0.3.8 safely.

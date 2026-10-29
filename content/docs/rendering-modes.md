@@ -63,10 +63,10 @@ bundle:
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 
 export default defineConfig({
-  ...gyralVitePreset({ clientOnly: true }),
+  plugins: [gyral({ clientOnly: true })],
 });
 ```
 
@@ -74,20 +74,20 @@ With `clientOnly: true` the browser bundle carries no hydration code: no seed re
 hydration chunk, and when your app has no other `import()`, Vite's preload helper goes too. The
 fallback for [invoker commands](/docs/intent/#invoker-commands) stays only when a module may make
 a component listen for `command` intents ([what the build reads](#what-the-build-reads)).
-Measured on Gyral's examples (gzip, 0.3.7):
+Measured on Gyral's examples (gzip, 0.3.8):
 
 | App         | Default: first load | Default: all chunks | `clientOnly: true` |
 | ----------- | ------------------- | ------------------- | ------------------ |
-| hello-world | 9.60 KiB            | 12.04 KiB           | 8.50 KiB           |
+| hello-world | 9.70 KiB            | 12.14 KiB           | 8.60 KiB           |
 
 "First load" is what a page downloads before any lazy `import()`; in these examples a
 client-only build has nothing lazy left, so its first load is all of it.
 
 Use it for apps that load their components with a `<script type="module">` into pages no Gyral
 server wrote: widgets in an existing site, admin tools, single-page apps. Leave it off as soon
-as any page is server-rendered or prerendered, including islands, and spread the same preset
-into your Vitest config so tests build the way the app does. With plugins of your own, spread
-the preset and add them: `plugins: [...preset.plugins, mine()]`.
+as any page is server-rendered or prerendered, including islands, and give your Vitest config
+the same `gyral({ clientOnly: true })` so tests build the way the app does. List plugins of
+your own beside it: `plugins: [gyral({ clientOnly: true }), mine()]`.
 
 If server-rendered markup reaches a client-only build anyway, nothing breaks twice: each
 component drops the server's seed and DOM and renders fresh from its attributes, so a view is
@@ -97,7 +97,7 @@ silently. The server's work is wasted, though, so treat that warning as a config
 ### Starting from create-gyral
 
 `create-gyral`'s `basic` template is client-only from the start: its `vite.config.ts` sets
-`gyralVitePreset({ clientOnly: true })`, and its `vitest.config.ts` reuses that config, so tests
+`gyral({ clientOnly: true })`, and its `vitest.config.ts` reuses that config, so tests
 build the way the app does. A new app is about 8.5 KiB gzip, in one file. Keep the option while
 every page renders in the browser. Delete `clientOnly: true` as soon as any page is rendered on
 a server or prerendered, for example when you add `@gyral/ssr`: with it on, those components
@@ -120,14 +120,15 @@ your whole dependency tree:
   through a module that re-exports it), whose markup is only known at run time. A function of
   another package that happens to be called `raw` doesn't count.
 
-Every build with the preset, client-only or not, uses the same scan for the features a spec
+Every build with `gyral()`, client-only or not, uses the same scan for the features a spec
 field turns on: view transitions, the frame lane, custom states, form association,
 subscriptions and the error fallback are bundled only when a module names `viewTransition`,
 `renderOnFrame`, `states`, `formAssociated`, `subscriptions`, `error` or `Errored` in code.
 Write these field names literally: a name built at run time isn't seen, and the component then
 renders without that feature (development builds warn). A package that writes these fields for
-your components must depend on Gyral to be read: if it doesn't, declare `@gyral/core` as a peer
-dependency in its `package.json`.
+your components must depend on Gyral to be read: a component library lists `@gyral/core` as a
+peer dependency in its `package.json`
+([Publishing a component library](/docs/packages/#publishing-a-component-library)).
 
 This site server-renders its pages and hydrates two islands, so it builds without the option.
 
