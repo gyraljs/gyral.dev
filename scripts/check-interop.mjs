@@ -4,12 +4,12 @@
 // page, used the way a non-Gyral host would use it: plain DOM, no Gyral parent.
 import { build } from 'vite';
 import { chromium } from 'playwright';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 
 const result = await build({
   configFile: false,
   logLevel: 'warn',
-  ...gyralVitePreset(),
+  plugins: [gyral()],
   build: {
     write: false,
     minify: false,

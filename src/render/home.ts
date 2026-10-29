@@ -11,7 +11,7 @@ import type { PageMeta } from './layout.js';
 import '../islands/loop-counter.js'; // registers <gd-loop-counter> for server rendering
 
 // The code samples live in content/home/ as text: in a .ts file under src/, the component
-// scan of `gyralVitePreset({ components: true })` would take their define() for a real one.
+// scan of `gyral({ components: true })` would take their define() for a real one.
 // scripts/check-snippets.mjs typechecks them against the real Gyral packages.
 const COUNTER_SOURCE = new URL('../../content/home/counter.ts.txt', import.meta.url);
 const TEST_SOURCE = new URL('../../content/home/counter.test.ts.txt', import.meta.url);

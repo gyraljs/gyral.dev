@@ -10,7 +10,7 @@ import { build } from 'vite';
 import { startVitest } from 'vitest/node';
 import { playwright } from '@vitest/browser-playwright';
 import { chromium } from 'playwright';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 
 const OUT = resolve('.smoke/recipes');
 rmSync(OUT, { recursive: true, force: true });
@@ -39,7 +39,7 @@ const vitest = await startVitest(
   [],
   { root: OUT, config: false, watch: false },
   {
-    ...gyralVitePreset({ clientOnly: true }),
+    plugins: [gyral({ clientOnly: true })],
     logLevel: 'warn',
     test: {
       include: ['src/**/*.test.ts'],
@@ -66,7 +66,7 @@ const result = await build({
   configFile: false,
   logLevel: 'warn',
   root: OUT,
-  ...gyralVitePreset({ clientOnly: true }),
+  plugins: [gyral({ clientOnly: true })],
   build: {
     write: false,
     minify: false,
