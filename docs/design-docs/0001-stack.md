@@ -114,3 +114,12 @@ removed and redirect to /docs/versioning/). `GYRAL_ERRORS_JSON` (src/content/err
 release branch read the upcoming error table from the gyral checkout, so the MCP snapshot's
 errors page lists the new code before npm has it. Hand-written repository links in the docs
 pages pin the release tag too; a content test fails when one names another tag.
+
+## Addendum: two-week release age (2026-10-29)
+
+A dependency version is adopted only once it has been published for two weeks, as in every
+gyraljs repository (Gyral's ADR 0032, bead gyral-337.7). `minimumReleaseAge: 20160` in
+`pnpm-workspace.yaml` makes pnpm refuse younger versions, and `.github/dependabot.yml` waits
+as long. A Gyral release the owner verified comes in early through an exact-version
+`minimumReleaseAgeExclude` entry, removed once it is two weeks old. Vite moved to 8.3.4 for
+GHSA-587h-7wmj-h5pm and five other advisories fixed in 8.3.3 (gyral-337.8).
