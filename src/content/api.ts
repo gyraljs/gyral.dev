@@ -67,9 +67,17 @@ interface Package {
   readonly entries: readonly Entry[];
 }
 
-/** Finds a package through node_modules and resolves each entry to its source or `.d.ts`. */
+/**
+ * Where the `@gyral/*` packages are read: node_modules, or `GYRAL_PACKAGES_DIR` (a Gyral
+ * checkout's `packages/`, whose entries are its sources) when a release branch is built before
+ * that release is on npm, so the API pages and the MCP snapshot taken from them carry the
+ * release's declarations and doc comments (gyral releasing.md, step 2; gyral-ns9).
+ */
+const packagesDir = (): string => process.env['GYRAL_PACKAGES_DIR'] || join(NODE_MODULES, '@gyral');
+
+/** Finds a package and resolves each entry to its source or `.d.ts`. */
 function loadPackage(name: string, entries: readonly string[]): Package {
-  const dir = realpathSync(join(NODE_MODULES, '@gyral', name));
+  const dir = realpathSync(join(packagesDir(), name));
   const json = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as PackageJson;
   return {
     name,

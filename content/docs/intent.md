@@ -110,7 +110,7 @@ moves with the keyboard and tracks focus, all on the `<li>` itself:
 
 ```ts
 // src/task-list.ts
-import { define, each, html, intentsOf, type TemplateResult } from '@gyral/core';
+import { define, each, html, intentsOf, on, type TemplateResult } from '@gyral/core';
 
 export interface Task {
   readonly id: string;
@@ -171,12 +171,10 @@ export const TaskList = define<State, Msg>()('my-task-list', {
     // Released over another task: the dragged one moves there.
     Drop: ({ target }) => ({ _tag: 'Drop', id: idOf(target) }),
     // Alt+ArrowUp and Alt+ArrowDown move the focused task; other keys keep their default.
-    Move: ({ target, key, event }) => {
-      const by = key === 'ArrowUp' ? -1 : key === 'ArrowDown' ? 1 : 0;
-      if (by === 0 || !(event instanceof KeyboardEvent) || !event.altKey) return undefined;
-      event.preventDefault();
-      return { _tag: 'Move', id: idOf(target), by };
-    },
+    Move: on('keydown', { keys: ['ArrowUp', 'ArrowDown'], modifiers: { alt: true } }, (input) => {
+      input.event.preventDefault();
+      return { _tag: 'Move', id: idOf(input.target), by: input.key === 'ArrowUp' ? -1 : 1 };
+    }),
     Focus: ({ target }) => ({ _tag: 'Focus', id: idOf(target) }),
   },
   update: {
@@ -253,6 +251,69 @@ element can dispatch a `CustomEvent`. [Using third-party web
 components](/docs/third-party-components/#what-the-parser-gets) shows a map's custom event
 parsed this way.
 
+### Parsers typed by their event
+
+`on(event, [filter], parser)` from `@gyral/core` is a parser for one event type. Its input is
+typed by that event, so `input.event` is a `KeyboardEvent` for `keydown`, a `DragEvent` for
+`drop` and a `SubmitEvent` for `submit`, and it adds what parsers otherwise dig out of the event
+themselves:
+
+| Field           | Holds                                                                                  |
+| --------------- | -------------------------------------------------------------------------------------- |
+| `control`       | The `input`, `select`, `textarea` or `button` that has the intent, typed               |
+| `form`          | That control's form, or the `<form>` that has the intent                               |
+| `modifiers`     | `{ shift, ctrl, alt, meta }`, all `false` for events without modifier keys             |
+| `files`         | The files from a file input, a drop or a paste; `undefined` for other events           |
+| `valueAsNumber` | A number, range, date or time input's value as a number; `undefined` when it's invalid |
+| `origin`        | The element the event started on (`composedPath()[0]`), inside shadow roots too        |
+
+A key filter, `{ keys, modifiers }`, declines other keys the way returning `undefined` does:
+they pass outward and keep their default action, so Ctrl+R still reloads the page. `modifiers`
+is `'none'`, `'any'`, or the keys that must be held or not, such as `{ ctrl: true }`:
+
+```ts
+// src/board.ts
+import { define, html, on } from '@gyral/core';
+
+export type Msg =
+  | { readonly _tag: 'Move'; readonly by: -1 | 1 }
+  | { readonly _tag: 'Attach'; readonly files: readonly File[] }
+  | { readonly _tag: 'Volume'; readonly level: number };
+
+export const Board = define<{ readonly at: number }, Msg>()('my-board', {
+  init: () => ({ at: 0 }),
+  intent: {
+    // Only the two arrows, with no modifier held: Alt+ArrowLeft still goes back.
+    Move: on('keydown', { keys: ['ArrowLeft', 'ArrowRight'], modifiers: 'none' }, (input) => ({
+      _tag: 'Move',
+      by: input.key === 'ArrowLeft' ? -1 : 1,
+    })),
+    Attach: on('change', (input) => ({ _tag: 'Attach', files: input.files ?? [] })),
+    Volume: on('input', (input) =>
+      input.valueAsNumber === undefined
+        ? undefined
+        : { _tag: 'Volume', level: input.valueAsNumber },
+    ),
+  },
+  update: {
+    Move: (s, m) => ({ at: s.at + m.by }),
+    Attach: (s) => s,
+    Volume: (s) => s,
+  },
+  view: (s, i) => html`
+    <p tabindex="0" data-intent-keydown=${i.Move}>Position: ${s.at}</p>
+    <label>Attachments <input type="file" multiple data-intent-change=${i.Attach} /></label>
+    <label>Volume <input type="range" data-intent-input=${i.Volume} /></label>
+  `,
+});
+```
+
+Bind the intent to the parser's event, with `data-intent-<event>` or `data-intent-on`, or rely on
+the element's own trigger. In development, a parser that another event reaches throws
+([G0018](/errors/#G0018)), and the `gyral/intent-event` lint rule reports such a binding in your
+editor. Plain parsers keep `IntentInput`, and `on()` is a module of its own: an app that never
+calls it doesn't bundle it.
+
 ## Parse, don't validate
 
 A parser returns one of three things:
@@ -299,7 +360,7 @@ component's root. So a container's keyboard shortcuts and its fields' own keys l
 
 ```ts
 // src/note-editor.ts
-import { define, html } from '@gyral/core';
+import { define, html, on } from '@gyral/core';
 
 export interface State {
   readonly body: string;
@@ -314,10 +375,6 @@ export type Msg =
   | { readonly _tag: 'AddTag'; readonly tag: string }
   | { readonly _tag: 'Save' };
 
-/** Ctrl+S, or Command+S on a Mac. */
-const isSave = (event: Event, key: string | undefined): boolean =>
-  key === 's' && event instanceof KeyboardEvent && (event.ctrlKey || event.metaKey);
-
 export const NoteEditor = define<State, Msg>()('my-note-editor', {
   init: () => ({ body: '', draft: '', tags: [], saving: false }),
   intent: {
@@ -328,12 +385,12 @@ export const NoteEditor = define<State, Msg>()('my-note-editor', {
       const tag = value?.trim() ?? '';
       return key === 'Enter' && tag !== '' ? { _tag: 'AddTag', tag } : undefined;
     },
-    // The editor's shortcut, wherever focus is inside it.
-    Save: ({ key, event }) => {
-      if (!isSave(event, key)) return undefined;
+    // The editor's shortcut, wherever focus is inside it: Ctrl+S, or Command+S on a Mac.
+    Save: on('keydown', { keys: ['s'] }, ({ event, modifiers }) => {
+      if (!modifiers.ctrl && !modifiers.meta) return undefined;
       event.preventDefault(); // not the browser's "Save page as"
       return { _tag: 'Save' };
-    },
+    }),
   },
   update: {
     Body: (s, m) => ({ ...s, body: m.text }),

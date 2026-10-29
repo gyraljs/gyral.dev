@@ -114,8 +114,23 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   },
   15: {
     explanation:
-      'Development only: two copies of `@gyral/core` run in the page. A value one copy makes, such as a stylesheet from `css` or a store, doesn’t work in the other, so components fail far from the cause (`styles.flatMap is not a function`). `gyralVitePreset` also warns at startup, in dev and builds, when the package is installed more than once, naming each copy’s version, folder and the packages that use it.',
-    fix: 'Pin `@gyral/core` to one version with your package manager’s overrides (pnpm or npm `overrides`, Yarn `resolutions`) and reinstall. A library should list `@gyral/core` as a peer dependency, so it shares the app’s copy.',
+      'Development only: two copies of `@gyral/core` run in the page. A value one copy makes, such as a stylesheet from `css` or a store, doesn’t work in the other, so components fail far from the cause (`styles.flatMap is not a function`). `gyral()` also warns at startup, in dev and builds, when the package is installed more than once, naming each copy’s version, folder and the packages that use it.',
+    fix: 'Give every `@gyral/*` package the same version: they take `@gyral/core` as a peer, so they share the app’s copy. For a library that pins another core, pin `@gyral/core` to one version with your package manager’s overrides (pnpm or npm `overrides`, Yarn `resolutions`) and reinstall. A library lists `@gyral/core` as a peer dependency ([Publishing a component library](/docs/packages/#publishing-a-component-library)).',
+  },
+  16: {
+    explanation:
+      'A Gyral package (`@gyral/http`, `router`, `time`, `ssr`, `testing` or `devtools`) loaded with a `@gyral/core` of another release. Each one uses core’s internals, which change between releases, so it checks core’s version when it loads. They take `@gyral/core` as a peer at their exact version, so the package manager normally reports the mismatch when it installs: pnpm lists the unmet peer, npm stops with `ERESOLVE`. Development throws, naming both versions; production logs this warning and carries on.',
+    fix: 'Install the same version of every `@gyral/*` package the app uses, and check that the lockfile resolves one version of each ([One version of every package](/docs/packages/#one-version-of-every-package)).',
+  },
+  17: {
+    explanation:
+      'Development only: a component renders only when its state, a declared prop or a declared store’s value changes, and this one rendered differently when Gyral rendered a skipped view again to check it. So its view reads something else, such as `Date.now()`, `Math.random()`, a module variable or the DOM, and on the page it shows a stale value until one of its inputs changes. Development checks up to 50 skipped views per render pass (a different 50 each pass when more are skipped, so every component is checked within a few passes) and warns once per component.',
+    fix: 'Move what the view reads into state (the time from an `every` subscription, a random value from a command), a prop or a store, so that a change to it renders the component ([Pure means repeatable](/docs/views/#pure-means-repeatable)).',
+  },
+  18: {
+    explanation:
+      'The intent’s parser is `on(event, …)`, written for one event type, but another event reached it: the template binds the intent to a different event, through the element’s own trigger, `data-intent-on` or another `data-intent-<event>` attribute. Development throws; production declines the event, as a parser that returns `undefined` does. The `gyral/intent-event` ESLint rule reports the same binding in the editor.',
+    fix: 'Bind the intent to the parser’s event, `data-intent-keydown=${i.Move}` for `on("keydown", …)`, or give the other event an intent and a parser of its own ([Parsers typed by their event](/docs/intent/#parsers-typed-by-their-event)).',
   },
   21: {
     explanation:
@@ -182,7 +197,17 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   43: {
     explanation:
       'The command’s driver is a token: `defineDriver<I, O, E>(name)` without an implementation of its own. Nothing above the component provides that name, so the command can’t run. It is reported through the error channel (phase `command`); `onFailure` isn’t called, because there was no driver to fail.',
-    fix: 'Provide the driver where the app starts, `provideDrivers(document.body, { name: implementation })`, or on the element with `el.drivers`. A page provides it before its components first render: before importing them, or later in the same task with no `await` in between ([Substituting drivers](/docs/effects/#substituting-drivers)). In tests, pass a fake by the same name ([Drivers the app provides](/docs/effects/#drivers-the-app-provides)).',
+    fix: 'Provide the driver where the app starts, `provideDrivers(document.body, [token.provide(run)])`, or on the element with `el.drivers`. A page provides it before its components first render: before importing them, or later in the same task with no `await` in between ([Substituting drivers](/docs/effects/#substituting-drivers)). In tests, pass a fake of the token, `fakeDriver(token)`, which takes its name ([Drivers the app provides](/docs/effects/#drivers-the-app-provides)).',
+  },
+  44: {
+    explanation:
+      'Development only: a list of drivers (for `provideDrivers`, `el.drivers`, `<gyral-drivers>`, `mount({ drivers })` or a store) has two drivers with the same name. A command finds its driver by name, so only one of them could ever run. Development throws; production has no check and uses the first.',
+    fix: 'Drop one of them, or give each driver a name of its own and build each command from the driver it should use.',
+  },
+  45: {
+    explanation:
+      'Development only: a record of drivers has a key that isn’t the name of the driver under it, such as `{ api: makeHttpDriver() }` for a driver named `http`. A command looks its driver up by the driver’s own name, `http` here, so that entry is never used: the lookup goes on to the next provider and, last, to the command’s own driver (for a token, [G0043](/errors/#G0043)). Development warns once per record.',
+    fix: 'Supply the drivers as a list, each under its own name, `provideDrivers(root, [makeHttpDriver()])`, or make the key the driver’s name ([Substituting drivers](/docs/effects/#substituting-drivers)).',
   },
   // Stores
   50: {

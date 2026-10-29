@@ -115,7 +115,7 @@ createServer(toNodeListener(app.fetch, { origin: 'https://example.com' })).liste
 ```
 
 `productionServer({ distDir, createApp })` expects Vite's output in `dist/client/` (with
-`build.manifest: true` and `gyralVitePreset({ components: true })`) and prerendered pages in
+`build.manifest: true` and `gyral({ components: true })`) and prerendered pages in
 `dist/static/`. It reads the manifests once and hands `createApp` the `components` for
 `renderPage` and the hashed CSS as `stylesheets`. With a client entry of your own instead, it
 hands over `clientEntry` and the chunks to preload with it as `modulepreload` (Gyral's hydration
@@ -240,7 +240,7 @@ How far each one is tested today:
 
 Run the networked `pnpm verify:platforms` in the framework repository to reproduce the Deno
 and workerd checks. The
-[spike report](https://github.com/gyraljs/gyral/blob/v0.3.7/docs/references/platform-spikes-2026-10-11.md)
+[spike report](https://github.com/gyraljs/gyral/blob/v0.3.8/docs/references/platform-spikes-2026-10-11.md)
 describes the tested boundary.
 
 ## Cache headers

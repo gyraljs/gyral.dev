@@ -207,8 +207,10 @@ hydration need the browser tests below.
 ## Browser tests
 
 For rendering, events and focus, test the real element in a real browser. Gyral's own tests use
-[Vitest browser mode](https://vitest.dev/guide/browser/) with Chromium; spread
-`gyralVitePreset()` into the browser project's config.
+[Vitest browser mode](https://vitest.dev/guide/browser/) with Chromium; add
+`gyral({ optimize: 'auto' })` to the browser project's `plugins`. `optimize: 'auto'` has Vite
+pre-bundle what your components and tests import before the first test runs, so Vitest doesn't
+reload the page partway through a run.
 
 Gyral renders on a schedule: reducers run as soon as a message arrives, and the DOM updates in a
 microtask, once for every message that arrived together. **`await settled()`** from
@@ -248,7 +250,7 @@ afterEach(() => time?.restore());
 it('debounces typing, then shows the answer', async () => {
   time = virtualTime();
   const http = fakeHttp(); // the real http driver over a fake fetch: schemas still decode
-  const lookup = await mount(Lookup, { drivers: { http } });
+  const lookup = await mount(Lookup, { drivers: [http] });
 
   await lookup.type('input', 'ada');
   await time.advance(299);
@@ -375,9 +377,10 @@ it('steps with the arrows of its orientation', () => {
 
 ## Fake drivers and commands
 
-Substitute drivers by name, as the app would ([Effects](/docs/effects/#substituting-drivers)):
+Substitute drivers by name, as the app would ([Effects](/docs/effects/#substituting-drivers)),
+in a list where each fake goes under its own name:
 
-- **`el.drivers = { http }`** for one element.
+- **`el.drivers = [http]`** for one element.
 - **`provideDrivers(root, drivers)`** from `@gyral/core` for every component under a container,
   including nested components in shadow roots, as the app itself would at its entry. It returns
   a function that removes the overrides.
@@ -385,30 +388,34 @@ Substitute drivers by name, as the app would ([Effects](/docs/effects/#substitut
 - **`fakeDriver(driverOrName, { impl? })`** records every call and waits for the test:
   `resolveNext(output)`, `rejectNext(error)`, `emitNext(value)` for streaming drivers, or
   `calls[i].resolve(…)`. With `impl`, it answers at once. **`fakeDriver(name, run)`** is the
-  short form: it answers every call with `run` and records the inputs.
+  short form: it answers every call with `run` and records the inputs. Given a driver or a
+  token, `fakeDriver(session, run)` takes its name and types, so `run` is checked against them.
 - **`fakeHttp()`** from `@gyral/http/testing` is the real HTTP driver over a controllable
   `fetch`, so response schemas, status errors and JSON parsing behave as in production.
   `respondNext({ status, body })`, `reply(422, problem)` and `failNext()` answer requests.
 
 Drivers go in as they are: any driver, a fake included, fits `el.drivers`, `mount` and
 `provideDrivers` with no cast. A driver token (`defineDriver<I, O, E>('name')`, which has no
-implementation of its own) is substituted the same way, by its name. When you keep a map of drivers yourself, type it as
-`DriverOverrides` from `@gyral/core`. `Record<string, Driver<unknown, unknown>>` looks right but
-rejects every driver with a typed input.
+implementation of its own) is substituted the same way, by its name. A record keyed by name,
+`el.drivers = { http }`, works too and reads well for fakes; development warns
+([G0045](/errors/#G0045)) when a key isn't the name of the driver under it. When you keep a set
+of drivers yourself, type a list as `DriverList` and a record as `DriverOverrides`, both from
+`@gyral/core`. `Record<string, Driver<unknown, unknown>>` looks right but rejects every driver
+with a typed input.
 
 ```ts
 // src/test-drivers.ts
-import type { DriverOverrides } from '@gyral/core';
+import type { DriverList } from '@gyral/core';
 import { fakeHttp } from '@gyral/http/testing';
 import { fakeDriver } from '@gyral/testing';
 
 /** What the component copied to the clipboard, for the test to read. */
 export const copied: string[] = [];
 
-export const testDrivers: DriverOverrides = {
-  http: fakeHttp(),
-  clipboard: fakeDriver<string, undefined>('clipboard', (text) => void copied.push(text)),
-};
+export const testDrivers: DriverList = [
+  fakeHttp(),
+  fakeDriver<string, undefined>('clipboard', (text) => void copied.push(text)),
+];
 ```
 
 Removing an element stops its commands one microtask later, so that a move (removed and
@@ -468,11 +475,11 @@ it in the browser project's config:
 ```ts
 // vitest.config.ts
 import { defineConfig } from 'vitest/config';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 import { renderOnServer } from '@gyral/testing/vitest';
 
 export default defineConfig({
-  ...gyralVitePreset(),
+  plugins: [gyral({ optimize: 'auto' })],
   test: {
     // Your browser setup (provider, instances) as usual, plus the command.
     browser: { commands: { renderOnServer } },
@@ -506,7 +513,7 @@ describe('the server-rendered lookup', { timeout: 60_000 }, () => {
     const host = page.root.querySelector('my-lookup');
     const input = host?.shadowRoot?.querySelector('input');
     const http = fakeHttp();
-    provideDrivers(page.root, { http });
+    provideDrivers(page.root, [http]);
 
     await import('./lookup.js'); // import after mounting, as a real page load would
     await hydrated(page);
@@ -595,11 +602,11 @@ lists the messages a reducer sent to a store.
 
 ## Coverage
 
-Keep `gyralVitePreset()` in the tested project and name your sources in Vitest's coverage
+Keep `gyral()` in the tested project and name your sources in Vitest's coverage
 settings: `test: { coverage: { provider: 'v8', include: ['src/**/*.ts'] } }`. Install
 `@vitest/coverage-v8` at the same version as Vitest.
 
-In development and tests, the preset records where each `html` and `svg` template was written,
+In development and tests, `gyral()` records where each `html` and `svg` template was written,
 so errors can name the file and line. That adds no branches to your coverage report: the counts
 are your own code's.
 

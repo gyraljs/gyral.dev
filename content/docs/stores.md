@@ -93,7 +93,8 @@ export const CartBadge = define<State, Msg>()('my-cart-badge', {
 });
 ```
 
-- **Declare** the stores a component reads in `stores`. A change to one re-renders the component.
+- **Declare** the stores a component reads in `stores`. A change to one's value re-renders the
+  component; a store message that leaves the value as it was renders nothing.
 - **Read** with `read(cart)` from the context, in the view and in every reducer. It's typed by
   the store. Reading a store you didn't declare throws an error that names the fix.
 - **Write** with `send(cart, msg)`, a command. The store's reducer does the change, so every

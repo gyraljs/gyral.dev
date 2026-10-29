@@ -79,7 +79,7 @@ development builds warn (G0014) when a tag is still undefined 3 seconds after th
 
 `define()` returns the element class. Its `spec` property is the object you passed in, which is
 how [tests](/docs/testing/) run `update` without a DOM. Export it as
-`export const Greeter = define…`, and the Vite preset writes `HTMLElementTagNameMap` entries for
+`export const Greeter = define…`, and `gyral()`, Gyral's Vite plugins, writes `HTMLElementTagNameMap` entries for
 every such component into `.gyral/elements.d.ts` (list that file in your tsconfig's `include`),
 so `document.querySelector('my-greeter')` is typed with no declaration of your own. It reads
 calls in code, not in comments or strings. For `tsc` outside Vite, the
@@ -215,7 +215,7 @@ export const SeatPicker = define<Stateless, never, PropsOf<typeof props>>()('my-
   `Date`s, filling in defaults or stripping keys would happen only to attributes, whose value is
   the parse's output.
 - **Declare a schema once and pass it by name.** Production client builds never run a
-  `prop.value` check, and the Vite preset removes it when it is a name (`prop.value(Seats)`,
+  `prop.value` check, and `gyral()` removes it when it is a name (`prop.value(Seats)`,
   `schemas.seat`) or an inline function, so the schema's code can leave the bundle. A call
   written in place, such as `prop.value(v.array(Seat))`, stays, because evaluating it could have
   effects. `prop.json` keeps its check: attributes are always parsed.

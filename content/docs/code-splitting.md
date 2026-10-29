@@ -23,7 +23,7 @@ can be "later, and only if it's on this page". There are three tools, from coars
 Custom elements make this simple: the page's HTML says which components it uses. Import the
 components every page has in the client entry, and load the rest when their tag appears.
 
-A server-rendered app can let Gyral do this: with `gyralVitePreset({ components: true })` and
+A server-rendered app can let Gyral do this: with `gyral({ components: true })` and
 `renderPage({ components })`, each page loads exactly the components it rendered, with no client
 entry to write (see
 [Server rendering](/docs/server-rendering/#loading-components-in-the-browser)). The loader
@@ -137,7 +137,7 @@ server-rendered components fetch. Preload it with the entry: `clientAssetsFromMa
 
 ## Which chunk holds a module
 
-With `gyralVitePreset({ components: true })`, the client build writes
+With `gyral({ components: true })`, the client build writes
 `.vite/gyral-components.json` next to Vite's manifest. Its `chunks` maps each tag to the chunk
 that defines it. `chunkModules` maps every emitted JavaScript chunk to the source
 modules in it, as paths relative to the project root:

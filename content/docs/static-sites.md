@@ -99,10 +99,10 @@ console.log(`prerendered ${String(pages.length)} pages`);
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 
 export default defineConfig({
-  ...gyralVitePreset(),
+  plugins: [gyral()],
   build: {
     outDir: 'dist',
     emptyOutDir: true,

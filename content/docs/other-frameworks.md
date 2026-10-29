@@ -129,7 +129,7 @@ reaches a Gyral parent with `OUTPUT_EVENT`.
 
 The `HTMLElementTagNameMap` entry in the component file (above) is what makes
 `document.createElement('my-picker')` and `querySelector('my-picker')` return the component's
-type, props included. Inside a Gyral app the Vite preset generates these entries; for components
+type, props included. Inside a Gyral app `gyral()` generates these entries; for components
 you publish to other apps, write the entry in the component's own file, as above, so it ships in
 your package's types.
 
@@ -203,7 +203,7 @@ These checks run in real Chromium with `pnpm verify:platforms` in the framework 
 install pinned host
 packages in a temporary directory, leaving Gyral's runtime dependency graph unchanged. They cover
 client mounts, not each host's SSR/hydration integration. The [spike
-report](https://github.com/gyraljs/gyral/blob/v0.3.7/docs/references/platform-spikes-2026-10-11.md)
+report](https://github.com/gyraljs/gyral/blob/v0.3.8/docs/references/platform-spikes-2026-10-11.md)
 records the results, fixtures and limits.
 
 ## Server rendering in another framework

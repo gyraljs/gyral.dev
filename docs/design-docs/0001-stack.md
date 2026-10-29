@@ -146,3 +146,11 @@ Held back as too young: eslint 10.13.0 (until 2026-10-30), stylelint-plugin-use-
 marked 18.1.2 (11-09) and `@types/node` 26.6.6 (11-11). fast-uri 3.1.9 (11-02) fixes four
 advisories in URI parsing, reached here only through ajv validating the config of stylelint's
 `table` output, so it waits too.
+
+## Addendum: API pages from the release's packages (2026-10-29)
+
+`GYRAL_PACKAGES_DIR` (src/content/api.ts) points the API reference at a Gyral checkout's
+`packages/` when a release branch is built before npm has the release: with
+`GYRAL_PACKAGES_DIR=../gyral/packages`, beside `GYRAL_DOCS_VERSION` and `GYRAL_ERRORS_JSON`, the
+pages, and the MCP docs snapshot taken from them, carry the release's declarations and doc
+comments instead of the previous release's (gyral-ns9; @gyral/mcp 0.3.6 shipped 0.3.5's).

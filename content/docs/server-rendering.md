@@ -124,7 +124,7 @@ renders to a string in about 0.2 ms on Node 24 (1.3 ms including encoding).
 
 ## Loading components in the browser
 
-Turn on `components` in the Vite preset and pass the `components` your server gets to
+Turn on `components` in `gyral()` and pass the `components` your server gets to
 `renderPage`. Each page then loads exactly the components it rendered (their modules,
 preloaded, and a small loader), and a page that rendered none loads no JavaScript at all. There
 is no client entry to write and no per-page list of islands:
@@ -132,10 +132,10 @@ is no client entry to write and no per-page list of islands:
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 
 export default defineConfig({
-  ...gyralVitePreset({ components: true }), // finds every define()'d tag under src/
+  plugins: [gyral({ components: true })], // finds every define()'d tag under src/
   build: { outDir: 'dist/client', emptyOutDir: true },
 });
 ```
@@ -147,7 +147,7 @@ rendered tag that no client module defines is a development warning, so a missin
 fail silently. For app-wide setup in the browser (providing drivers to the page), keep a small
 client entry and pass it in `scripts` next to `components`.
 
-The preset finds components written as `export const X = define<…>()('my-tag', …)`. It reads
+`gyral()` finds components written as `export const X = define<…>()('my-tag', …)`. It reads
 code only: a `define()` inside a comment, a string, template text or a regular
 expression doesn't count, so a code sample in a doc comment or a test fixture defines no tag. A
 component created through a helper of your own (one that calls `define()` with a tag it was
@@ -156,12 +156,10 @@ given) is invisible to that scan, so list it with its module, relative to the pr
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { gyralVitePreset } from '@gyral/core/vite';
+import { gyral } from '@gyral/core/vite';
 
 export default defineConfig({
-  ...gyralVitePreset({
-    components: { modules: { 'member-form': 'src/forms/member.ts' } },
-  }),
+  plugins: [gyral({ components: { modules: { 'member-form': 'src/forms/member.ts' } } })],
   build: { outDir: 'dist/client', emptyOutDir: true },
 });
 ```
@@ -345,8 +343,8 @@ to ship either, see [Deploying](/docs/deploying/).
 ## Development server
 
 `gyralDevServer()` from `@gyral/ssr/node` runs Vite in middleware mode, loads your server module
-fresh on every request (so edits show up), streams each response, and shows Vite's error overlay
-when a render throws:
+through Vite (so edits show up), streams each response, and shows Vite's error overlay when a
+render throws:
 
 ```ts
 // scripts/dev.ts
@@ -360,7 +358,18 @@ const dev = await gyralDevServer<typeof App>({
 console.log(`Listening on ${dev.url}`);
 ```
 
-`state` keeps a value, such as an in-memory database, across those reloads.
+`app` builds the request handler once per version of the server module (Vite loads a new one
+after an edit) and set of components, not on every request, so keep per-request work inside the
+handler; a cache of your own around `app` isn't needed. `state` keeps a value, such as an
+in-memory database, across those reloads. Vite runs as a custom server here, so `gyral()`'s
+[`optimize: 'auto'`](/docs/packages/#the-vite-plugins) is on: it pre-bundles what your
+components import when the server starts.
+
+To run the same development server inside a Node server of your own, `gyralDevMiddleware()`
+takes the same options without `port` and `host` and returns `{ middleware, vite, close }`.
+Express and Connect take `middleware` with `app.use()`, and Fastify through `@fastify/middie`.
+It answers every request that reaches it, Vite's modules first and then your app, so mount your
+own routes before it.
 
 ## The request layer
 
@@ -382,7 +391,7 @@ build yourself. Import them only from server code, so client bundles carry no se
 
 ## Production checklist
 
-- Spread `gyralVitePreset()` into your Vite config, so templates are checked and precompiled.
+- Add `gyral()` to your Vite config's `plugins`, so templates are checked and precompiled.
 - Keep component state and props JSON data.
 - Bind form state with `value=${…}`, `?checked=${…}` and `<textarea>${…}</textarea>`, never
   `.value=` or `.checked=`, which the server can't write.

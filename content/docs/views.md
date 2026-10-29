@@ -157,15 +157,15 @@ markup: the intent name and the button's `value`.
 Templates are static, so their mistakes can be found before anyone loads the page. One set of
 rules runs in three places, with the same messages:
 
-- **`vite build`**, through `gyralVitePreset()`: every template is checked and precompiled, and a
+- **`vite build`**, through `gyral()`: every template is checked and precompiled, and a
   mistake fails the build with a code frame. Precompiled templates also leave the code that
   prepares templates at runtime out of your bundle. With the optional `parse5` package
   installed, the compiler also compares each template with what a full HTML parser builds.
 - **The development runtime** (the dev server and tests) checks each template the first time it
-  renders and throws with the same message (a production bundle built without the preset
+  renders and throws with the same message (a production bundle built without `gyral()`
   leaves out two checks, on component tag names and custom-element attribute names, to stay
   small), naming where the template is written:
-  `at src/cart.ts:12:5`. Under Vite the preset gives the exact file, line and column; elsewhere
+  `at src/cart.ts:12:5`. Under Vite, `gyral()` gives the exact file, line and column; elsewhere
   they come from the stack trace. Hydration mismatches name it too.
 - **ESLint**, in your editor, with `@gyral/core/eslint`:
 
@@ -191,7 +191,11 @@ The ESLint config also reports a function written in a hole (`${() => …}`), wh
 right in a view, and warns, with `gyral/unused-intent`, about an intent parser that no template
 in the module names with `data-intent`: a renamed intent or dead code. That rule is static, so
 intents rendered only in some states count as used, and it skips components whose intent names
-may be used in another module.
+may be used in another module. `gyral/intent-event` reports an
+[`on()` parser](/docs/intent/#parsers-typed-by-their-event) whose intent the template binds to
+another event, and `gyral/prefer-built-in` warns about hand-written versions of what Gyral has
+built in, such as a dialog opened with `showModal()` where `?modal` belongs, naming the built-in
+to use ([the full list](/docs/packages/#the-eslint-plugin)).
 
 In development, Gyral also warns once when a property binding gets a function: `.onclick=${fn}`
 on a built-in element (use `data-intent`), or a function prop on a Gyral component (props are
@@ -295,6 +299,13 @@ export const Todos = define<State, Msg>()('my-todos', {
 When the selection moves, `pick` runs for every row (one comparison each), and only the two
 rows whose answer changed render again. `pick` results are compared one level deep, so returning
 a small tuple or object is fine.
+
+A `pick` that builds a nested value on every render, such as `() => ({ columns, season })` with
+`columns` computed in the view, is never the same twice, so every row renders again. Make the
+reference stable first: compute `columns` in `update` and keep it in state. Where that can't be
+done, pass options instead of a function, `each(items, key, row, { pick, equals })`, and `equals`
+compares the picked values in place of the one-level check. Keep it cheap: it runs for every row
+on every render.
 
 - Keys are unique strings or numbers. A duplicate key is an error in development.
 - The ESLint rule `gyral/each-row-purity` names any variable a row reads from the view and
@@ -436,7 +447,8 @@ browser:
 A binding writes the control only when the model's value for it changes. Then the model wins,
 even after the user has edited the control (the view compares with what the control shows now
 and writes only if they differ). A render for any other reason, such as another field's
-message or a reducer that refused the edit, leaves what the user typed or toggled alone. On the
+message, leaves what the user typed or toggled alone, and a reducer that refuses the edit
+returns the same state, which renders nothing. On the
 server the bindings write the attribute, so the page is right before JavaScript loads, and
 hydration keeps what the user typed before scripts ran until the model's value changes.
 
@@ -950,7 +962,10 @@ to their new place) needs a `shadow: false` component; the host element itself c
 ## When the DOM updates
 
 Reducers run as soon as a message arrives; the DOM updates in a microtask, once for all the
-messages that arrived together, parents before children. Element hooks then run, children
+messages that arrived together, parents before children. A component renders only when what its
+view reads has changed: its state, a declared prop or a declared store's value, each compared
+with `Object.is` against its last render. A message whose reducer returns the same state renders
+nothing, so a reducer with nothing to change returns `s` itself, not a copy. Element hooks then run, children
 before parents. In a test, `await settled()` waits
 until every component has rendered and messages have stopped arriving. See
 [Testing](/docs/testing/).
@@ -958,6 +973,9 @@ until every component has rendered and messages have stopped arriving. See
 ## Pure means repeatable
 
 Because a view only reads its arguments, the server can render it, the browser can hydrate the
-same markup without changes, and a test can render a state and inspect it. If a view needs the
-time, a random number or a measurement, put it in state through a
-[command](/docs/effects/) first.
+same markup without changes, a test can render a state and inspect it, and Gyral can skip a
+render whose inputs are unchanged. If a view needs the time, a random number or a measurement,
+put it in state through a [command](/docs/effects/) first: a view that reads `Date.now()`, a
+module variable or the DOM shows a stale value, because messages that change nothing it reads
+don't render it. In development, Gyral renders skipped views again to check, and warns once per
+component when one comes out different ([G0017](/errors/#G0017)).
