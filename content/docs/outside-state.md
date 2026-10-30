@@ -93,7 +93,9 @@ input are checked against them ([below](#a-store-per-page-provided-by-a-token)).
   each value first (a slice of a store's state), `equals` drops a value equal to the last one
   delivered (`equals: Object.is` for a store that hands out the same object when nothing
   changed), and `coalesce: 'microtask'` or `'frame'` delivers only the latest value per
-  microtask or animation frame. For a token `count = defineDriver<undefined, number>('count')`,
+  microtask or animation frame, the first one too: nothing arrives in the same turn as `emit`,
+  so a test awaits a microtask (or a frame) before it checks. Without `coalesce`, each value is
+  delivered at once. For a token `count = defineDriver<undefined, number>('count')`,
   `subscription(count, (emit) => store.subscribe(() => emit(store.getState())), { select: (s) => s.count, equals: Object.is })`
   delivers the store's `count` only when it changes.
 
@@ -101,6 +103,11 @@ For many values per frame (market data, sensors) into a view that takes real wor
 `coalesce: 'frame'` delivers only the latest one per animation frame. When the reducers need
 every value, list the message in the component's `renderOnFrame` instead: each message still
 reaches `update`, and the component renders once per frame.
+
+A component renders only when its state changes, but a value that is a new object each time
+(a sensor reading, a game's score snapshot) changes state by identity, so every one renders,
+even when its fields are the same. Drop repeats before they become messages: compare in the
+driver, or give the subscription an `equals` (with a `select` for the fields the view shows).
 
 ## Moves and reconnects
 

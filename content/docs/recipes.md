@@ -11,7 +11,7 @@ useWhen: building a list with add, toggle, delete and filters, or a form with va
 Each recipe is a whole component in one file, with its tests. They need only `@gyral/core`,
 plus `@gyral/testing` and Vitest for the tests, so they work in a new `basic` app from
 [create-gyral](/docs/getting-started/#create-a-project). Every recipe compiles against Gyral
-0.3.8, and the site tests each one in a browser when it builds.
+0.3.9, and the site tests each one in a browser when it builds.
 
 ## A todo list with filters
 

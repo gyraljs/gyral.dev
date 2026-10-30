@@ -53,7 +53,9 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
 - **MUST keep reducers, `init` and `view` pure.** Return a new object
   (`{ ...s, items: [...s.items, x] }`); never mutate state. A component renders only when its
   state, a declared prop or a declared store's value changes, so a reducer with nothing to
-  change returns `s` itself, and a view that reads anything else shows stale values (G0017).
+  change returns `s` itself, and a view that reads anything else shows stale values (G0017). A
+  message that carries a new object each time renders every time: drop repeats in the driver or
+  with the subscription's `equals`.
 - **MUST return side effects as commands**: `Save: (s) => [{ ...s, saving: true }, [cmd]]`.
   Focus is a command too: `focus('#name')` runs after the update renders.
 - **MUST start long-lived work from `subscriptions(state, props)`**, not from `init` or a
@@ -64,7 +66,8 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
   (`Number`, a type guard, `trim()`) and return `undefined` for input you don't accept. For one
   event type, `on('keydown', { keys: ['Enter'] }, (input) => …)` types `input.event` and adds
   `modifiers`, `files`, `valueAsNumber` (a number input's value) and `origin`; bind its intent to
-  that event (G0018 otherwise).
+  that event (G0018 otherwise). Test it in Node:
+  `parse(C, 'Save', { key: 's', modifiers: { ctrl: true } })`.
 - **MUST carry ids, not positions**, in list controls: `value=${todo.id}` on the button or
   checkbox, and match by id in the reducer (`t.id === m.id`). With a filter or sort, a position
   points at the wrong item.
@@ -122,8 +125,9 @@ it passes. Setup for each client: [Use Gyral with coding agents](/docs/coding-ag
   the child, `child(Child, mapper)` in the parent) go to the direct parent only; pass them on
   with an output of the parent's own.
 - **DO NOT import `lit`** or another library's `html`: Gyral renders with its own view layer.
-- **DO NOT test with jsdom or happy-dom.** Test the model with `step`/`run` and the element in
-  a real browser.
+- **DO NOT test with jsdom or happy-dom.** Test the model with `step`/`run`, parsers with
+  `parse`, and the element in a real browser, where Gyral's development checks run and throw on
+  mistakes such as a duplicate key.
 - **DO NOT guess at exports.** If a name isn't in the import map below, look it up in the
   [API reference](/docs/api/) before you use it.
 
@@ -294,7 +298,7 @@ export { gyral } from '@gyral/core/vite'; // vite.config.ts: { plugins: [gyral()
 export {
   step, // step(C.spec, state, msg): { state, commands }
   run, // run(C.spec, msgs, { state?, props? }): from init or from state
-  parse, // parse(C, 'Intent', { value: '3' }): one parser, no DOM
+  parse, // parse(C, 'Save', { key: 's', modifiers: { ctrl: true } }): one parser, no DOM
   focusTargetsIn, // where reducers asked focus to go
   outputsIn, // what a child sent its parent
   inputsFor, // inputsFor(commands, driver): the inputs of one driver's commands

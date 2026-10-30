@@ -166,7 +166,9 @@ rules runs in three places, with the same messages:
   leaves out two checks, on component tag names and custom-element attribute names, to stay
   small), naming where the template is written:
   `at src/cart.ts:12:5`. Under Vite, `gyral()` gives the exact file, line and column; elsewhere
-  they come from the stack trace. Hydration mismatches name it too.
+  they come from the stack trace. Hydration mismatches name it too. `gyral()` also has Vite
+  pre-bundle the development build of `@gyral/core`, so `vite dev` and Vitest's browser mode run
+  these checks in an app that installs Gyral from npm.
 - **ESLint**, in your editor, with `@gyral/core/eslint`:
 
 ```js
@@ -305,7 +307,8 @@ A `pick` that builds a nested value on every render, such as `() => ({ columns, 
 reference stable first: compute `columns` in `update` and keep it in state. Where that can't be
 done, pass options instead of a function, `each(items, key, row, { pick, equals })`, and `equals`
 compares the picked values in place of the one-level check. Keep it cheap: it runs for every row
-on every render.
+on every render. The view's `props` is already stable: it stays the same object until a declared
+prop's value changes, so a pick that passes it on, `(day) => ({ day, props })`, lets rows skip.
 
 - Keys are unique strings or numbers. A duplicate key is an error in development.
 - The ESLint rule `gyral/each-row-purity` names any variable a row reads from the view and
@@ -965,8 +968,11 @@ Reducers run as soon as a message arrives; the DOM updates in a microtask, once 
 messages that arrived together, parents before children. A component renders only when what its
 view reads has changed: its state, a declared prop or a declared store's value, each compared
 with `Object.is` against its last render. A message whose reducer returns the same state renders
-nothing, so a reducer with nothing to change returns `s` itself, not a copy. Element hooks then run, children
-before parents. In a test, `await settled()` waits
+nothing, so a reducer with nothing to change returns `s` itself, not a copy. A message that
+carries a new object each time, such as a sensor reading or a game's score snapshot, changes
+state by identity and renders even when its values are the same: drop repeats at the source, in
+the driver or with a [subscription's](/docs/outside-state/#subscription) `equals` and `select`.
+Element hooks then run, children before parents. In a test, `await settled()` waits
 until every component has rendered and messages have stopped arriving. See
 [Testing](/docs/testing/).
 
@@ -979,3 +985,12 @@ put it in state through a [command](/docs/effects/) first: a view that reads `Da
 module variable or the DOM shows a stale value, because messages that change nothing it reads
 don't render it. In development, Gyral renders skipped views again to check, and warns once per
 component when one comes out different ([G0017](/errors/#G0017)).
+
+The check compares what the view renders, not object identities: plain objects and arrays
+compare by value. So a view may build values anew on every render when they come out equal:
+`each(s.items.map(…), …)`, `keyed(key, html…)`, `.data=${{ n: s.n }}` or
+`.items=${s.items.slice()}`. A `Date`, a `Set` or a class instance built in the view compares by
+reference, so it differs every time: keep it in state. The warning says where the view differs:
+in its template, or in the innermost `each(…, Row)` or `keyed(…)` that does. When that list's
+`pick` returned a new object for the same item, it says to pick only the fields the row reads,
+or to pass `each(items, key, row, { pick, equals })`.

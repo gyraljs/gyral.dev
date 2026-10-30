@@ -18,7 +18,7 @@ Use documented public package entries. Entries containing `/internal` are for Gy
 packages and have no stability promise. A symbol being technically exported does not make
 an internal entry an application API. The
 [export inventory](https://github.com/gyraljs/gyral/blob/v0.3.8/docs/references/public-api-0.3.1.md)
-records the public boundary of 0.3.8: every entry and what it exports.
+records the public boundary of 0.3.9: every entry and what it exports.
 
 The `@gyral/*` packages and `create-gyral` release together at a shared version: keep every
 `@gyral/*` package your app installs on that one version. Gyral's packages take `@gyral/core` as a
@@ -29,7 +29,7 @@ of core throws [G0016](/errors/#G0016) in development. The
 
 ## Releases
 
-These guides describe **0.3.8**, the `latest` version on npm. Every package is published
+These guides describe **0.3.9**, the `latest` version on npm. Every package is published
 from GitHub Actions with npm provenance; install from the registry. Today npm has releases
 only, under the `latest` tag.
 
@@ -38,7 +38,7 @@ Deploy server output and client assets from the same build: stale HTML with new 
 templates can cause hydration mismatches. Versioned hashed assets help keep that agreement.
 
 Breaking changes wait for a new minor version, and that release gets an upgrade guide in these
-docs. On an older 0.3.x release? Install 0.3.8 and read the
+docs. On an older 0.3.x release? Install 0.3.9 and read the
 [core changelog](https://github.com/gyraljs/gyral/blob/main/packages/core/CHANGELOG.md).
 
 ## Upgrade with evidence
@@ -46,25 +46,30 @@ docs. On an older 0.3.x release? Install 0.3.8 and read the
 1. Read the changelogs for every release between yours and the target, and the upgrade guide
    when the target is a new minor version.
 2. Update packages together and install from the lockfile.
-3. Commit, then run `npx @gyral/codemod 0.3.8` from the app's directory. It moves code to
-   0.3.8's APIs wherever it can prove the rewrite safe: a spread-in `gyralVitePreset()` becomes
-   `plugins: [gyral()]`,
-   driver records outside tests become [lists](/docs/effects/#substituting-drivers), and
+3. Commit, then run `npx @gyral/codemod 0.3.8` from the app's directory, before or after you
+   install. It moves code from 0.3.7's APIs to the current ones wherever it can prove the
+   rewrite safe: a spread-in `gyralVitePreset()` becomes `plugins: [gyral()]`, driver records
+   outside tests become [lists](/docs/effects/#substituting-drivers), and
    `subscription('feed', …)` becomes `subscription(feed, …)` where the module declares the
-   `feed` token. It lists every candidate it leaves, with `file:line` and the reason, and only
-   writes into a clean git working tree (`--dry` prints the diff instead), so `git diff` shows
-   what it did.
+   `feed` token. An app on 0.3.8 has nothing to rewrite. A package whose `@gyral/core` is older
+   than 0.3.7 is left as it is, and reported once if it has code to rewrite: migrate it to 0.3.7
+   first. The codemod lists every candidate it leaves, with `file:line` and the reason, among
+   them driver records it can't follow (returned from a function, passed in
+   `defineStore({ drivers })` options) and `subscription('feed', …)` where `feed` is imported
+   from another module. It only writes into a clean git working tree (`--dry` prints the diff
+   instead), so `git diff` shows what it did.
 4. Run ESLint with `gyral.configs.recommended` from `@gyral/core/eslint`. `gyral/prefer-built-in`
    names code that a built-in replaces, such as a parser that checks modifier keys by hand
    (`on()`), and `gyral/intent-event` an `on()` parser bound to another event
    ([the rules](/docs/packages/#the-eslint-plugin)).
-5. Run typechecking, component/browser tests and the production build. In development, a view
-   that reads something besides its state, props and stores warns ([G0017](/errors/#G0017)),
+5. Run typechecking, component/browser tests and the production build. `vite dev` and browser
+   tests run Gyral's development checks, and some throw, naming what to change. A view that
+   reads something besides its state, props and stores warns ([G0017](/errors/#G0017)),
    because Gyral skips renders whose inputs are unchanged.
 6. Test server/client hydration, edited forms, routing and the production CSP if your app
    uses them. Check payload size for the pages whose loading matters.
 7. Update the agent skill your project carries:
-   `npx @gyral/mcp@0.3.8 skill` ([coding agents](/docs/coding-agents/#the-agent-skill)).
+   `npx @gyral/mcp@0.3.9 skill` ([coding agents](/docs/coding-agents/#the-agent-skill)).
 
 The generated [API reference](/docs/api/) describes the packages installed for this site's
 build. Consult the changelog for the exact version your app runs:

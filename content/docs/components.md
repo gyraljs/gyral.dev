@@ -117,7 +117,9 @@ export const Badge = define<Stateless, never, Props>()('my-badge', {
 ```
 
 - **Read props as context.** Every reducer and the view get `{ props }` as their last argument.
-  Don't copy props into state just to read them.
+  Don't copy props into state just to read them. `props` is the same object until a declared
+  prop's value changes, so a list row's [`pick`](/docs/views/#lists) may pass it on. Copy it
+  before you change anything in it.
 - **`required: true`** is a promise from the parent. A missing value logs one warning per
   instance at first render.
 - **`default`** is used whenever the element's own value is missing.

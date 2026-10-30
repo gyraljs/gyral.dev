@@ -343,8 +343,9 @@ to ship either, see [Deploying](/docs/deploying/).
 ## Development server
 
 `gyralDevServer()` from `@gyral/ssr/node` runs Vite in middleware mode, loads your server module
-through Vite (so edits show up), streams each response, and shows Vite's error overlay when a
-render throws:
+through Vite, streams each response, and shows Vite's error overlay when a render throws. An
+edit shows on the next request, a component's too: Vite runs the edited module again, and its
+`define()` replaces the spec the server renders, with its styles and CSP hashes:
 
 ```ts
 // scripts/dev.ts
@@ -362,11 +363,13 @@ console.log(`Listening on ${dev.url}`);
 after an edit) and set of components, not on every request, so keep per-request work inside the
 handler; a cache of your own around `app` isn't needed. `state` keeps a value, such as an
 in-memory database, across those reloads. Vite runs as a custom server here, so `gyral()`'s
-[`optimize: 'auto'`](/docs/packages/#the-vite-plugins) is on: it pre-bundles what your
-components import when the server starts.
+[`optimize: 'auto'`](/docs/packages/#the-vite-plugins) is on: when the server starts, it
+pre-bundles what your components, your client build's inputs and the modules listed in
+`components.modules` import.
 
 To run the same development server inside a Node server of your own, `gyralDevMiddleware()`
-takes the same options without `port` and `host` and returns `{ middleware, vite, close }`.
+takes the same options without `port` and `host` and returns `{ middleware, vite, close }`. It
+renders edited components on the next request too.
 Express and Connect take `middleware` with `app.use()`, and Fastify through `@fastify/middie`.
 It answers every request that reaches it, Vite's modules first and then your app, so mount your
 own routes before it.

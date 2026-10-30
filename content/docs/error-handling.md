@@ -167,9 +167,15 @@ window.addEventListener('error', (event) => {
 });
 ```
 
-Production builds report the same errors with short messages; the codes are explained on the
-[error codes](/errors/) page. For your own tooling, the same table (code, group, message,
-arguments, link) ships with the package as `@gyral/core/errors.json`:
+Development builds print each diagnostic in full, ending with its code and a link to its entry
+on the [error codes](/errors/) page: `… (G0010: https://gyral.dev/errors/#G0010)`. Production
+builds report the same errors with short messages:
+`Gyral G0010 my-cart Add https://gyral.dev/errors/#G0010`. A test that matches a development
+message exactly (`toBe`, `toEqual`) includes that ending, or matches with `toContain`. Uncoded
+`gyral:` notices, such as a server-rendered element no client module defines, carry no code.
+
+For your own tooling, the same table (code, group, message, arguments, link) ships with the
+package as `@gyral/core/errors.json`:
 
 ```ts
 import table from '@gyral/core/errors.json' with { type: 'json' };
@@ -246,9 +252,10 @@ In a model test, `step()` accepts `Errored`, so you can test that reducer withou
 
 Start with the production diagnostic code, for example `Gyral G0010`. The
 [diagnostics reference](/errors/) expands it into the cause and a suggested fix. A development
-build includes the explanation; the [devtools panel](/docs/devtools/) shows the message,
-previous/next state, component and command lane around the failure. Inspect the underlying
-`GyralError.cause` without putting private user data into shared logs.
+build prints the full explanation, ending with the same code; the
+[devtools panel](/docs/devtools/) shows the message, previous/next state, component and command
+lane around the failure. Inspect the underlying `GyralError.cause` without putting private user
+data into shared logs.
 
 Distinguish three outcomes:
 
