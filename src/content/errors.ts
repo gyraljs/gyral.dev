@@ -124,8 +124,8 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   },
   17: {
     explanation:
-      'Development only: a component renders only when its state, a declared prop or a declared store’s value changes, and this one rendered differently when Gyral rendered a skipped view again to check it. So its view reads something else, such as `Date.now()`, `Math.random()`, a module variable or the DOM, and on the page it shows a stale value until one of its inputs changes. Development checks up to 50 skipped views per render pass (a different 50 each pass when more are skipped, so every component is checked within a few passes) and warns once per component.',
-    fix: 'Move what the view reads into state (the time from an `every` subscription, a random value from a command), a prop or a store, so that a change to it renders the component ([Pure means repeatable](/docs/views/#pure-means-repeatable)).',
+      'Development only: a component renders only when its state, a declared prop or a declared store’s value changes, and this one rendered differently when Gyral rendered a skipped view again to check it. So its view reads something else, such as `Date.now()`, `Math.random()`, a module variable or the DOM, and on the page it shows a stale value until one of its inputs changes. The check compares what the view renders, plain objects and arrays by value, so values a view builds anew each render match when they are equal; a `Date`, a `Set` or a class instance built in the view compares by reference, so it differs every time. `where` says where the view differs: `in its template`, or in the innermost `each(…, Row)` or `keyed(…)` that does, named by its row function. When that list’s `pick` returned a new object for the same item, the message says so. Development checks up to 50 skipped views per render pass (a different 50 each pass when more are skipped, so every component is checked within a few passes) and warns once per component.',
+    fix: 'Move what the view reads into state (the time from an `every` subscription, a random value from a command, a `Date` built from a timestamp), a prop or a store, so that a change to it renders the component ([Pure means repeatable](/docs/views/#pure-means-repeatable)). When the message names a list’s `pick`, pick only the fields the row reads, or pass `each(items, key, row, { pick, equals })`.',
   },
   18: {
     explanation:
@@ -253,12 +253,12 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   },
   62: {
     explanation:
-      'The server’s HTML differs from the first client render, so the component can’t be hydrated in place. Development throws `HydrationMismatch`, naming the template’s file and line; production keeps the sentence (the component, the DOM path, what was expected and found), ends it with this code, and renders the component fresh (G0063).',
+      'The server’s HTML differs from the first client render, so the component can’t be hydrated in place. Development throws `HydrationMismatch`, naming the template’s file and line; production keeps the sentence (the component, the DOM path, what was expected and found) and renders the component fresh (G0063). Both end the sentence with this code and its link.',
     fix: 'Make the view render the same on both sides: no `Date.now()`, random numbers or locale-dependent formatting in `view` (put them in state through a command). Also rule out a browser extension or script that changed the DOM before hydration, and a stale cached page.',
   },
   63: {
     explanation:
-      'Production only: after a hydration mismatch (G0062, which follows in the same warning), Gyral cleared this component and rendered it fresh. The rest of the page stays hydrated, but this component flashes and redoes the server’s work.',
+      'Production only: after a hydration mismatch, Gyral cleared this component and rendered it fresh. The warning prints this code with the component’s tag, then the mismatch’s own sentence, which ends with G0062. The rest of the page stays hydrated, but this component flashes and redoes the server’s work.',
     fix: 'Fix the mismatch the warning describes; reproducing it in development gives the full message and the template’s location.',
   },
   // Templates
@@ -346,7 +346,7 @@ function errorsMarkdown(errors: readonly GyralError[], version: string): string 
   const groups = [...new Set(errors.map((e) => e.group))];
   const parts = [
     '# Error codes\n',
-    'Development builds of `@gyral/core` print each diagnostic in full. Production builds print a short line instead, so the message texts stay out of your bundle: `Gyral`, the code, the message’s arguments in order, and a link to this page.\n',
+    'Development builds of `@gyral/core` print each diagnostic in full, ending with its code and a link to this page: `… (G0010: https://gyral.dev/errors/#G0010)`. Production builds print a short line instead, so the message texts stay out of your bundle: `Gyral`, the code, the message’s arguments in order, and the link.\n',
     '```text\nGyral G0010 my-cart Add https://gyral.dev/errors/#G0010\n```\n',
     'Read that one as: `<my-cart>` has no update for the message `Add`. Find the code below; its message shows where each argument goes. For the full sentence, reproduce the problem in development (the dev server, tests, or a build with `--mode development`). A hydration mismatch keeps its own sentence in production and ends with its code and link.\n',
     `The codes and messages are read from \`@gyral/core\` ${version}, the version this site is built with; codes are never reused.\n`,
