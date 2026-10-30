@@ -130,7 +130,7 @@ GYRAL_MCP_PUBLIC_ORIGIN=http://127.0.0.1:3000 npx -y @gyral/mcp http
 
 It is configured by environment variables only; `gyral-mcp http --help` lists them. Put it
 behind TLS, and pin the package version you deploy. The
-[package README](https://github.com/gyraljs/gyral/blob/v0.3.8/packages/mcp/README.md#public-hosting)
+[package README](https://github.com/gyraljs/gyral/blob/v0.3.9/packages/mcp/README.md#public-hosting)
 has the details.
 
 ## The agent skill
@@ -175,7 +175,7 @@ extension or suffix (`NOTICE.txt`, `SOURCE-gyral.md`). Those are never compared.
 MIT-licensed, so a vendored copy carries Gyral's `LICENSE` and `NOTICE`.
 
 Other agents: copy
-[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.8/skills/gyral) into the agent's
+[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.9/skills/gyral) into the agent's
 skills or rules folder, or point it at `SKILL.md`.
 
 ## Docs for agents
