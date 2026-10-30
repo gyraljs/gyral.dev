@@ -58,10 +58,10 @@ region with a real heading and keyboard-operable controls, in light and dark.
 ## Free in production
 
 The instrumentation lives in `@gyral/core`, behind a package-internal import with a
-`development` condition. Vite resolves that condition in the dev server and in Vitest, and the
-production one in `vite build`, where every call site is guarded by a constant `false`. The
-bundler drops the call sites and the module: a production build contains neither the hook nor
-its event code.
+`development` condition. Vite resolves that condition in the dev server and in Vitest (`gyral()`
+passes it to the dependency pre-bundle of an installed `@gyral/core` too), and the production one
+in `vite build`, where every call site is guarded by a constant `false`. The bundler drops the
+call sites and the module: a production build contains neither the hook nor its event code.
 
 With other bundlers, set the `development` resolve condition in development builds to get events.
 Without it you get the safe default: no events.

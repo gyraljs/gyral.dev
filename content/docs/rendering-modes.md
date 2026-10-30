@@ -52,7 +52,7 @@ export const staticPaths = (): string[] =>
 
 `RenderMode` names them the way the rest of the ecosystem does: `ssg` (static), `ssr` (per
 request) and `csr` (client). Gyral's
-[isomorphic example](https://github.com/gyraljs/gyral/tree/v0.3.8/examples/isomorphic) uses
+[isomorphic example](https://github.com/gyraljs/gyral/tree/v0.3.9/examples/isomorphic) uses
 exactly this table.
 
 ## Client-only builds
@@ -74,11 +74,11 @@ With `clientOnly: true` the browser bundle carries no hydration code: no seed re
 hydration chunk, and when your app has no other `import()`, Vite's preload helper goes too. The
 fallback for [invoker commands](/docs/intent/#invoker-commands) stays only when a module may make
 a component listen for `command` intents ([what the build reads](#what-the-build-reads)).
-Measured on Gyral's examples (gzip, 0.3.8):
+Measured on Gyral's examples (gzip, 0.3.9):
 
 | App         | Default: first load | Default: all chunks | `clientOnly: true` |
 | ----------- | ------------------- | ------------------- | ------------------ |
-| hello-world | 9.70 KiB            | 12.14 KiB           | 8.60 KiB           |
+| hello-world | 9.69 KiB            | 12.14 KiB           | 8.60 KiB           |
 
 "First load" is what a page downloads before any lazy `import()`; in these examples a
 client-only build has nothing lazy left, so its first load is all of it.

@@ -311,8 +311,11 @@ export const Board = define<{ readonly at: number }, Msg>()('my-board', {
 Bind the intent to the parser's event, with `data-intent-<event>` or `data-intent-on`, or rely on
 the element's own trigger. In development, a parser that another event reaches throws
 ([G0018](/errors/#G0018)), and the `gyral/intent-event` lint rule reports such a binding in your
-editor. Plain parsers keep `IntentInput`, and `on()` is a module of its own: an app that never
-calls it doesn't bundle it.
+editor. Plain parsers keep `IntentInput`, and `on()` is a module of its own, about 0.43 KiB gzip,
+paid once per app on its first use however many parsers use it: an app that never calls it
+doesn't bundle it. Test an `on()` parser without a DOM with `parse()` from `@gyral/testing`,
+which creates an event of the parser's type ([on() parsers in
+Node](/docs/testing/#on-parsers-in-node)).
 
 ## Parse, don't validate
 

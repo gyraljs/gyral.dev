@@ -10,7 +10,7 @@ order: 1
 
 Gyral is a set of small packages under the `@gyral` scope on npm, plus `create-gyral`, which
 sets up a new app. Every app needs `@gyral/core`; add the others when you need them. All ten
-packages are released together with the same version number (0.3.8), are ES modules with
+packages are released together with the same version number (0.3.9), are ES modules with
 TypeScript types, and are published from GitHub Actions with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
@@ -39,7 +39,7 @@ Apps that do not import them carry no storage driver code.
 | `@gyral/testing`  | `step`, `run`, `viewOf`, `subscriptionsFor`, `outputsIn`, `mount`, `parse`, fake drivers, virtual time, `mountSsr` and `hydrated`. `@gyral/testing/vitest` renders server markup for browser tests.                                                                                    |
 | `@gyral/devtools` | The in-page devtools panel, for development builds.                                                                                                                                                                                                                                    |
 | `@gyral/mcp`      | An MCP server for coding agents: it searches these docs, looks up exact API signatures, reads the examples, scaffolds components and typechecks snippets against your project. Hosted at `https://mcp.gyral.dev/mcp`.                                                                  |
-| `@gyral/codemod`  | Rewrites an app's source for a release's API changes, `npx @gyral/codemod 0.3.8`, and lists what it leaves for you. Run it with `npx`; there is nothing to install.                                                                                                                    |
+| `@gyral/codemod`  | Rewrites an app's source for a release's API changes, such as 0.3.8's with `npx @gyral/codemod 0.3.8`, and lists what it leaves for you. Run it with `npx`; there is nothing to install.                                                                                               |
 
 ```sh
 npm install @gyral/http @gyral/router @gyral/time
@@ -121,11 +121,16 @@ export default defineConfig({
 - **Pre-bundling.** The dev server and Vitest pre-bundle the browser entry points of every
   Gyral package installed for the app, and of your direct dependencies that use Gyral (a design
   system, a widget library), all together, so they never load a second copy of `@gyral/core`
-  partway through a run. `gyral()` also warns once when `@gyral/core` is installed more than once
+  partway through a run. The pre-bundle is core's development build, with every development
+  check and full messages: `gyral()` gives Vite's dependency optimizer the environment's resolve
+  conditions (your `resolve.conditions`, or Vite's defaults with `development`), and an
+  `optimizeDeps.rolldownOptions.resolve.conditionNames` of your own wins. Production builds are
+  unaffected. `gyral()` also warns once when `@gyral/core` is installed more than once
   ([G0015](/errors/#G0015)): pin one version with your package manager's overrides.
-- **`optimize: 'auto'`** points Vite's startup scan at the modules that define components, and
-  at a Vitest browser project's tests, so Vite finds everything they import before the first
-  page or test loads instead of reloading partway through. It is on by default when Vite runs as
+- **`optimize: 'auto'`** points Vite's startup scan at the modules that define components, the
+  modules listed in `components.modules`, the client build's inputs and a Vitest browser
+  project's tests, so Vite finds everything they import before the first page or test loads
+  instead of reloading partway through. It is on by default when Vite runs as
   a custom server (`appType: 'custom'`, as the [development server](/docs/server-rendering/#development-server)
   does); set it yourself in a Vitest browser project. A list adds dependencies to pre-bundle,
   `gyral({ optimize: ['some-dep'] })`, and `optimize: false` turns the scan off.
@@ -162,10 +167,12 @@ export default [{ files: ['src/**/*.ts'], ...gyral.configs.recommended }];
 [`on()` parser](/docs/intent/#parsers-typed-by-their-event) bound to another event) as errors,
 and `gyral/unused-intent` and `gyral/prefer-built-in` as warnings. `gyral/prefer-built-in` finds
 hand-written versions of what Gyral has built in and names the built-in: a dialog opened with
-`showModal()` (`?modal`), `.focus()` in a driver (the `focus()` command), `JSON.parse` of an
-attribute or prop (`prop.json()`), a subscription that drops repeated values by hand (`equals`),
-a record of drivers outside tests (a list), and a parser that checks the event's type, modifier
-keys, `Number(value)` of a number input or `composedPath()[0]` (`on()`). It works without Vite.
+`showModal()` (`?modal`), `.focus()` in a driver on an element reached through a component's
+`shadowRoot` or `renderRoot` (the `focus()` command; a page element outside any component stays
+the driver's to focus), `JSON.parse` of an attribute or prop (`prop.json()`), a subscription
+that drops repeated values by hand (`equals`), a record of drivers outside tests (a list), and a
+parser that checks the event's type, modifier keys, `Number(value)` of a number input or
+`composedPath()[0]` (`on()`, about 0.43 KiB gzip once per app). It works without Vite.
 See [Views](/docs/views/#checked-before-it-runs) for what the template rules catch.
 
 ## Publishing a component library
@@ -177,14 +184,14 @@ version you develop against:
 
 ```json
 {
-  "peerDependencies": { "@gyral/core": "^0.3.8" },
-  "devDependencies": { "@gyral/core": "0.3.8" }
+  "peerDependencies": { "@gyral/core": "^0.3.9" },
+  "devDependencies": { "@gyral/core": "0.3.9" }
 }
 ```
 
 - **A peer, never a dependency.** A dependency pinned to one version installs a second core
   whenever the app has another one ([G0015](/errors/#G0015)); a peer uses the app's.
-- **A caret range**: `^0.3.8` is 0.3.8 up to, but not including, 0.4.0. Its lower bound is the
+- **A caret range**: `^0.3.9` is 0.3.9 up to, but not including, 0.4.0. Its lower bound is the
   oldest core you test against. Gyral's own packages pin core exactly because they use its
   internals; a library uses the public API, so any core in the range works. Other Gyral packages
   the library imports, such as `@gyral/http`, are caret peers too.
@@ -197,7 +204,7 @@ version you develop against:
   installed package that lists `@gyral/core`, as a peer too, for the features its components
   use ([what the build reads](/docs/rendering-modes/#what-the-build-reads)).
 - **Test against the range**: run the library's tests with the lowest core its range allows and
-  with the newest. `npx @gyral/mcp@0.3.8 skill --check` in its CI keeps the
+  with the newest. `npx @gyral/mcp@0.3.9 skill --check` in its CI keeps the
   [agent skill](/docs/coding-agents/#the-agent-skill) it carries on the version it develops
   against.
 
@@ -211,13 +218,13 @@ cancellation, concurrency lanes and retries.
 Apps ship only the features they use. `each`, `raw`, hooks, commands, stores and the prop builders
 register themselves when your code first calls them, so an app that never calls one doesn't
 bundle it, and the hydration code is a separate chunk that only server-rendered pages fetch.
-Measured on Gyral's examples at 0.3.8 (KiB gzip, production builds with `gyral()`):
+Measured on Gyral's examples at 0.3.9 (KiB gzip, production builds with `gyral()`):
 
 | App                      | First load | All chunks |
 | ------------------------ | ---------- | ---------- |
 | hello-world              | 9.7        | 12.1       |
 | hello-world, client-only | 8.6        | 8.6        |
-| isomorphic (SSR)         | 15.6       | 18.6       |
+| isomorphic (SSR)         | 15.6       | 18.7       |
 | no-js-first (SSR, forms) | 20.0       | 20.1       |
 
 "First load" is the entry chunk and what it imports statically: what a page downloads before any
@@ -226,7 +233,8 @@ lazy `import()`. The no-js-first example loads its components
 load counts what a page with every component preloads, the hydration chunk included. Builds leave
 out view transitions, the frame lane and custom states unless a module names their spec field (the
 build reads your code and the packages that depend on Gyral; see [what the build
-reads](/docs/rendering-modes/#what-the-build-reads)), `on()` is bundled only by apps that call it,
+reads](/docs/rendering-modes/#what-the-build-reads)), `on()` (about 0.43 KiB) is bundled only by
+apps that call it,
 and production builds print short
 [error codes](/errors/) instead of messages. [Error handling](/docs/error-handling/), which every
 app carries, costs about 0.75 KiB. The client-only row is the same app built with

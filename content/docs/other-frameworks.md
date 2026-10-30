@@ -203,7 +203,7 @@ These checks run in real Chromium with `pnpm verify:platforms` in the framework 
 install pinned host
 packages in a temporary directory, leaving Gyral's runtime dependency graph unchanged. They cover
 client mounts, not each host's SSR/hydration integration. The [spike
-report](https://github.com/gyraljs/gyral/blob/v0.3.8/docs/references/platform-spikes-2026-10-11.md)
+report](https://github.com/gyraljs/gyral/blob/v0.3.9/docs/references/platform-spikes-2026-10-11.md)
 records the results, fixtures and limits.
 
 ## Server rendering in another framework

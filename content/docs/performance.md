@@ -18,15 +18,20 @@ Reducers run immediately. One scheduler batches DOM work in a microtask, renders
 before children, and runs focus and other post-render work after the commit. A component
 renders only when its state, a declared prop or a declared store's value has changed since its
 last render, so a message whose reducer returns the same state costs no render: return `s`
-itself when nothing changes, not a copy. When a view does render, unchanged binding values do
-not rewrite the DOM. Keep views pure and deterministic: a view that reads anything else shows
-stale values, and development warns about it ([G0017](/errors/#G0017)).
+itself when nothing changes, not a copy. That helps only when `update` returns the same state:
+a message that carries a new object each time (a sensor reading, a game's score snapshot)
+renders on every arrival. For a high-rate source, drop repeats before they become messages, in
+the driver or with the subscription's `equals` and `select`. When a view does render, unchanged
+binding values do not rewrite the DOM. Keep views pure and deterministic: a view that reads
+anything else shows stale values, and development warns about it, naming where the view
+differs ([G0017](/errors/#G0017)).
 
 Use `each(items, key, row, pick?)` for lists that insert, remove or reorder items. It skips a
 row when its item reference and picked inputs are unchanged. Preserve unchanged objects in
 your reducers and put changing external row inputs in `pick`; do not capture outer view state
 in the row function. A `pick` that returns a new nested value every render defeats the check;
-make its references stable, or compare with `each(items, key, row, { pick, equals })`.
+make its references stable, or compare with `each(items, key, row, { pick, equals })`. The
+view's `props` is stable already: the same object until a declared prop's value changes.
 Development checks and the row-purity lint help detect mistakes. See
 [Views](/docs/views/#lists) and [Update](/docs/update/).
 

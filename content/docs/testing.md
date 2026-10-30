@@ -212,6 +212,12 @@ For rendering, events and focus, test the real element in a real browser. Gyral'
 pre-bundle what your components and tests import before the first test runs, so Vitest doesn't
 reload the page partway through a run.
 
+`gyral()` also has Vite pre-bundle the development build of `@gyral/core`, so browser tests run
+Gyral's development checks (a [view that reads something else](/docs/views/#pure-means-repeatable),
+duplicate keys, impure rows, template rules, prop checks) and print each message in full. Some
+checks throw, such as a duplicate key or a broken template rule: the test fails with a message
+that names what to change.
+
 Gyral renders on a schedule: reducers run as soon as a message arrives, and the DOM updates in a
 microtask, once for every message that arrived together. **`await settled()`** from
 `@gyral/core` waits until every component on the page has rendered its latest state, including
@@ -374,6 +380,60 @@ it('steps with the arrows of its orientation', () => {
   expect(parse(FolderList, 'Step', { key: 'ArrowDown', event }, horizontal)).toBeUndefined();
 });
 ```
+
+### on() parsers in Node
+
+`parse()` needs no DOM for [`on()` parsers](/docs/intent/#parsers-typed-by-their-event) either,
+so they run in a Node test. The event it creates has the type the parser declares (`keydown` for
+`on('keydown', …)`) and carries `key`, so key filters work, and `modifiers` names the keys held
+(`{ ctrl: true }`; the others are up). Without a target, `valueAsNumber` reads `value`, and
+`control`, `form` and `origin` are `undefined`:
+
+```ts
+// src/note-editor.ts
+import { define, html, on } from '@gyral/core';
+
+export type Msg =
+  { readonly _tag: 'Save' } | { readonly _tag: 'Zoom'; readonly level: number | undefined };
+
+export const NoteEditor = define<{ readonly saves: number }, Msg>()('my-note-editor', {
+  init: () => ({ saves: 0 }),
+  intent: {
+    Save: on('keydown', { keys: ['s'], modifiers: { ctrl: true } }, () => ({ _tag: 'Save' })),
+    Zoom: on('input', (input) => ({ _tag: 'Zoom', level: input.valueAsNumber })),
+  },
+  update: { Save: (s) => ({ saves: s.saves + 1 }), Zoom: (s) => s },
+  view: (s, i) => html`
+    <label for="note">Note</label>
+    <textarea id="note" data-intent-keydown=${i.Save}></textarea>
+    <label for="zoom">Zoom</label>
+    <input id="zoom" type="range" data-intent-input=${i.Zoom} />
+    <output for="note">Saved ${s.saves} times</output>
+  `,
+});
+```
+
+```ts
+// src/note-editor.node.test.ts
+import { expect, it } from 'vitest';
+import { parse } from '@gyral/testing';
+import { NoteEditor } from './note-editor.js';
+
+it('saves on Ctrl+S only', () => {
+  expect(parse(NoteEditor, 'Save', { key: 's', modifiers: { ctrl: true } })).toEqual({
+    _tag: 'Save',
+  });
+  expect(parse(NoteEditor, 'Save', { key: 's' })).toBeUndefined(); // declined: Ctrl is up
+});
+
+it('reads the slider as a number', () => {
+  expect(parse(NoteEditor, 'Zoom', { value: '150' })).toEqual({ _tag: 'Zoom', level: 150 });
+});
+```
+
+`modifiers` applies only to the event `parse()` creates. To pass an `event` of your own, to read
+its `defaultPrevented` afterwards, say, set `ctrlKey` and the other modifier keys on it: `parse()`
+throws when it gets both.
 
 ## Fake drivers and commands
 

@@ -130,7 +130,7 @@ rendered, and hydrate in the browser. `gyral-rs` runs your app's own Gyral serve
 embedded V8 inside the Rust process. Node builds the bundles; the running server doesn't need
 it.
 
-`gyral-rs` is **experimental**. Version 0.6 accepts bundles built with Gyral **0.3.8** exactly,
+`gyral-rs` is **experimental**. Version 0.7 accepts bundles built with Gyral **0.3.9** exactly,
 and its tested target is Linux x86_64 (GNU) with Rust 1.99. Each `gyral-rs` minor accepts one
 Gyral release, so check its [changelog](https://github.com/gyraljs/gyral-rs/blob/main/CHANGELOG.md)
 before you upgrade Gyral in a Rust-served app.

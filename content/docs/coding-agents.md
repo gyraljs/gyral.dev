@@ -42,7 +42,7 @@ Any other client that speaks Streamable HTTP: add a server with the URL
 The hosted server has every tool except `check_snippet`, which needs your project's
 TypeScript and packages. It can run an older `@gyral/mcp` than the latest release; its
 `initialize` response and `https://mcp.gyral.dev/healthz` report the version it serves. This
-page describes the tools as `@gyral/mcp` 0.3.8 provides them.
+page describes the tools as `@gyral/mcp` 0.3.9 provides them.
 
 ## The local MCP server
 
@@ -130,7 +130,7 @@ GYRAL_MCP_PUBLIC_ORIGIN=http://127.0.0.1:3000 npx -y @gyral/mcp http
 
 It is configured by environment variables only; `gyral-mcp http --help` lists them. Put it
 behind TLS, and pin the package version you deploy. The
-[package README](https://github.com/gyraljs/gyral/blob/v0.3.8/packages/mcp/README.md#public-hosting)
+[package README](https://github.com/gyraljs/gyral/blob/v0.3.9/packages/mcp/README.md#public-hosting)
 has the details.
 
 ## The agent skill
@@ -155,19 +155,27 @@ write it. Run it from the app's directory, with the version of `@gyral/core` the
 installed:
 
 ```sh
-npx @gyral/mcp@0.3.8 skill           # write the skill into the project
-npx @gyral/mcp@0.3.8 skill --check   # in CI: fail when a copy differs
+npx @gyral/mcp@0.3.9 skill           # write the skill into the project
+npx @gyral/mcp@0.3.9 skill --check   # in CI: fail when a copy differs
 ```
 
 `skill` writes `SKILL.md` and its references to `.claude/skills/gyral`, and to
-`.agents/skills/gyral` when that folder exists (`--dir <folder>` names others), and removes files
-the skill no longer has. The version must match the installed `@gyral/core`, because each
-release's skill describes that release; it says which command to run when it doesn't. With
-`--check` it writes nothing and exits 1 when a copy differs, so a CI job catches a skill left
-behind by an upgrade.
+`.agents/skills/gyral` when that folder exists. `--dir <folder>` names others, relative to the app
+or absolute, such as a user-level `~/.claude/skills/gyral`. The version must match the installed
+`@gyral/core`, because each release's skill describes that release; it says which command to run
+when it doesn't. With `--check` it writes nothing and exits 1 when a copy differs, so a CI job
+catches a skill left behind by an upgrade.
+
+Each copy gets a `VERSION` file naming its release and the source it came from
+(`https://github.com/gyraljs/gyral/tree/v0.3.9/skills/gyral`), which `--check` compares like the
+skill's other files, so a vendored copy needs no note of its own saying which release it is.
+`skill` removes files the skill doesn't ship, except the ones an owner keeps at the top of a copy:
+`LICENSE` (or `LICENCE`), `NOTICE`, `COPYING`, `PINNED` and `SOURCE` (or `SOURCES`), with any
+extension or suffix (`NOTICE.txt`, `SOURCE-gyral.md`). Those are never compared. The skill is
+MIT-licensed, so a vendored copy carries Gyral's `LICENSE` and `NOTICE`.
 
 Other agents: copy
-[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.8/skills/gyral) into the agent's
+[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.9/skills/gyral) into the agent's
 skills or rules folder, or point it at `SKILL.md`.
 
 ## Docs for agents
