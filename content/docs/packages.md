@@ -10,7 +10,7 @@ order: 1
 
 Gyral is a set of small packages under the `@gyral` scope on npm, plus `create-gyral`, which
 sets up a new app. Every app needs `@gyral/core`; add the others when you need them. All ten
-packages are released together with the same version number (0.3.9), are ES modules with
+packages are released together with the same version number (0.3.10), are ES modules with
 TypeScript types, and are published from GitHub Actions with
 [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
@@ -27,6 +27,28 @@ npm install @gyral/core
 `@gyral/core/storage` and `@gyral/core/indexeddb` are optional entry points in the same
 package. They provide separate native [localStorage and IndexedDB drivers](/docs/browser-storage/).
 Apps that do not import them carry no storage driver code.
+
+### Development and production builds
+
+`@gyral/core` ships two builds of its runtime entry points. The full build has every
+development check, switched on by the `development` resolve condition. The production build has
+those checks, and the modules only they use, removed when Gyral is built, so a production bundle
+leaves them out whichever bundler makes it. Your bundler picks the build from the package's
+export conditions:
+
+| Who resolves `@gyral/core`                                     | Gets                                                  |
+| -------------------------------------------------------------- | ----------------------------------------------------- |
+| Vite's dev server and Vitest's browser mode                    | the full build, checks on                             |
+| `vite build` for the browser                                   | the production build                                  |
+| esbuild, webpack, Rspack, Parcel or Bun, bundling for browsers | the production build; the full one with `development` |
+| Node, Deno, Bun, Vite's SSR and Vitest's Node projects         | the full build, its checks on only with `development` |
+
+For the checks in a browser bundle built without Vite, pass the condition while you develop:
+esbuild's `conditions: ['development']` (webpack and Rspack set it in development mode).
+Without it you get the production build: coded messages (`Gyral G0010 …`), no checks and no
+[devtools](/docs/devtools/) events. Only the `browser` condition selects the production build,
+so a server process loads one copy of core whatever resolves it. Don't import files under
+`@gyral/core/dist/` yourself: the conditions pick the build.
 
 ## Optional packages
 
@@ -148,7 +170,8 @@ to each browser project's config too ([Testing](/docs/testing/#browser-tests)).
 
 `gyralVitePreset(options)` returns the same plugins as `{ plugins, optimizeDeps }`, for a config
 that spreads it in. `npx @gyral/codemod 0.3.8` rewrites such a config to `plugins: [gyral()]`
-where it can prove the result the same, and lists the configs it leaves.
+where it can prove the result the same (`...(gyralVitePreset(o).plugins ?? [])` becomes
+`...gyral(o)`, which always returns an array), and lists the configs it leaves.
 
 ## The ESLint plugin
 
@@ -169,7 +192,8 @@ and `gyral/unused-intent` and `gyral/prefer-built-in` as warnings. `gyral/prefer
 hand-written versions of what Gyral has built in and names the built-in: a dialog opened with
 `showModal()` (`?modal`), `.focus()` in a driver on an element reached through a component's
 `shadowRoot` or `renderRoot` (the `focus()` command; a page element outside any component stays
-the driver's to focus), `JSON.parse` of an attribute or prop (`prop.json()`), a subscription
+the driver's to focus), `JSON.parse` of an attribute or prop, whatever the props parameter is
+called and when it is destructured (`prop.json()`), a subscription
 that drops repeated values by hand (`equals`), a record of drivers outside tests (a list), and a
 parser that checks the event's type, modifier keys, `Number(value)` of a number input or
 `composedPath()[0]` (`on()`, about 0.43 KiB gzip once per app). It works without Vite.
@@ -184,14 +208,14 @@ version you develop against:
 
 ```json
 {
-  "peerDependencies": { "@gyral/core": "^0.3.9" },
-  "devDependencies": { "@gyral/core": "0.3.9" }
+  "peerDependencies": { "@gyral/core": "^0.3.10" },
+  "devDependencies": { "@gyral/core": "0.3.10" }
 }
 ```
 
 - **A peer, never a dependency.** A dependency pinned to one version installs a second core
   whenever the app has another one ([G0015](/errors/#G0015)); a peer uses the app's.
-- **A caret range**: `^0.3.9` is 0.3.9 up to, but not including, 0.4.0. Its lower bound is the
+- **A caret range**: `^0.3.10` is 0.3.10 up to, but not including, 0.4.0. Its lower bound is the
   oldest core you test against. Gyral's own packages pin core exactly because they use its
   internals; a library uses the public API, so any core in the range works. Other Gyral packages
   the library imports, such as `@gyral/http`, are caret peers too.
@@ -204,7 +228,7 @@ version you develop against:
   installed package that lists `@gyral/core`, as a peer too, for the features its components
   use ([what the build reads](/docs/rendering-modes/#what-the-build-reads)).
 - **Test against the range**: run the library's tests with the lowest core its range allows and
-  with the newest. `npx @gyral/mcp@0.3.9 skill --check` in its CI keeps the
+  with the newest. `npx @gyral/mcp@0.3.10 skill --check` in its CI keeps the
   [agent skill](/docs/coding-agents/#the-agent-skill) it carries on the version it develops
   against.
 
@@ -218,11 +242,11 @@ cancellation, concurrency lanes and retries.
 Apps ship only the features they use. `each`, `raw`, hooks, commands, stores and the prop builders
 register themselves when your code first calls them, so an app that never calls one doesn't
 bundle it, and the hydration code is a separate chunk that only server-rendered pages fetch.
-Measured on Gyral's examples at 0.3.9 (KiB gzip, production builds with `gyral()`):
+Measured on Gyral's examples at 0.3.10 (KiB gzip, production builds with `gyral()`):
 
 | App                      | First load | All chunks |
 | ------------------------ | ---------- | ---------- |
-| hello-world              | 9.7        | 12.1       |
+| hello-world              | 9.7        | 12.2       |
 | hello-world, client-only | 8.6        | 8.6        |
 | isomorphic (SSR)         | 15.6       | 18.7       |
 | no-js-first (SSR, forms) | 20.0       | 20.1       |
@@ -250,8 +274,8 @@ feature-detected and used as enhancements.
 ## Known issues
 
 - **Some markup isn't handled yet by the template checks**: `<select>` content under the new
-  customizable-select parsing, CDATA in SVG, and `<noscript>` as raw text. Keep these out of
-  templates, or put them in `raw()` on the server.
+  customizable-select parsing and CDATA in SVG. Keep these out of templates, or put them in
+  `raw()` on the server.
 - **Deno and Cloudflare Workers have only had a spot check** for server rendering: a
   `renderPage` bundle ran on Deno and in a local Workers runtime, but adapters, deployed edge
   behavior, bindings and assets aren't tested (see

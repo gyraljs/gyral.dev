@@ -42,7 +42,7 @@ Any other client that speaks Streamable HTTP: add a server with the URL
 The hosted server has every tool except `check_snippet`, which needs your project's
 TypeScript and packages. It can run an older `@gyral/mcp` than the latest release; its
 `initialize` response and `https://mcp.gyral.dev/healthz` report the version it serves. This
-page describes the tools as `@gyral/mcp` 0.3.9 provides them.
+page describes the tools as `@gyral/mcp` 0.3.10 provides them.
 
 ## The local MCP server
 
@@ -85,7 +85,7 @@ the latest docs at startup instead; it falls back to the bundled copy after 3 se
 | Tool                 | What it returns                                                                                                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `start_here`         | The mental model, the rules, the workflow, and which example or guide covers which task                                    |
-| `search_docs`        | Ranked doc sections for a query: title, URL and snippet                                                                    |
+| `search_docs`        | Ranked doc sections for a query, matching words at their start (`hydrat` finds hydration): title, URL and snippet          |
 | `get_doc`            | One docs page, or one section with `#anchor`, such as `forms#the-server-half`                                              |
 | `get_api`            | The declaration, doc comment and import line of an export, with usage code and the next call; on a miss, the nearest names |
 | `list_examples`      | Every example and what it shows                                                                                            |
@@ -155,8 +155,8 @@ write it. Run it from the app's directory, with the version of `@gyral/core` the
 installed:
 
 ```sh
-npx @gyral/mcp@0.3.9 skill           # write the skill into the project
-npx @gyral/mcp@0.3.9 skill --check   # in CI: fail when a copy differs
+npx @gyral/mcp@0.3.10 skill           # write the skill into the project
+npx @gyral/mcp@0.3.10 skill --check   # in CI: fail when a copy differs
 ```
 
 `skill` writes `SKILL.md` and its references to `.claude/skills/gyral`, and to

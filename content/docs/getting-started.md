@@ -37,7 +37,9 @@ Leave out `--template` and it asks you which one you want.
 
 ### Or set it up by hand
 
-Gyral works with any bundler. To add it to a [Vite](https://vite.dev) project yourself:
+Gyral works with any bundler (see
+[which build of core each one gets](/docs/packages/#development-and-production-builds)). To add
+it to a [Vite](https://vite.dev) project yourself:
 
 ```sh
 npm create vite@latest my-app -- --template vanilla-ts
@@ -237,4 +239,4 @@ rendering, hydration and virtual time. See [Testing](/docs/testing/).
 - Working with a coding agent? Connect it to Gyral's MCP server and skill:
   [Use Gyral with coding agents](/docs/coding-agents/).
 - Upgrading an existing app? [Versioning and stability](/docs/versioning/) explains how to move
-  to 0.3.9 safely.
+  to 0.3.10 safely.

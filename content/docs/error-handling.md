@@ -270,7 +270,10 @@ failed component can render its fallback while the page continues. `onError: 'th
 the render fail before returning the response; chunked output cannot change an HTTP status
 after bytes have been sent. See [Server rendering](/docs/server-rendering/).
 
-For a hydration mismatch, reproduce with the production build and the exact server/client
+A hydration mismatch doesn't use this channel: the component renders fresh and works, and the
+console says what differed, as an error in development ([G0062](/errors/#G0062) with the
+template's file and line) and a warning in production
+([Mismatches](/docs/server-rendering/#mismatches)). Reproduce it with the exact server/client
 assets. Check stale HTML, unseeded current time, locale differences, invalid parser-repaired
 markup, and third-party changes before scripts arrive. Use `mountSsr()` and `hydrated()` to
 exercise real server markup; they report mounting/hydration problems. Keep a small failing

@@ -112,12 +112,13 @@ then. There is nothing to hydrate: the server sent a tag, not the component's HT
 attribute is parsed and validated like any [prop](/docs/components/#builders-and-attributes),
 so a bad value falls back to the prop's default.
 
-Build the client with your usual bundler (the example uses esbuild). Rust serves its hashed
-files and sends a policy that allows them. Components that render in the browser adopt their
-styles as constructed stylesheets, so `style-src 'self'` is enough; style hashes are only for
-server-rendered components. Components that read form fields, such as a live preview, observe
-the native controls with a [subscription](/docs/outside-state/); the form still submits to
-Rust.
+Build the client with your usual bundler (the example uses esbuild); without the `development`
+condition, it bundles core's [production build](/docs/packages/#development-and-production-builds).
+Rust serves its hashed files and sends a policy that allows them. Components that render in the
+browser adopt their styles as constructed stylesheets, so `style-src 'self'` is enough; style
+hashes are only for server-rendered components. Components that read form fields, such as a
+live preview, observe the native controls with a [subscription](/docs/outside-state/); the form
+still submits to Rust.
 
 The [`gyral-rs` Askama example](https://github.com/gyraljs/gyral-rs/tree/main/examples/askama-client-app)
 is a complete notes app on this path: Axum routes, CSRF checks, SQLite, redirects after
@@ -137,13 +138,14 @@ before you upgrade Gyral in a Rust-served app.
 
 ### The server bundle
 
-The bundle is one script that sets two globals. Rust calls `gyralRender` with a page name and
-the JSON props it approved; the function returns the page's HTML:
+The bundle is one script that sets two globals. `gyralBundleVersion` declares the embedded SSR
+protocol the bundle speaks, `SSR_PROTOCOL` from `@gyral/ssr`. Rust calls `gyralRender` with a
+page name and the JSON props it approved; the function returns the page's HTML:
 
 ```ts
 // src/server.ts
 import { html } from '@gyral/core';
-import { renderToString } from '@gyral/ssr';
+import { renderToString, SSR_PROTOCOL } from '@gyral/ssr';
 import './counter.js';
 
 // The build replaces these with the hashed client file and its integrity hash.
@@ -160,7 +162,7 @@ declare global {
   var gyralRender: (input: RenderInput) => Promise<string>;
 }
 
-globalThis.gyralBundleVersion = 1;
+globalThis.gyralBundleVersion = SSR_PROTOCOL;
 globalThis.gyralRender = ({ page, props }) => {
   if (page !== 'home') throw new Error(`Unknown page: ${page}`);
   return renderToString(
@@ -191,21 +193,24 @@ runtime has no Fetch API, so the bundle writes its own document shell and return
 `onError: 'throw'` turns a failing component into a failed render, which Rust answers with an
 error page instead of a page with a hole in it.
 
-The runtime is not Node and not a browser. It has no DOM, file system, network or `TextEncoder`,
-and Gyral's style hashing needs `TextEncoder`. The
+The runtime is not Node and not a browser. It has the ECMAScript built-ins, `Intl`,
+`queueMicrotask` and `console`, and nothing else: no DOM, file system, network, timers, `URL` or
+`TextEncoder`. Gyral's server rendering uses nothing else, so the bundle needs no shim for it. Only
+`styleHashes()` uses `TextEncoder`, and the build calls it in Node. The
 [example's server entry](https://github.com/gyraljs/gyral-rs/blob/main/examples/axum-app/web/server.mjs)
-installs a small UTF-8 encoder first; copy it.
+is a fuller one, with a store, a form and time zones.
 
 ### Building the pair
 
-Build the browser and server bundles together, from the same components and the same exact
-Gyral version:
+Build the browser and server bundles together, from the same components and the same Gyral
+release (the HTML and the hydration seeds are a contract between one release's server and
+browser code), and write a manifest beside them:
 
 - **Browser**: one self-contained ES module from `src/client.ts`, named by its SHA-256 hash.
 - **Server**: one IIFE from `src/server.ts` with every import bundled in, `platform: 'neutral'`,
   and the client's path and integrity hash defined into it.
-- **Manifest**: `manifest.json` with the bundle ABI (`1`), the Gyral version, both hashes and
-  the style hashes from `styleHashes()`.
+- **Manifest**: `manifest.json` with the protocol as `abi` (`SSR_PROTOCOL` from the installed
+  `@gyral/ssr`), the Gyral version, both hashes and the style hashes from `styleHashes()`.
 
 The renderer loads no modules at runtime, so split chunks and dynamic `import()` are not
 supported. The [example's build script](https://github.com/gyraljs/gyral-rs/blob/main/tools/build-example.mjs)
