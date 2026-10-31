@@ -42,7 +42,7 @@ Any other client that speaks Streamable HTTP: add a server with the URL
 The hosted server has every tool except `check_snippet`, which needs your project's
 TypeScript and packages. It can run an older `@gyral/mcp` than the latest release; its
 `initialize` response and `https://mcp.gyral.dev/healthz` report the version it serves. This
-page describes the tools as `@gyral/mcp` 0.3.9 provides them.
+page describes the tools as `@gyral/mcp` 0.3.10 provides them.
 
 ## The local MCP server
 
@@ -85,7 +85,7 @@ the latest docs at startup instead; it falls back to the bundled copy after 3 se
 | Tool                 | What it returns                                                                                                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `start_here`         | The mental model, the rules, the workflow, and which example or guide covers which task                                    |
-| `search_docs`        | Ranked doc sections for a query: title, URL and snippet                                                                    |
+| `search_docs`        | Ranked doc sections for a query, matching words at their start (`hydrat` finds hydration): title, URL and snippet          |
 | `get_doc`            | One docs page, or one section with `#anchor`, such as `forms#the-server-half`                                              |
 | `get_api`            | The declaration, doc comment and import line of an export, with usage code and the next call; on a miss, the nearest names |
 | `list_examples`      | Every example and what it shows                                                                                            |
@@ -130,7 +130,7 @@ GYRAL_MCP_PUBLIC_ORIGIN=http://127.0.0.1:3000 npx -y @gyral/mcp http
 
 It is configured by environment variables only; `gyral-mcp http --help` lists them. Put it
 behind TLS, and pin the package version you deploy. The
-[package README](https://github.com/gyraljs/gyral/blob/v0.3.9/packages/mcp/README.md#public-hosting)
+[package README](https://github.com/gyraljs/gyral/blob/v0.3.10/packages/mcp/README.md#public-hosting)
 has the details.
 
 ## The agent skill
@@ -155,8 +155,8 @@ write it. Run it from the app's directory, with the version of `@gyral/core` the
 installed:
 
 ```sh
-npx @gyral/mcp@0.3.9 skill           # write the skill into the project
-npx @gyral/mcp@0.3.9 skill --check   # in CI: fail when a copy differs
+npx @gyral/mcp@0.3.10 skill           # write the skill into the project
+npx @gyral/mcp@0.3.10 skill --check   # in CI: fail when a copy differs
 ```
 
 `skill` writes `SKILL.md` and its references to `.claude/skills/gyral`, and to
@@ -167,7 +167,7 @@ when it doesn't. With `--check` it writes nothing and exits 1 when a copy differ
 catches a skill left behind by an upgrade.
 
 Each copy gets a `VERSION` file naming its release and the source it came from
-(`https://github.com/gyraljs/gyral/tree/v0.3.9/skills/gyral`), which `--check` compares like the
+(`https://github.com/gyraljs/gyral/tree/v0.3.10/skills/gyral`), which `--check` compares like the
 skill's other files, so a vendored copy needs no note of its own saying which release it is.
 `skill` removes files the skill doesn't ship, except the ones an owner keeps at the top of a copy:
 `LICENSE` (or `LICENCE`), `NOTICE`, `COPYING`, `PINNED` and `SOURCE` (or `SOURCES`), with any
@@ -175,7 +175,7 @@ extension or suffix (`NOTICE.txt`, `SOURCE-gyral.md`). Those are never compared.
 MIT-licensed, so a vendored copy carries Gyral's `LICENSE` and `NOTICE`.
 
 Other agents: copy
-[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.9/skills/gyral) into the agent's
+[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.10/skills/gyral) into the agent's
 skills or rules folder, or point it at `SKILL.md`.
 
 ## Docs for agents

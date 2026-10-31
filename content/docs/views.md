@@ -186,7 +186,7 @@ control, a self-closing `<my-el />` (HTML ignores the slash, so the element swal
 follows it), an unquoted `class=a${b}`, markup the browser would repair (a `<tr>` directly in a
 `<table>`, a `<div>` inside a `<p>`), an HTML element such as `<button>` inside an `<svg>` (it
 would become an unknown SVG element that renders nothing), a bound `xlink:href=${…}`, a
-`${…}` inside `<script>` or `<style>`, a list row that reads the view's variables, a JSX-style `<SignupForm>` where the component's tag `<signup-form>` belongs, and a camelCase attribute on a custom element (`<pool-card playerBase=${…}>`, which HTML lowercases to `playerbase`, an attribute no prop reads). Each
+`${…}` inside `<script>`, `<style>` or `<noscript>`, a list row that reads the view's variables, a JSX-style `<SignupForm>` where the component's tag `<signup-form>` belongs, and a camelCase attribute on a custom element (`<pool-card playerBase=${…}>`, which HTML lowercases to `playerbase`, an attribute no prop reads). Each
 message says what to write instead.
 
 The ESLint config also reports a function written in a hole (`${() => …}`), which is never
@@ -784,7 +784,9 @@ export const flash = defineHook<[value: unknown]>({
 a JSON-LD script. Use it only for markup your own code produced, never for user input. It
 belongs mostly on the server: in a component that renders in the browser, every change parses
 the string again, and development mode warns about it. This site renders every docs page with
-`raw()` inside a server-only template.
+`raw()` inside a server-only template. A `<noscript>` in the markup is written by the server and
+inserted empty in the browser, as in a template
+([Notices without JavaScript](/docs/server-rendering/#notices-without-javascript)).
 
 ## Focus is a command
 

@@ -646,13 +646,15 @@ it('hydrates the server page in place', async () => {
 - **`mountSsr(html)`** parses Declarative Shadow DOM, applies only the `<head>` styles, restores
   the store seed and `<meta>` tags, and starts recording console errors.
 - **`hydrated(page)`** waits until every component, including nested ones, has hydrated (it
-  awaits `settled()`). It fails on a hydration mismatch, on any console error or warning since
-  mounting, and on a server-rendered element whose module was never imported. Islands keep
-  waiting unless you pass `{ releaseIslands: true }`.
+  awaits `settled()`). It fails on any console error or warning since mounting, so on a
+  hydration mismatch too, quoting the mismatch, and on a server-rendered element whose module
+  was never imported. Islands keep waiting unless you pass `{ releaseIslands: true }`.
 - Render the markup with development output (Vitest does by default) and the browser also
   checks each template's id while hydrating. Run the hydration tests against a production build
-  of your components too: production hydration recovers from a mismatch instead of throwing, so
-  only a warning shows it.
+  of core too, a second browser project with
+  `resolve: { conditions: ['module', 'browser', 'production'] }`: production checks structure
+  only and warns where development logs an error. Both builds render a mismatched component
+  fresh, and `hydrated()` fails on either log.
 
 ## Testing stores
 

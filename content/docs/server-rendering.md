@@ -211,21 +211,49 @@ devtools and a later move to server rendering simple. State that equals `init(pr
 typed before scripts ran: hydration never overwrites it, and a control is written again only
 when the model's value for it changes.
 
+## Notices without JavaScript
+
+A notice for visitors without JavaScript goes in a `<noscript>` in the view, next to the
+controls it stands in for:
+
+```ts
+html`
+  <button type="button" data-intent=${i.Record}>Record</button>
+  <noscript>
+    <p>Recording needs JavaScript: <a href="/upload">upload a file</a> instead.</p>
+  </noscript>
+`;
+```
+
+Only the server writes a `<noscript>`'s content. Hydration adopts the server's notice as it is,
+and a client render creates the element empty, so a `<style>` or `<img>` inside it never
+applies or loads while scripts run. Write the notice as static markup: a `${…}` inside
+`<noscript>` is a template error, so keep what changes outside it (attributes of the
+`<noscript>` element itself may be bound). A `<noscript>` inside
+[`raw()`](/docs/views/#trusted-markup-with-raw) markup works the same way.
+
 ## Mismatches
 
 The server and the browser share one template normalizer, so they agree on every template's
 structure. A mismatch means the view rendered something different for the same state: it read
 the clock or a random number, or a browser extension edited the page before scripts ran.
 
-- **In development**, hydration fails with a `HydrationMismatch` that names the tag, the
-  template's file and line, the DOM path, and what it expected and found. It is reported as a
-  `view` failure through the [error channel](/docs/error-handling/#one-channel), and the
-  component keeps the server's DOM (or shows its `error` view).
-  Development output carries `<!--gyral:ID-->` markers, so the browser also checks that each
-  template is the one it expects.
-- **In production**, the component logs a warning that describes the mismatch and links to
-  [its entry on the errors page](/errors/#G0062), then renders itself fresh. Only that
-  component: the rest of the page stays hydrated.
+In development and in production alike, Gyral clears that one component and renders it fresh
+from its seeded state: it works as usual, and the rest of the page stays hydrated. The console
+says what differed:
+
+- **In development**, an error that names the tag, the template's file and line, the DOM path,
+  and what it expected and found, links to [its entry on the errors page](/errors/#G0062), and
+  ends with [G0063](/errors/#G0063): the component was rendered fresh. Development output
+  carries `<!--gyral:ID-->` markers, so the browser also checks that each template is the one
+  it expects.
+- **In production**, a warning: G0063's code and the tag, then the DOM path, what was expected
+  and what was found. Production checks structure only, not what text says.
+
+A mismatch isn't a failure for the [error channel](/docs/error-handling/#one-channel): the
+component doesn't show its `error` view, no `error` event bubbles, and monitoring doesn't hear
+of it. A hydration test fails on it, because `hydrated()` fails on any console error or warning
+(see [Testing](/docs/testing/#mountssr-and-hydrated)).
 
 ## Lazy hydration
 
@@ -390,7 +418,9 @@ See [Deploying](/docs/deploying/) for both.
 `styleHashes()` lists the CSP hashes of every registered component's styles, for a policy you
 build yourself. Import them only from server code, so client bundles carry no server renderer.
 `renderToString` is also what a Rust server calls when it embeds Gyral through `gyral-rs`
-([Rust servers](/docs/rust-servers/#embedded-rendering-with-gyral-rs)).
+([Rust servers](/docs/rust-servers/#embedded-rendering-with-gyral-rs)). `SSR_PROTOCOL` (`1`) is
+the embedded SSR protocol this release implements: a server bundle that such a host runs
+declares it, so a host that doesn't support the protocol refuses the bundle at startup.
 
 ## Production checklist
 
