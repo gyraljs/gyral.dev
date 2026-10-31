@@ -35,17 +35,17 @@
   },
   "dependencies": {
     "@fontsource-variable/sora": "5.3.0",
-    "@gyral/core": "0.3.9",
-    "@gyral/ssr": "0.3.9",
-    "@gyral/time": "0.3.9"
+    "@gyral/core": "0.3.10",
+    "@gyral/ssr": "0.3.10",
+    "@gyral/time": "0.3.10"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@eslint/js": "10.0.1",
-    "@gyral/devtools": "0.3.9",
-    "@gyral/http": "0.3.9",
-    "@gyral/router": "0.3.9",
-    "@gyral/testing": "0.3.9",
+    "@gyral/devtools": "0.3.10",
+    "@gyral/http": "0.3.10",
+    "@gyral/router": "0.3.10",
+    "@gyral/testing": "0.3.10",
     "@hono/node-server": "^2.1.5",
     "@types/node": "26.6.5",
     "@vitest/browser-playwright": "5.0.5",
