@@ -130,7 +130,7 @@ GYRAL_MCP_PUBLIC_ORIGIN=http://127.0.0.1:3000 npx -y @gyral/mcp http
 
 It is configured by environment variables only; `gyral-mcp http --help` lists them. Put it
 behind TLS, and pin the package version you deploy. The
-[package README](https://github.com/gyraljs/gyral/blob/v0.3.9/packages/mcp/README.md#public-hosting)
+[package README](https://github.com/gyraljs/gyral/blob/v0.3.10/packages/mcp/README.md#public-hosting)
 has the details.
 
 ## The agent skill
@@ -167,7 +167,7 @@ when it doesn't. With `--check` it writes nothing and exits 1 when a copy differ
 catches a skill left behind by an upgrade.
 
 Each copy gets a `VERSION` file naming its release and the source it came from
-(`https://github.com/gyraljs/gyral/tree/v0.3.9/skills/gyral`), which `--check` compares like the
+(`https://github.com/gyraljs/gyral/tree/v0.3.10/skills/gyral`), which `--check` compares like the
 skill's other files, so a vendored copy needs no note of its own saying which release it is.
 `skill` removes files the skill doesn't ship, except the ones an owner keeps at the top of a copy:
 `LICENSE` (or `LICENCE`), `NOTICE`, `COPYING`, `PINNED` and `SOURCE` (or `SOURCES`), with any
@@ -175,7 +175,7 @@ extension or suffix (`NOTICE.txt`, `SOURCE-gyral.md`). Those are never compared.
 MIT-licensed, so a vendored copy carries Gyral's `LICENSE` and `NOTICE`.
 
 Other agents: copy
-[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.9/skills/gyral) into the agent's
+[`skills/gyral/`](https://github.com/gyraljs/gyral/tree/v0.3.10/skills/gyral) into the agent's
 skills or rules folder, or point it at `SKILL.md`.
 
 ## Docs for agents
