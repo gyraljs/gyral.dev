@@ -131,10 +131,13 @@ rendered, and hydrate in the browser. `gyral-rs` runs your app's own Gyral serve
 embedded V8 inside the Rust process. Node builds the bundles; the running server doesn't need
 it.
 
-`gyral-rs` is **experimental**. Version 0.7 accepts bundles built with Gyral **0.3.9** exactly,
-and its tested target is Linux x86_64 (GNU) with Rust 1.99. Each `gyral-rs` minor accepts one
-Gyral release, so check its [changelog](https://github.com/gyraljs/gyral-rs/blob/main/CHANGELOG.md)
-before you upgrade Gyral in a Rust-served app.
+`gyral-rs` is **experimental**, and its tested target is Linux x86_64 (GNU) with Rust 1.99.
+Version 0.8 accepts bundles that declare SSR protocol 1, built with Gyral **0.3.8 or newer**
+(stable releases, not prereleases), so a Gyral release that keeps the protocol needs no new
+`gyral-rs`. Only a new protocol does: it comes in a Gyral minor with an upgrade guide, after a
+`gyral-rs` minor that supports it. Its
+[changelog](https://github.com/gyraljs/gyral-rs/blob/main/CHANGELOG.md) names the protocols and
+Gyral releases each version accepts.
 
 ### The server bundle
 
