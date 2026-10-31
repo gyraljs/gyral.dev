@@ -253,13 +253,13 @@ export const ERROR_NOTES: Readonly<Record<number, ErrorNote>> = {
   },
   62: {
     explanation:
-      'The server’s HTML differs from the first client render, so the component can’t be hydrated in place. Development throws `HydrationMismatch`, naming the template’s file and line; production keeps the sentence (the component, the DOM path, what was expected and found) and renders the component fresh (G0063). Both end the sentence with this code and its link.',
+      'The server’s HTML differs from the first client render, so the component can’t be hydrated in place. Every build clears it and renders it fresh from its seeded state (G0063), and the rest of the page stays hydrated. Development logs this sentence as an error, naming the template’s file and line, then G0063’s; production warns with G0063’s code, then this sentence (the component, the DOM path, what was expected and found). Both end the sentence with this code and its link. It isn’t reported through the error channel, but `hydrated()` from `@gyral/testing` fails a test on it.',
     fix: 'Make the view render the same on both sides: no `Date.now()`, random numbers or locale-dependent formatting in `view` (put them in state through a command). Also rule out a browser extension or script that changed the DOM before hydration, and a stale cached page.',
   },
   63: {
     explanation:
-      'Production only: after a hydration mismatch, Gyral cleared this component and rendered it fresh. The warning prints this code with the component’s tag, then the mismatch’s own sentence, which ends with G0062. The rest of the page stays hydrated, but this component flashes and redoes the server’s work.',
-    fix: 'Fix the mismatch the warning describes; reproducing it in development gives the full message and the template’s location.',
+      'After a hydration mismatch (G0062), Gyral cleared this component and rendered it fresh from its seeded state. Development logs this sentence after the mismatch’s own, in one error; production warns with this code and the component’s tag, then the mismatch’s sentence, which ends with G0062. The component works and the rest of the page stays hydrated, but it flashes and redoes the server’s work.',
+    fix: 'Fix the mismatch the message describes; in development it names the template’s file and line.',
   },
   // Templates
   69: {
@@ -348,7 +348,7 @@ function errorsMarkdown(errors: readonly GyralError[], version: string): string 
     '# Error codes\n',
     'Development builds of `@gyral/core` print each diagnostic in full, ending with its code and a link to this page: `… (G0010: https://gyral.dev/errors/#G0010)`. Production builds print a short line instead, so the message texts stay out of your bundle: `Gyral`, the code, the message’s arguments in order, and the link.\n',
     '```text\nGyral G0010 my-cart Add https://gyral.dev/errors/#G0010\n```\n',
-    'Read that one as: `<my-cart>` has no update for the message `Add`. Find the code below; its message shows where each argument goes. For the full sentence, reproduce the problem in development (the dev server, tests, or a build with `--mode development`). A hydration mismatch keeps its own sentence in production and ends with its code and link.\n',
+    'Read that one as: `<my-cart>` has no update for the message `Add`. Find the code below; its message shows where each argument goes. For the full sentence, reproduce the problem in development (the dev server, tests, a Vite build with `--mode development`, or another bundler with the `development` condition). A hydration mismatch keeps its own sentence in production and ends with its code and link.\n',
     `The codes and messages are read from \`@gyral/core\` ${version}, the version this site is built with; codes are never reused.\n`,
   ];
   for (const group of groups) {
